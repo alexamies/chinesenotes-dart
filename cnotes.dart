@@ -5,6 +5,8 @@
 library chinesenotes;
 
 // DictionaryCollection is a collection of dictionaries for lookup of terms.
+//
+// The entries are indexed by Chinese headword.
 class DictionaryCollection {
   final Map<String, DictionaryEntries> entries;
 
@@ -70,6 +72,19 @@ class DictionarySource {
       this.citation);
 }
 
+class DictionarySources {
+  final Map<int, DictionarySource> sources;
+
+  DictionarySources(this.sources);
+}
+
+Future<DictionarySources> loadDictionarySources() async {
+  var cnSource = DictionarySource(1, 'cnotes.json', 'Chinese Notes',
+      'Chinese Notes Chinese-English Dictionary', 'www.com');
+  var sources = <int, DictionarySource>{1: cnSource};
+  return DictionarySources(sources);
+}
+
 // DictionaryLoader load a dictionary from some source.
 class HttpDictionaryLoader implements DictionaryLoader {
   final String url;
@@ -100,13 +115,15 @@ class Sense {
       this.grammar, this.notes);
 }
 
-void main() {
+void main() async {
+  var sources = await loadDictionarySources();
   var loader = HttpDictionaryLoader('abc');
   var future = loader.load();
   future.then((DictionaryCollection dictionaries) {
     var dictEntries = dictionaries.entries['你好'];
     for (var ent in dictEntries.entries) {
-      print('Entry found for ${ent.headword} in source ${ent.sourceId}');
+      var source = sources.sources[ent.sourceId];
+      print('Entry found for ${ent.headword} in source ${source.abbreviation}');
       print('Pinyin: ${ent.pinyin}');
     }
   });
