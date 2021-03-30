@@ -4,13 +4,32 @@
 // directions.
 library chinesenotes;
 
+import 'dart:convert';
+import 'dart:io';
+
+// App is a top level class that holds state of resources.
+class App {
+  final DictionaryCollection dictionaries;
+  final DictionarySources sources;
+
+  App(this.dictionaries, this.sources);
+}
+
 // DictionaryCollection is a collection of dictionaries for lookup of terms.
 //
 // The entries are indexed by Chinese headword.
 class DictionaryCollection {
-  final Map<String, DictionaryEntries> entries;
+  final Map<String, DictionaryEntries> _entries;
 
-  DictionaryCollection(this.entries);
+  DictionaryCollection(this._entries);
+
+  DictionaryEntries lookup(String key) {
+    var dictEntries = _entries[key];
+    if (dictEntries == null) {
+      return DictionaryEntries(key, []);
+    }
+    return dictEntries;
+  }
 }
 
 // DictionaryEntries is a list of dictionary entries with the same headword.
@@ -63,42 +82,71 @@ abstract class DictionaryLoader {
 // DictionarySource is a collection of dictionary entries from a single source.
 class DictionarySource {
   final int sourceId;
-  final String filename;
+  final String url;
   final String abbreviation;
   final String title;
   final String citation;
 
-  DictionarySource(this.sourceId, this.filename, this.abbreviation, this.title,
-      this.citation);
+  DictionarySource(
+      this.sourceId, this.url, this.abbreviation, this.title, this.citation);
 }
 
 class DictionarySources {
-  final Map<int, DictionarySource> sources;
+  final Map<int, DictionarySource> _sources;
 
-  DictionarySources(this.sources);
-}
+  DictionarySources(this._sources);
 
-Future<DictionarySources> loadDictionarySources() async {
-  var cnSource = DictionarySource(1, 'cnotes.json', 'Chinese Notes',
-      'Chinese Notes Chinese-English Dictionary', 'www.com');
-  var sources = <int, DictionarySource>{1: cnSource};
-  return DictionarySources(sources);
+  DictionarySource lookup(int key) {
+    var source = _sources[key];
+    if (source == null) {
+      // return DictionarySource(-1, '', '', '', '');
+      throw Exception('dictionary source not found');
+    }
+    return source;
+  }
 }
 
 // DictionaryLoader load a dictionary from some source.
 class HttpDictionaryLoader implements DictionaryLoader {
-  final String url;
+  final DictionarySource source;
 
-  HttpDictionaryLoader(this.url);
+  HttpDictionaryLoader(this.source);
 
   /// fill in real implementation
   Future<DictionaryCollection> load() async {
-    var chinese = '你好';
-    var sense = Sense(chinese, '', 'níhǎo', 'hello', 'interjection', 'p. 655');
-    var entry = DictionaryEntry(chinese, 42, 1, [sense]);
-    var entryList = DictionaryEntries(chinese, [entry]);
-    var entries = <String, DictionaryEntries>{chinese: entryList};
-    return DictionaryCollection(entries);
+    Map<String, DictionaryEntries> entryMap = {};
+    HttpClient client = new HttpClient();
+    try {
+      client
+          .getUrl(Uri.parse(this.source.url))
+          .then((HttpClientRequest request) {
+        return request.close();
+      }).then((HttpClientResponse response) {
+        response.transform(utf8.decoder).listen((contents) {
+          List data = json.decode(contents) as List;
+          for (var lu in data) {
+            var hwid = lu['h'] as int;
+            var s = lu['s'];
+            var t = lu['t'];
+            var p = lu['p'];
+            var e = lu['e'];
+            var g = lu['e'];
+            var n = lu['n'];
+            var sense = Sense(s, t, p, e, g, n);
+            var entries = entryMap[s];
+            if (entries == null) {
+              var entry = DictionaryEntry(s, hwid, source.sourceId, [sense]);
+              entryMap[s] = DictionaryEntries(s, [entry]);
+            } else {
+              entries.entries[0].senses.add(sense);
+            }
+          }
+        });
+      });
+    } catch (ex) {
+      rethrow;
+    }
+    return DictionaryCollection(entryMap);
   }
 }
 
@@ -116,15 +164,20 @@ class Sense {
 }
 
 void main() async {
-  var sources = await loadDictionarySources();
-  var loader = HttpDictionaryLoader('abc');
-  var future = loader.load();
-  future.then((DictionaryCollection dictionaries) {
-    var dictEntries = dictionaries.entries['你好'];
-    for (var ent in dictEntries.entries) {
-      var source = sources.sources[ent.sourceId];
-      print('Entry found for ${ent.headword} in source ${source.abbreviation}');
-      print('Pinyin: ${ent.pinyin}');
-    }
-  });
+  var cnSource = DictionarySource(
+      1,
+      'https://ntireader.org/dist/ntireader.json',
+      'Chinese Notes',
+      'Chinese Notes Chinese-English Dictionary',
+      'https://github.com/alexamies/chinesenotes.com');
+  var sources = DictionarySources(<int, DictionarySource>{1: cnSource});
+  var loader = HttpDictionaryLoader(cnSource);
+  var dictionaries = await loader.load();
+  var app = App(dictionaries, sources);
+  var dictEntries = app.dictionaries.lookup('你好');
+  for (var ent in dictEntries.entries) {
+    var source = app.sources.lookup(ent.sourceId);
+    print('Entry found for ${ent.headword} in source ${source.abbreviation}');
+    print('Pinyin: ${ent.pinyin}');
+  }
 }
