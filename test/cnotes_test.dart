@@ -28,7 +28,7 @@ void main() {
     var cnSource = DictionarySource(1, 'cnotes.json', 'Chinese Notes',
         'Chinese Notes Chinese-English Dictionary', 'www.com');
     var sources = DictionarySources(<int, DictionarySource>{1: cnSource});
-    var loader = HttpDictionaryLoader('abc');
+    var loader = TestDictionaryLoader();
     var dictionaries = await loader.load();
     var app = App(dictionaries, sources);
     var dictEntries = app.dictionaries.lookup('你好');

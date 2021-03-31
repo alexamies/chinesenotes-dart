@@ -106,7 +106,9 @@ class DictionarySources {
   }
 }
 
-// DictionaryLoader load a dictionary from some source.
+// HttpDictionaryLoader loads a dictionary from command line or a mobile client.
+//
+// This loader does not work from a browser.
 class HttpDictionaryLoader implements DictionaryLoader {
   final DictionarySource source;
 
@@ -114,40 +116,87 @@ class HttpDictionaryLoader implements DictionaryLoader {
 
   /// fill in real implementation
   Future<DictionaryCollection> load() async {
-    Map<String, DictionaryEntries> entryMap = {};
+    var jsonString = await _download(source.url);
+    return dictFromJson(jsonString, source);
+  }
+
+  /// downloads the file from the given url
+  Future<String> _download(String url) async {
+    StringBuffer sb = StringBuffer();
     HttpClient client = new HttpClient();
     try {
-      client
-          .getUrl(Uri.parse(this.source.url))
-          .then((HttpClientRequest request) {
-        return request.close();
-      }).then((HttpClientResponse response) {
-        response.transform(utf8.decoder).listen((contents) {
-          List data = json.decode(contents) as List;
-          for (var lu in data) {
-            var hwid = lu['h'] as int;
-            var s = lu['s'];
-            var t = lu['t'];
-            var p = lu['p'];
-            var e = lu['e'];
-            var g = lu['e'];
-            var n = lu['n'];
-            var sense = Sense(s, t, p, e, g, n);
-            var entries = entryMap[s];
-            if (entries == null) {
-              var entry = DictionaryEntry(s, hwid, source.sourceId, [sense]);
-              entryMap[s] = DictionaryEntries(s, [entry]);
-            } else {
-              entries.entries[0].senses.add(sense);
-            }
-          }
-        });
-      });
+      var request = await client.getUrl(Uri.parse(url));
+      var response = await request.close();
+      if (response.statusCode != 200) {
+        throw Exception('server error or not found');
+      }
+      await for (var contents in response.transform(Utf8Decoder())) {
+        //print('Received ${contents.length} characters');
+        sb.write(contents);
+      }
     } catch (ex) {
+      print('Could not load the dictionary ${source.title}');
       rethrow;
     }
-    return DictionaryCollection(entryMap);
+    var s = sb.toString();
+    print('Downloaded ${s.length} characters');
+    return s;
   }
+}
+
+// Parse a dictionary from a JSON string.
+DictionaryCollection dictFromJson(String jsonString, DictionarySource source) {
+  List data = json.decode(jsonString) as List;
+  Map<String, DictionaryEntries> entryMap = {};
+  for (var lu in data) {
+    try {
+      var h = lu['h'];
+      var hwid = -1;
+      if (h != null) {
+        hwid = int.parse(h);
+      } else {
+        print('HW id is null for ${lu['s']}');
+      }
+      var s = '';
+      if (lu['s'] != null) {
+        s = lu['s'];
+      }
+
+      var t = '';
+      if (lu['t'] != null) {
+        t = lu['t'];
+      }
+      var p = '';
+      if (lu['p'] != null) {
+        p = lu['p'];
+      }
+      var e = '';
+      if (lu['e'] != null) {
+        e = lu['e'];
+      }
+      var g = '';
+      if (lu['g'] != null) {
+        g = lu['g'];
+      }
+      var n = '';
+      if (lu['n'] != null) {
+        n = lu['n'];
+      }
+      var sense = Sense(s, t, p, e, g, n);
+      var entries = entryMap[s];
+      if (entries == null) {
+        var entry = DictionaryEntry(s, hwid, source.sourceId, [sense]);
+        entryMap[s] = DictionaryEntries(s, [entry]);
+      } else {
+        entries.entries[0].senses.add(sense);
+      }
+    } catch (ex) {
+      print('Could not load parse entry ${lu['h']}, ${lu['s']}: $ex');
+      rethrow;
+    }
+  }
+  print('Loaded ${entryMap.length} entries');
+  return DictionaryCollection(entryMap);
 }
 
 // Sense is the meaning of a dictionary entry.
