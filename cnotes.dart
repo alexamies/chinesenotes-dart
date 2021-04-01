@@ -7,22 +7,55 @@ library chinesenotes;
 import 'dart:convert';
 import 'dart:io';
 
+const separator = ' / ';
+
 // App is a top level class that holds state of resources.
 class App {
-  final DictionaryCollection dictionaries;
+  final DictionaryCollectionIndex forrwardIndex;
   final DictionarySources sources;
 
-  App(this.dictionaries, this.sources);
+  App(this.forrwardIndex, this.sources);
+}
+
+// Builds a reverse index from the given forward in dex.
+DictionaryReverseIndex buildReverseIndex(
+    DictionaryCollectionIndex forrwardIndex) {
+  var revIndex = <String, Senses>{};
+  var keys = forrwardIndex.keys();
+  for (var hw in keys) {
+    var e = forrwardIndex.lookup(hw);
+    for (var entry in e.entries) {
+      for (var sense in entry.senses) {
+        var equivalents = sense.english.split(separator);
+        for (var equiv in equivalents) {
+          var ent = revIndex[equiv];
+          if (ent == null) {
+            revIndex[equiv] = Senses([sense]);
+          } else {
+            ent.senses.add(sense);
+          }
+        }
+      }
+    }
+  }
+  return DictionaryReverseIndex(revIndex);
 }
 
 // DictionaryCollection is a collection of dictionaries for lookup of terms.
 //
 // The entries are indexed by Chinese headword.
-class DictionaryCollection {
+class DictionaryCollectionIndex {
   final Map<String, DictionaryEntries> _entries;
 
-  DictionaryCollection(this._entries);
+  DictionaryCollectionIndex(this._entries);
 
+  Iterable<String> keys() {
+    return _entries.keys;
+  }
+
+  /// Null safe lookup
+  ///
+  /// Return: the value or an empty list if there is no match found
   DictionaryEntries lookup(String key) {
     var dictEntries = _entries[key];
     if (dictEntries == null) {
@@ -76,7 +109,27 @@ class DictionaryEntry {
 
 // DictionaryLoader load a dictionary from some source.
 abstract class DictionaryLoader {
-  Future<DictionaryCollection> load();
+  Future<DictionaryCollectionIndex> load();
+}
+
+// DictionaryReverseIndex indexes the dictionary by equivalent.
+//
+// The entries are indexed by Chinese headword.
+class DictionaryReverseIndex {
+  final Map<String, Senses> _senses;
+
+  DictionaryReverseIndex(this._senses);
+
+  /// Null safe lookup
+  ///
+  /// Return: the senses or an empty list if there is no match found
+  Senses lookup(String key) {
+    var senses = _senses[key];
+    if (senses == null) {
+      return Senses([]);
+    }
+    return senses;
+  }
 }
 
 // DictionarySource is a collection of dictionary entries from a single source.
@@ -115,7 +168,7 @@ class HttpDictionaryLoader implements DictionaryLoader {
   HttpDictionaryLoader(this.source);
 
   /// fill in real implementation
-  Future<DictionaryCollection> load() async {
+  Future<DictionaryCollectionIndex> load() async {
     var jsonString = await _download(source.url);
     return dictFromJson(jsonString, source);
   }
@@ -144,8 +197,9 @@ class HttpDictionaryLoader implements DictionaryLoader {
   }
 }
 
-// Parse a dictionary from a JSON string.
-DictionaryCollection dictFromJson(String jsonString, DictionarySource source) {
+// Build a forward index by parsing a dictionary from a JSON string.
+DictionaryCollectionIndex dictFromJson(
+    String jsonString, DictionarySource source) {
   List data = json.decode(jsonString) as List;
   Map<String, DictionaryEntries> entryMap = {};
   for (var lu in data) {
@@ -196,7 +250,7 @@ DictionaryCollection dictFromJson(String jsonString, DictionarySource source) {
     }
   }
   print('Loaded ${entryMap.length} entries');
-  return DictionaryCollection(entryMap);
+  return DictionaryCollectionIndex(entryMap);
 }
 
 // Sense is the meaning of a dictionary entry.
@@ -212,6 +266,13 @@ class Sense {
       this.grammar, this.notes);
 }
 
+// Senses is a list of word senses.
+class Senses {
+  final List<Sense> senses;
+
+  Senses(this.senses);
+}
+
 void main() async {
   var cnSource = DictionarySource(
       1,
@@ -223,7 +284,7 @@ void main() async {
   var loader = HttpDictionaryLoader(cnSource);
   var dictionaries = await loader.load();
   var app = App(dictionaries, sources);
-  var dictEntries = app.dictionaries.lookup('你好');
+  var dictEntries = app.forrwardIndex.lookup('你好');
   for (var ent in dictEntries.entries) {
     var source = app.sources.lookup(ent.sourceId);
     print('Entry found for ${ent.headword} in source ${source.abbreviation}');
