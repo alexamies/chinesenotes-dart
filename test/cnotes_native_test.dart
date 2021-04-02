@@ -3,7 +3,7 @@ import 'dart:io';
 
 import 'package:test/test.dart';
 
-import '../cnotes.dart';
+import 'package:chinesenotes/cnotes.dart';
 
 const url = 'https://ntireader.org/dist/ntireader.json';
 
@@ -17,10 +17,11 @@ Future<String> download(String url) async {
     if (response.statusCode != 200) {
       throw Exception('server error or not found');
     }
-    await for (var contents in response.transform(Utf8Decoder())) {
-      //print('Received ${contents.length} characters');
-      sb.write(contents);
+    var contents = response.transform(utf8.decoder);
+    await for (var chunk in contents) {
+      sb.write(chunk);
     }
+    client.close();
   } catch (ex) {
     print('Could not load the dictionary from ${url}');
     rethrow;

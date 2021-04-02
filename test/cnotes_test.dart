@@ -1,6 +1,6 @@
 import 'package:test/test.dart';
 
-import '../cnotes.dart';
+import 'package:chinesenotes/cnotes.dart';
 
 const jsonString =
     """[{"s":"邃古","t":"","p":"suìgǔ","e": "remote antiquity","g":"noun","n":"(CC-CEDICT '邃古'; Guoyu '邃古')","h":"2"}]""";

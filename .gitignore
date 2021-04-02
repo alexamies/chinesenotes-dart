@@ -2,4 +2,6 @@
 .local-chromium/
 .packages
 coverage/
+doc/
 ntireader.json
+pubspec.lock
