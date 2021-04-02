@@ -1,1 +1,2 @@
-2021-04-02 Initial release of skeleton library
+#0.0.1
+* Initial release of skeleton library

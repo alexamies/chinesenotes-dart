@@ -1,4 +1,8 @@
 name: chinesenotes
+description: Chinese-English dictionary and text processing tools
+version: 0.0.1
+repository: https://github.com/alexamies/chinesenotes-dart
+homepage: https://chinesenotes.com
 environment:
   sdk: '>=2.12.0 <3.0.0'
 dev_dependencies:

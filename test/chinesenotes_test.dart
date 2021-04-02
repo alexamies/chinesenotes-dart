@@ -1,6 +1,6 @@
 import 'package:test/test.dart';
 
-import 'package:chinesenotes/cnotes.dart';
+import 'package:chinesenotes/chinesenotes.dart';
 
 const jsonString =
     """[{"s":"邃古","t":"","p":"suìgǔ","e": "remote antiquity","g":"noun","n":"(CC-CEDICT '邃古'; Guoyu '邃古')","h":"2"}]""";
@@ -32,12 +32,22 @@ void main() {
     expect(entry.headword, equals(headword));
   });
   test('dictFromJson builds the index correctly', () {
+    var sources = DictionarySources(<int, DictionarySource>{1: cnSource});
     var forrwardIndex = dictFromJson(jsonString, cnSource);
     const headword = '邃古';
     var dictEntries = forrwardIndex.lookup(headword);
     expect(dictEntries.entries.length, equals(1));
     var entry = dictEntries.entries.first;
     expect(entry.headword, equals(headword));
+    for (var ent in dictEntries.entries) {
+      var source = sources.lookup(ent.sourceId);
+      expect(source.abbreviation, cnSource.abbreviation);
+      expect(ent.senses.length, equals(1));
+      for (var sense in ent.senses) {
+        expect(sense.pinyin, 'suìgǔ');
+        expect(sense.english, 'remote antiquity');
+      }
+    }
   });
   test('buildReverseIndex builds the reverse index correctly', () async {
     var loader = TestDictionaryLoader();

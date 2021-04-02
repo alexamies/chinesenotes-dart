@@ -2,7 +2,7 @@ import 'dart:html';
 
 const url = 'https://ntireader.org/dist/ntireader.json';
 
-void main() {
+void main() async {
   try {
     String jsonString = await HttpRequest.getString(url);
     print('got ${jsonString.length}');
