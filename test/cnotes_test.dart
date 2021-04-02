@@ -9,7 +9,7 @@ var cnSource = DictionarySource(1, 'cnotes.json', 'Chinese Notes',
     'Chinese Notes Chinese-English Dictionary', 'www.com');
 
 // DictionaryLoader load a dictionary from some source.
-class TestDictionaryLoader implements DictionaryLoader {
+class TestDictionaryLoader {
   /// fill in real implementation
   Future<DictionaryCollectionIndex> load() async {
     var chinese = '你好';
@@ -39,17 +39,24 @@ void main() {
     var entry = dictEntries.entries.first;
     expect(entry.headword, equals(headword));
   });
-  test('buildReverseIndex builds the reverse index correctly', () {
+  test('buildReverseIndex builds the reverse index correctly', () async {
     var loader = TestDictionaryLoader();
-    var future = loader.load();
-    future.then((DictionaryCollectionIndex forwardIndex) {
-      var reverseIndex = buildReverseIndex(forwardIndex!);
-      const headword = '你好';
-      const english = 'hello';
-      var senses = reverseIndex.lookup(english);
-      expect(senses.senses.length, equals(1));
-      var sense = senses.senses.first;
-      expect(sense.simplified, equals(headword));
-    });
+    var forwardIndex = await loader.load();
+    List<String> patterns = [];
+    var np = NotesProcessor(patterns);
+    var reverseIndex = buildReverseIndex(forwardIndex, np);
+    const headword = '你好';
+    const english = 'hello';
+    var senses = reverseIndex.lookup(english);
+    expect(senses.senses.length, equals(1));
+    var sense = senses.senses.first;
+    expect(sense.simplified, equals(headword));
+  });
+  test('NotesProcessor.parseNotes return equivalents in notes', () {
+    const notes = 'Scientific name: Rosa rugosa (CC-CEDICT)';
+    var np = NotesProcessor([r'Scientific name: (.+) \(']);
+    var equivalents = np.parseNotes(notes);
+    expect(equivalents.length, equals(1));
+    expect(equivalents[0], equals('Rosa rugosa'));
   });
 }

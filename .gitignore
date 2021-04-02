@@ -1,4 +1,5 @@
 .dart_tool/
+.local-chromium/
 .packages
 coverage/
 ntireader.json
