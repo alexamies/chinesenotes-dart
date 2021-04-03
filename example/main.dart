@@ -34,7 +34,7 @@ Future<String> download(String url) async {
 void main() async {
   var cnSource = DictionarySource(
       1,
-      url,
+      ntiReaderJson,
       'Chinese Notes',
       'Chinese Notes Chinese-English Dictionary',
       'https://github.com/alexamies/chinesenotes.com, accessed 2021-04-01');

@@ -6,6 +6,7 @@ library chinesenotes;
 
 import 'dart:convert';
 
+const ntiReaderJson = 'https://ntireader.org/dist/ntireader.json';
 const separator = ' / ';
 
 /// App is a top level class that holds state of resources.
