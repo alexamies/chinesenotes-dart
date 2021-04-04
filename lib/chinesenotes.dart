@@ -10,12 +10,12 @@ const ntiReaderJson = 'https://ntireader.org/dist/ntireader.json';
 const cnotesJson = 'https://chinesenotes.com/dist/ntireader.json';
 const separator = ' / ';
 const notesPatterns = [
-  r'Scientific name: (.+)(\(|,|;)',
-  r'Sanskrit equivalent: (.+)(\(|,|;)',
-  r'Pāli: (.+)(\(|,|;)',
-  r'Pali: (.+)(\(|,|;)',
-  r'Japanese: (.+)(\(|,|;)',
-  r'Tibetan: (.+)(\(|,|;)'
+  r'Scientific name: (.+?)(\(|,|;)',
+  r'Sanskrit equivalent: (.+?)(\(|,|;)',
+  r'Pāli: (.+?)(\(|,|;)',
+  r'Pali: (.+?)(\(|,|;)',
+  r'Japanese: (.+?)(\(|,|;)',
+  r'Tibetan: (.+?)(\(|,|;)'
 ];
 
 /// App is a top level class that holds state of resources.
@@ -46,13 +46,25 @@ DictionaryReverseIndex buildReverseIndex(
     DictionaryCollectionIndex forrwardIndex) {
   var np = NotesProcessor(notesPatterns);
   var revIndex = <String, Senses>{};
-  void addSense(String equiv, Sense sense) {
-    var ent = revIndex[equiv];
-    if (ent == null) {
-      revIndex[equiv] = Senses([sense]);
-    } else {
-      ent.senses.add(sense);
+  void addSenses(List<String> equivalents, Sense sense) {
+    for (var equiv in equivalents) {
+      print('Adding equiv: $equiv');
+      var ent = revIndex[equiv];
+      if (ent == null) {
+        revIndex[equiv] = Senses([sense]);
+      } else {
+        ent.senses.add(sense);
+      }
     }
+  }
+
+  List<String> removeStopWords(List<String> equivalents) {
+    List<String> cleaned = [];
+    for (var equiv in equivalents) {
+      var s = equiv.replaceAll('a ', '');
+      cleaned.add(s);
+    }
+    return cleaned;
   }
 
   var keys = forrwardIndex.keys();
@@ -61,13 +73,10 @@ DictionaryReverseIndex buildReverseIndex(
     for (var entry in e.entries) {
       for (var sense in entry.senses) {
         var equivalents = sense.english.split(separator);
-        for (var equiv in equivalents) {
-          addSense(equiv, sense);
-        }
+        var cleaned = removeStopWords(equivalents);
+        addSenses(equivalents, sense);
         var notesEquiv = np.parseNotes(sense.notes);
-        for (var equiv in notesEquiv) {
-          addSense(equiv, sense);
-        }
+        addSenses(notesEquiv, sense);
       }
     }
   }
@@ -250,13 +259,9 @@ class NotesProcessor {
   List<String> parseNotes(String notes) {
     List<String> matches = [];
     for (var exp in _exp) {
-      Iterable<Match> reMatches = exp.allMatches(notes);
-      for (Match m in reMatches) {
-        if (m.groupCount > 0) {
-          if (m[1] != null) {
-            matches.add(m[1]!.trim());
-          }
-        }
+      var reMatch = exp.firstMatch(notes);
+      if (reMatch != null) {
+        matches.add(reMatch[1]!.trim());
       }
     }
     return matches;
