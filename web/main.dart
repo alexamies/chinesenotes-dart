@@ -21,9 +21,10 @@ void main() async {
     final jsonString = await HttpRequest.getString(url);
     var forwardIndex = dictFromJson(jsonString, cnSource);
     var reverseIndex = buildReverseIndex(forwardIndex);
+    var hwIDIndex = headwordsFromJson(jsonString, cnSource);
     statusDiv.text = 'Dictionary loaded';
 
-    var app = App(forwardIndex, sources, reverseIndex);
+    var app = App(forwardIndex, sources, reverseIndex, hwIDIndex);
 
     var textField = querySelector('#findInput') as TextInputElement;
     var div = querySelector('#findResults')!;
@@ -74,18 +75,48 @@ void main() async {
             entryDiv.children.add(sourceDiv);
           }
         } else if (term.senses.senses.length > 0) {
-          div.text = 'Found ${term.senses.senses.length} senses.';
+          var counttDiv = DivElement();
+          counttDiv.className = 'counttDiv';
+          if (dictEntries.length == 1) {
+            counttDiv.text = 'Found 1 sense.';
+          } else {
+            counttDiv.text = 'Found ${term.senses.senses.length} senses.';
+          }
+          div.children.add(counttDiv);
           var ul = UListElement();
           div.children.add(ul);
           for (var sense in term.senses.senses) {
-            StringBuffer sb = StringBuffer();
-            sb.write('Simplified: ${sense.simplified}, ');
-            sb.write('Traditional: ${sense.traditional}, ');
-            sb.write('pinyin: ${sense.pinyin}, ');
-            sb.write('English: ${sense.english},');
-            sb.write('Notes: ${sense.notes}.');
             var li = LIElement();
-            li.text = sb.toString();
+            var primaryDiv = DivElement();
+            primaryDiv.text = sense.chinese;
+            primaryDiv.className = 'dict-sense-primary';
+            li.children.add(primaryDiv);
+            var secondaryDiv = DivElement();
+            secondaryDiv.className = 'dict-sense-secondary';
+            var pinyinSpan = SpanElement();
+            pinyinSpan.className = 'dict-entry-pinyin';
+            pinyinSpan.text = '${sense.pinyin} ';
+            secondaryDiv.children.add(pinyinSpan);
+            var engSpan = SpanElement();
+            engSpan.className = 'dict-entry-equivalent';
+            engSpan.text = '${sense.english} ';
+            secondaryDiv.children.add(engSpan);
+            li.children.add(secondaryDiv);
+            var notesDiv = DivElement();
+            var notesSpan = SpanElement();
+            notesSpan.className = 'dict-entry-notes';
+            if (sense.notes != '') {
+              notesSpan.text = 'Notes: ${sense.notes} ';
+            }
+            notesDiv.children.add(notesSpan);
+            var sourceSpan = SpanElement();
+            sourceSpan.className = 'dict-sense-source';
+            var source = app.getSource(sense.hwid);
+            if (source != null) {
+              sourceSpan.text = 'Source: ${source.abbreviation}';
+            }
+            notesDiv.children.add(sourceSpan);
+            li.children.add(notesDiv);
             ul.children.add(li);
           }
         } else {

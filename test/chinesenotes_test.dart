@@ -17,7 +17,8 @@ class TestDictionaryLoader {
   /// fill in real implementation
   Future<DictionaryCollectionIndex> load() async {
     var chinese = '你好';
-    var sense = Sense(chinese, '', 'níhǎo', 'hello', 'interjection', 'p. 655');
+    var sense =
+        Sense(-1, 42, chinese, '', 'níhǎo', 'hello', 'interjection', 'p. 655');
     var entry = DictionaryEntry(chinese, 42, 1, [sense]);
     var entryList = DictionaryEntries(chinese, [entry]);
     var entries = <String, DictionaryEntries>{chinese: entryList};
@@ -37,9 +38,9 @@ void main() {
   });
   test('dictFromJson builds the index correctly', () {
     var sources = DictionarySources(<int, DictionarySource>{1: cnSource});
-    var forrwardIndex = dictFromJson(jsonString, cnSource);
+    var forwardIndex = dictFromJson(jsonString, cnSource);
     const headword = '邃古';
-    var dictEntries = forrwardIndex.lookup(headword);
+    var dictEntries = forwardIndex.lookup(headword);
     expect(dictEntries.entries.length, equals(1));
     var entry = dictEntries.entries.first;
     expect(entry.headword, equals(headword));
@@ -55,10 +56,10 @@ void main() {
   });
   test('dictFromJson builds the index with traditional', () {
     var sources = DictionarySources(<int, DictionarySource>{1: cnSource});
-    var forrwardIndex = dictFromJson(jsonString, cnSource);
+    var forwardIndex = dictFromJson(jsonString, cnSource);
     const simp = '围';
     const trad = '圍';
-    var dictEntries = forrwardIndex.lookup(trad);
+    var dictEntries = forwardIndex.lookup(trad);
     expect(dictEntries.entries.length, equals(1));
     var entry = dictEntries.entries.first;
     expect(entry.headword, equals(simp));
@@ -111,7 +112,8 @@ void main() {
     var loader = TestDictionaryLoader();
     var forwardIndex = await loader.load();
     var reverseIndex = buildReverseIndex(forwardIndex);
-    var app = App(forwardIndex, sources, reverseIndex);
+    var hwIDIndex = headwordsFromJson(jsonString, cnSource);
+    var app = App(forwardIndex, sources, reverseIndex, hwIDIndex);
     const query = '你好';
     const pinyin = 'níhǎo';
     var result = app.lookup(query);
@@ -130,7 +132,8 @@ void main() {
     var loader = TestDictionaryLoader();
     var forwardIndex = await loader.load();
     var reverseIndex = buildReverseIndex(forwardIndex);
-    var app = App(forwardIndex, sources, reverseIndex);
+    var hwIDIndex = headwordsFromJson('[]', cnSource);
+    var app = App(forwardIndex, sources, reverseIndex, hwIDIndex);
     const query = 'hello';
     const chinese = '你好';
     const pinyin = 'níhǎo';
@@ -145,15 +148,38 @@ void main() {
       }
     }
   });
+  test('App.lookup English query reverse lookup with a stop word', () async {
+    const sourceId = 1;
+    var sources =
+        DictionarySources(<int, DictionarySource>{sourceId: cnSource});
+    var forwardIndex = dictFromJson(jsonString, cnSource);
+    var reverseIndex = buildReverseIndex(forwardIndex);
+    var hwIDIndex = headwordsFromJson(jsonString, cnSource);
+    var app = App(forwardIndex, sources, reverseIndex, hwIDIndex);
+    const query = 'encircle';
+    const chinese = '围';
+    var result = app.lookup(query);
+    expect(result.terms.length, equals(1));
+    for (var term in result.terms) {
+      expect(term.queryText, equals(query));
+      expect(term.senses.senses.length, equals(1));
+      for (var sense in term.senses.senses) {
+        expect(sense.simplified, equals(chinese));
+        var source = app.getSource(sense.hwid);
+        expect(source!.sourceId, equals(sourceId));
+      }
+    }
+  });
   test('App.lookup can find a word from an equivalent in the notes', () async {
     var sources = DictionarySources(<int, DictionarySource>{1: cnSource});
     var forwardIndex = dictFromJson(jsonString, cnSource);
     var reverseIndex = buildReverseIndex(forwardIndex);
-    var app = App(forwardIndex, sources, reverseIndex);
+    var hwIDIndex = headwordsFromJson(jsonString, cnSource);
+    var app = App(forwardIndex, sources, reverseIndex, hwIDIndex);
     const query = 'Rosa rugosa';
     const simplified = '玫瑰';
     var result = app.lookup(query);
-    //expect(result.terms.length, equals(1));
+    expect(result.terms.length, equals(1));
     for (var term in result.terms) {
       expect(term.queryText, equals(query));
       expect(term.senses.senses.length, equals(1));

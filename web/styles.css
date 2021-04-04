@@ -15,7 +15,7 @@ html, body {
 
 h1 {
   padding: 20;
-  font-size: larger;
+  font-size: x-large;
 }
 
 #formDiv {
@@ -32,7 +32,7 @@ h1 {
 
 .status {
   padding: 10px 0px 15px 0px;
-  font-size: 12px;
+  font-size: small;
 }
 
 #findSubmit {
@@ -45,11 +45,11 @@ h1 {
 
 .dict-entry-source {
   padding: 10px 0px 15px 0px;
-  font-size: 12px;
+  font-size: medium;
 }
 
 .dict-entry-headword {
-  font-size: 14px;
+  font-size: large;
 }
 
 .dict-entry-pinyin {
@@ -61,5 +61,17 @@ h1 {
 }
 
 .dict-entry-notes {
-  font-size: 11px;
+  font-size: small;
+}
+
+.dict-sense-source {
+  font-size: small;
+}
+
+.dict-sense-primary {
+  font-size: large;
+}
+
+.dict-sense-secondary {
+  font-size: medium;
 }

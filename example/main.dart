@@ -42,7 +42,8 @@ void main() async {
   var jsonString = await download(cnSource.url);
   var forrwardIndex = dictFromJson(jsonString, cnSource);
   var reverseIndex = buildReverseIndex(forrwardIndex);
-  var app = App(forrwardIndex, sources, reverseIndex);
+  var hwIDIndex = headwordsFromJson(jsonString, cnSource);
+  var app = App(forrwardIndex, sources, reverseIndex, hwIDIndex);
   const hw = '你好';
   print('Looking up $hw');
   var results = app.lookup(hw);

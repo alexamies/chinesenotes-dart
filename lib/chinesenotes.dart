@@ -9,6 +9,7 @@ import 'dart:convert';
 const ntiReaderJson = 'https://ntireader.org/dist/ntireader.json';
 const cnotesJson = 'https://chinesenotes.com/dist/ntireader.json';
 const separator = ' / ';
+const stopWords = ['a ', 'an ', 'to '];
 const notesPatterns = [
   r'Scientific name: (.+?)(\(|,|;)',
   r'Sanskrit equivalent: (.+?)(\(|,|;)',
@@ -22,15 +23,21 @@ const notesPatterns = [
 class App {
   final DictionaryCollectionIndex forrwardIndex;
   final DictionarySources sources;
-  DictionaryReverseIndex reverseIndex;
+  final DictionaryReverseIndex reverseIndex;
+  final HeadwordIDIndex hwIDIndex;
 
-  App(this.forrwardIndex, this.sources, this.reverseIndex);
+  App(this.forrwardIndex, this.sources, this.reverseIndex, this.hwIDIndex);
 
   QueryResults lookup(String query) {
     var entries = forrwardIndex.lookup(query);
     var senses = reverseIndex.lookup(query);
     var term = Term(query, entries, senses);
     return QueryResults([term]);
+  }
+
+  DictionarySource? getSource(int hwID) {
+    var sourceId = hwIDIndex.entries[hwID]?.sourceId;
+    return sources.lookup(sourceId!);
   }
 }
 
@@ -45,13 +52,13 @@ class App {
 DictionaryReverseIndex buildReverseIndex(
     DictionaryCollectionIndex forrwardIndex) {
   var np = NotesProcessor(notesPatterns);
-  var revIndex = <String, Senses>{};
+  Map<String, Senses> revIndex = {};
   void addSenses(List<String> equivalents, Sense sense) {
     for (var equiv in equivalents) {
       var ent = revIndex[equiv];
       if (ent == null) {
         revIndex[equiv] = Senses([sense]);
-      } else {
+      } else if (!ent.senses.contains(sense)) {
         ent.senses.add(sense);
       }
     }
@@ -60,8 +67,11 @@ DictionaryReverseIndex buildReverseIndex(
   List<String> removeStopWords(List<String> equivalents) {
     List<String> cleaned = [];
     for (var equiv in equivalents) {
-      var s = equiv.replaceAll('a ', '');
-      cleaned.add(s);
+      var clean = equiv;
+      for (var sw in stopWords) {
+        clean = clean.replaceAll(sw, '');
+      }
+      cleaned.add(clean);
     }
     return cleaned;
   }
@@ -73,12 +83,13 @@ DictionaryReverseIndex buildReverseIndex(
       for (var sense in entry.senses) {
         var equivalents = sense.english.split(separator);
         var cleaned = removeStopWords(equivalents);
-        addSenses(equivalents, sense);
+        addSenses(cleaned, sense);
         var notesEquiv = np.parseNotes(sense.notes);
         addSenses(notesEquiv, sense);
       }
     }
   }
+
   return DictionaryReverseIndex(revIndex);
 }
 
@@ -154,7 +165,8 @@ class DictionaryEntry {
         variants[sense.traditional] = true;
       }
     }
-    var variantRollup = variants.isEmpty ? '' : variants.keys.join('、').trim();;
+    var variantRollup = variants.isEmpty ? '' : variants.keys.join('、').trim();
+    ;
     return '$rollup （$variantRollup）';
   }
 
@@ -216,20 +228,23 @@ class DictionarySources {
 }
 
 /// Build a forward index by parsing a dictionary from a JSON string.
+///
+/// Indended for the Chinese Notes and NTI Reader native dictionary structure
 DictionaryCollectionIndex dictFromJson(
     String jsonString, DictionarySource source) {
   List data = json.decode(jsonString) as List;
   Map<String, DictionaryEntries> entryMap = {};
   for (var lu in data) {
     try {
-      var hwid = (lu['h'] == null) ? int.parse(lu['h']) : -1;
+      var luid = (lu['luid'] != null) ? int.parse(lu['luid']) : -1;
+      var hwid = (lu['h'] != null) ? int.parse(lu['h']) : -1;
       var s = lu['s'] ?? '';
       var t = lu['t'] ?? '';
       var p = lu['p'] ?? '';
       var e = lu['e'] ?? '';
       var g = lu['g'] ?? '';
       var n = lu['n'] ?? '';
-      var sense = Sense(s, t, p, e, g, n);
+      var sense = Sense(luid, hwid, s, t, p, e, g, n);
       var entries = entryMap[s];
       if (entries == null || entries.length == 0) {
         var entry = DictionaryEntry(s, hwid, source.sourceId, [sense]);
@@ -253,6 +268,55 @@ DictionaryCollectionIndex dictFromJson(
   }
   print('Loaded ${entryMap.length} entries');
   return DictionaryCollectionIndex(entryMap);
+}
+
+/// Build a forward index by parsing a dictionary from a JSON string.
+///
+/// Indended for the Chinese Notes and NTI Reader native dictionary structure
+HeadwordIDIndex headwordsFromJson(String jsonString, DictionarySource source) {
+  List data = json.decode(jsonString) as List;
+  Map<int, DictionaryEntry> entryMap = {};
+  for (var lu in data) {
+    try {
+      var luid = (lu['luid'] != null) ? int.parse(lu['luid']) : -1;
+      var hwid = (lu['h'] != null) ? int.parse(lu['h']) : -1;
+      var s = lu['s'] ?? '';
+      var t = lu['t'] ?? '';
+      var p = lu['p'] ?? '';
+      var e = lu['e'] ?? '';
+      var g = lu['g'] ?? '';
+      var n = lu['n'] ?? '';
+      var sense = Sense(luid, hwid, s, t, p, e, g, n);
+      var entry = entryMap[s];
+      if (entry == null) {
+        entryMap[hwid] = DictionaryEntry(s, hwid, source.sourceId, [sense]);
+      } else {
+        entry.senses.add(sense);
+      }
+      if (t != '') {
+        var entry = entryMap[t];
+        if (entry == null) {
+          entryMap[hwid] = DictionaryEntry(s, hwid, source.sourceId, [sense]);
+        } else {
+          entry.senses.add(sense);
+        }
+      }
+    } on Exception catch (ex) {
+      print('Could not load parse entry ${lu['h']}, ${lu['s']}: $ex');
+      rethrow;
+    }
+  }
+  print('Loaded ${entryMap.length} headwords');
+  return HeadwordIDIndex(entryMap);
+}
+
+/// HeadwordIDIndex indexes the dictionary by headword ID.
+///
+/// A headword ID uniquely identifies a dictionary entry with a specific source.
+class HeadwordIDIndex {
+  final Map<int, DictionaryEntry> entries;
+
+  HeadwordIDIndex(this.entries);
 }
 
 /// NotesProcessor processes notes in dictonary entries.
@@ -296,15 +360,45 @@ class QueryResults {
 
 /// Sense is the meaning of a dictionary entry.
 class Sense {
+  /// Lexical unit ID, uniquely identifies the word sense in a dictionary
+  final int luid;
+
+  /// Headword ID, uniquely determines the headword in a specific dictionary
+  final int hwid;
+
+  /// The simplified Chinese form
   final String simplified;
+
+  /// The traditional Chinese, form or empty string if the same as simplified
   final String traditional;
+
+  /// The Hanyu pinyin pronunciation of the sense
   final String pinyin;
+
+  /// A delimited set of English equivalents
   final String english;
+
+  /// Part of speech
   final String grammar;
+
+  /// Notes, including citations
   final String notes;
 
-  Sense(this.simplified, this.traditional, this.pinyin, this.english,
-      this.grammar, this.notes);
+  Sense(this.luid, this.hwid, this.simplified, this.traditional, this.pinyin,
+      this.english, this.grammar, this.notes);
+
+  @override
+  bool operator ==(dynamic other) {
+    return other is Sense && other.english == english;
+  }
+
+  // Combines simplified and traditional if they differe, eg 围 (圍)
+  String get chinese {
+    if (traditional == '' || simplified == traditional) {
+      return simplified;
+    }
+    return '$simplified （$traditional）';
+  }
 }
 
 /// Senses is a list of word senses.
