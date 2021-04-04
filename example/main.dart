@@ -41,16 +41,30 @@ void main() async {
   var sources = DictionarySources(<int, DictionarySource>{1: cnSource});
   var jsonString = await download(cnSource.url);
   var forrwardIndex = dictFromJson(jsonString, cnSource);
+  var reverseIndex = buildReverseIndex(forrwardIndex);
+  var app = App(forrwardIndex, sources, reverseIndex);
   const hw = '你好';
   print('Looking up $hw');
-  var dictEntries = forrwardIndex.lookup(hw);
-  print('Found ${dictEntries.entries.length} entries');
-  for (var ent in dictEntries.entries) {
-    var source = sources.lookup(ent.sourceId);
-    print('Source: ${source.abbreviation}');
-    for (var sense in ent.senses) {
-      print('Pinyin: ${sense.pinyin}');
-      print('English: ${sense.english}');
+  var results = app.lookup(hw);
+  if (results.terms.length == 0) {
+    print('No results found.');
+    return;
+  }
+  if (results.terms.length == 1 &&
+      results.terms.first.entries.entries.length == 0) {
+    print('No results found.');
+    return;
+  }
+  for (var term in results.terms) {
+    var entries = term.entries.entries;
+    print('Found ${entries.length} entries');
+    for (var ent in entries) {
+      var source = sources.lookup(ent.sourceId);
+      print('Source: ${source.abbreviation}');
+      for (var sense in ent.senses) {
+        print('Pinyin: ${sense.pinyin}');
+        print('English: ${sense.english}');
+      }
     }
   }
 }

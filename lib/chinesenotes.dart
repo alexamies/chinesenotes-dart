@@ -9,13 +9,22 @@ import 'dart:convert';
 const ntiReaderJson = 'https://ntireader.org/dist/ntireader.json';
 const cnotesJson = 'https://chinesenotes.com/dist/ntireader.json';
 const separator = ' / ';
+const notesPatterns = [r'Scientific name: (.+) \('];
 
 /// App is a top level class that holds state of resources.
 class App {
   final DictionaryCollectionIndex forrwardIndex;
   final DictionarySources sources;
+  DictionaryReverseIndex reverseIndex;
 
-  App(this.forrwardIndex, this.sources);
+  App(this.forrwardIndex, this.sources, this.reverseIndex);
+
+  QueryResults lookup(String query) {
+    var entries = forrwardIndex.lookup(query);
+    var senses = reverseIndex.lookup(query);
+    var term = Term(query, entries, senses);
+    return QueryResults([term]);
+  }
 }
 
 /// Builds a reverse index from the given forward index.
@@ -27,7 +36,8 @@ class App {
 ///   forrwardIndex - containing the dictionary entries
 ///   np - to extract secondary equivalents contained in notes
 DictionaryReverseIndex buildReverseIndex(
-    DictionaryCollectionIndex forrwardIndex, NotesProcessor np) {
+    DictionaryCollectionIndex forrwardIndex) {
+  var np = NotesProcessor(notesPatterns);
   var revIndex = <String, Senses>{};
   void addSense(String equiv, Sense sense) {
     var ent = revIndex[equiv];
@@ -192,6 +202,15 @@ DictionaryCollectionIndex dictFromJson(
       } else {
         entries.entries[0].senses.add(sense);
       }
+      if (t != '') {
+        var entries = entryMap[t];
+        if (entries == null) {
+          var entry = DictionaryEntry(s, hwid, source.sourceId, [sense]);
+          entryMap[t] = DictionaryEntries(t, [entry]);
+        } else {
+          entries.entries[0].senses.add(sense);
+        }
+      }
     } on Exception catch (ex) {
       print('Could not load parse entry ${lu['h']}, ${lu['s']}: $ex');
       rethrow;
@@ -235,6 +254,13 @@ class NotesProcessor {
   }
 }
 
+/// Contains the result of a lookup checking both forward and reverse indexes.
+class QueryResults {
+  List<Term> terms;
+
+  QueryResults(this.terms);
+}
+
 /// Sense is the meaning of a dictionary entry.
 class Sense {
   final String simplified;
@@ -253,4 +279,17 @@ class Senses {
   final List<Sense> senses;
 
   Senses(this.senses);
+}
+
+/// A Term contains the QueryText searched for and possibly a matching
+/// dictionary entry. There will only be matching dictionary entries for
+/// Chinese words in the dictionary. For reverse lookups with non-Chinese text,
+/// Chinese words will have nil DictEntry values and matching values will be
+/// included in the Senses field.
+class Term {
+  String queryText;
+  DictionaryEntries entries;
+  Senses senses;
+
+  Term(this.queryText, this.entries, this.senses);
 }

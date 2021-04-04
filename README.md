@@ -12,7 +12,7 @@ Status: Experimental, will probably change.
 Clone the GitHub repo:
 
 ```shell
-git clone https://github.com/alexamies/chinesenotes-go.git
+git clone https://github.com/alexamies/chinesenotes-dart.git
 ```
 
 Setup your Dart environment. See
