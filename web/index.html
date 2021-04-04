@@ -1,30 +1,33 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset='utf-8'>
+    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0'>
     <title>Chinese Notes Chinese-English Dictionary</title>
-    <link rel="stylesheet" href="styles.css">
-    <link rel="icon" sizes="192x192" href="favicon.png">
+    <link rel='stylesheet' href='styles.css'>
+    <link rel='icon' sizes='192x192' href='favicon.png'>
   </head>
   <body>
-    <h1>Chinese-English Dictionary</h1>
-    <p>Search for a term. Examples: 玫瑰, 围 (圍), or 五蘊.</p>
-    <p>
-      <form name="findForm" id="findForm" action="#">
-        <div>
-          <label for="findInput">Search for</label>
-          <input type="text" name="findInput"
-                 id="findInput" size="40" required/>
-          <button type="submit" id="findSubmit">
-            <span>Find</span>
-          </button>
-        </div>
-      </form>
-    </p>
-    <div id="findResults"></div>
-    <p id="findError"></p>
-    <script defer src="main.dart.js"></script>
+    <h1>Chinese Notes Chinese-English Dictionary</h1>
+    <div id='output'>
+      <p>Search for a term. Examples: 玫瑰, 围 (圍), or 五蘊.</p>
+      <div id='formDiv'>
+        <form name='findForm' id='findForm' action='#'>
+          <div>
+            <label for='findInput'>Search for</label>
+            <input type='text' name='findInput'
+                   id='findInput' size='40' required/>
+            <button type='submit' id='findSubmit'>
+              <span>Find</span>
+            </button>
+          </div>
+        </form>
+      </div>
+      <div id='findResults'></div>
+      <div id='findError'></div>
+      <div class='status' id='status'></div>
+    </div>
+    <script defer src='main.dart.js'></script>
   </body>
 </html>

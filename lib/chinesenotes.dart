@@ -48,7 +48,6 @@ DictionaryReverseIndex buildReverseIndex(
   var revIndex = <String, Senses>{};
   void addSenses(List<String> equivalents, Sense sense) {
     for (var equiv in equivalents) {
-      print('Adding equiv: $equiv');
       var ent = revIndex[equiv];
       if (ent == null) {
         revIndex[equiv] = Senses([sense]);
@@ -118,6 +117,10 @@ class DictionaryEntries {
   final List<DictionaryEntry> entries;
 
   DictionaryEntries(this.headword, this.entries);
+
+  int get length {
+    return entries.length;
+  }
 }
 
 /// DictionaryEntry is an entry for a term in a Chinese-English dictionary.
@@ -135,11 +138,27 @@ class DictionaryEntry {
   /// The sourceId identifies the origin of the entry.
   final int sourceId;
 
-  List<Sense> senses;
+  final List<Sense> senses;
 
   DictionaryEntry(this.headword, this.headwordId, this.sourceId, this.senses);
 
-  /// Rolls up Hanyun pinyin from all senses
+  /// A rollup of simplified, traditional, and variant forms of the headword
+  ///
+  /// The headword may have simplified, traditional, and variant forms. For
+  /// example, 围 (圍).
+  String get hwRollup {
+    var rollup = headword;
+    var variants = <String, bool>{};
+    for (var sense in senses) {
+      if (sense.traditional != '') {
+        variants[sense.traditional] = true;
+      }
+    }
+    var variantRollup = variants.isEmpty ? '' : variants.keys.join('、').trim();;
+    return '$rollup （$variantRollup）';
+  }
+
+  /// Rolls up different writings of Hanyun pinyin from all senses
   String get pinyin {
     var values = <String, bool>{};
     for (var s in senses) {
@@ -212,7 +231,7 @@ DictionaryCollectionIndex dictFromJson(
       var n = lu['n'] ?? '';
       var sense = Sense(s, t, p, e, g, n);
       var entries = entryMap[s];
-      if (entries == null) {
+      if (entries == null || entries.length == 0) {
         var entry = DictionaryEntry(s, hwid, source.sourceId, [sense]);
         entryMap[s] = DictionaryEntries(s, [entry]);
       } else {

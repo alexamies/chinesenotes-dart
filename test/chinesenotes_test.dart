@@ -151,14 +151,14 @@ void main() {
     var reverseIndex = buildReverseIndex(forwardIndex);
     var app = App(forwardIndex, sources, reverseIndex);
     const query = 'Rosa rugosa';
-    const traditional = '玫瑰';
+    const simplified = '玫瑰';
     var result = app.lookup(query);
     //expect(result.terms.length, equals(1));
     for (var term in result.terms) {
       expect(term.queryText, equals(query));
       expect(term.senses.senses.length, equals(1));
       for (var sense in term.senses.senses) {
-        expect(sense.traditional, equals(traditional));
+        expect(sense.simplified, equals(simplified));
       }
     }
   });

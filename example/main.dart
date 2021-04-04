@@ -50,8 +50,7 @@ void main() async {
     print('No results found.');
     return;
   }
-  if (results.terms.length == 1 &&
-      results.terms.first.entries.entries.length == 0) {
+  if (results.terms.length == 1 && results.terms.first.entries.length == 0) {
     print('No results found.');
     return;
   }
