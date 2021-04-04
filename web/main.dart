@@ -19,8 +19,7 @@ void main() async {
     var sources = DictionarySources(<int, DictionarySource>{1: cnSource});
     final jsonString = await HttpRequest.getString(url);
     var forwardIndex = dictFromJson(jsonString, cnSource);
-    var np = NotesProcessor([r'Scientific name: (.+) \(']);
-    var reverseIndex = buildReverseIndex(forwardIndex, np);
+    var reverseIndex = buildReverseIndex(forwardIndex);
     output.text = 'Dictionary loaded';
 
     var app = App(forwardIndex, sources, reverseIndex);

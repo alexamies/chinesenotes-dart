@@ -83,10 +83,19 @@ void main() {
   });
   test('NotesProcessor.parseNotes return equivalents in notes', () {
     const notes = 'Scientific name: Rosa rugosa (CC-CEDICT)';
-    var np = NotesProcessor([r'Scientific name: (.+) \(']);
+    var np = NotesProcessor(notesPatterns);
     var equivalents = np.parseNotes(notes);
     expect(equivalents.length, equals(1));
     expect(equivalents[0], equals('Rosa rugosa'));
+  });
+  test(
+      'NotesProcessor.parseNotes gets equivalents in notes with training comma',
+      () {
+    const notes = 'Sanskrit equivalent: pañcaskandha, xxx';
+    var np = NotesProcessor(notesPatterns);
+    var equivalents = np.parseNotes(notes);
+    expect(equivalents.length, equals(1));
+    expect(equivalents[0], equals('pañcaskandha'));
   });
   test('App.lookup can find a word with a Chinese query', () async {
     var sources = DictionarySources(<int, DictionarySource>{1: cnSource});

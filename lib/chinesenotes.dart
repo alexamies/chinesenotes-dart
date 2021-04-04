@@ -9,7 +9,14 @@ import 'dart:convert';
 const ntiReaderJson = 'https://ntireader.org/dist/ntireader.json';
 const cnotesJson = 'https://chinesenotes.com/dist/ntireader.json';
 const separator = ' / ';
-const notesPatterns = [r'Scientific name: (.+) \('];
+const notesPatterns = [
+  r'Scientific name: (.+)(\(|,|;)',
+  r'Sanskrit equivalent: (.+)(\(|,|;)',
+  r'Pāli: (.+)(\(|,|;)',
+  r'Pali: (.+)(\(|,|;)',
+  r'Japanese: (.+)(\(|,|;)',
+  r'Tibetan: (.+)(\(|,|;)'
+];
 
 /// App is a top level class that holds state of resources.
 class App {
@@ -230,7 +237,7 @@ class NotesProcessor {
 
   NotesProcessor(List<String> patterns) : _exp = [] {
     for (var pattern in patterns) {
-      _exp.add(RegExp(pattern));
+      _exp.add(RegExp(pattern, unicode: true));
     }
   }
 
@@ -246,7 +253,9 @@ class NotesProcessor {
       Iterable<Match> reMatches = exp.allMatches(notes);
       for (Match m in reMatches) {
         if (m.groupCount > 0) {
-          matches.add(m[1]!);
+          if (m[1] != null) {
+            matches.add(m[1]!.trim());
+          }
         }
       }
     }
