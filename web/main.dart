@@ -4,7 +4,7 @@ import 'package:chinesenotes/chinesenotes.dart';
 
 void main() async {
   print('Starting client app');
-  var errorDiv = querySelector('#findError')!;
+  var errorDiv = querySelector('#lookupError')!;
   var statusDiv = querySelector('#status')!;
   statusDiv.text = 'Loading dictionary';
 
@@ -26,8 +26,8 @@ void main() async {
 
     var app = App(forwardIndex, sources, reverseIndex, hwIDIndex);
 
-    var textField = querySelector('#findInput') as TextInputElement;
-    var div = querySelector('#findResults')!;
+    var textField = querySelector('#lookupInput') as TextInputElement;
+    var div = querySelector('#lookupResults')!;
 
     void lookup(Event evt) {
       div.children = [];
@@ -128,11 +128,12 @@ void main() async {
       evt.preventDefault();
     }
 
-    var findForm = querySelector('#findForm')!;
+    var findForm = querySelector('#lookupForm')!;
     findForm.onSubmit.listen(lookup);
   } catch (e) {
     errorDiv.text = 'Unable to load dictionary';
     statusDiv.text = 'Try a hard refresh of the page and search again';
     print('Unable to load dictionary, error: $e');
+    rethrow;
   }
 }

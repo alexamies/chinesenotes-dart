@@ -22,11 +22,11 @@ h1 {
   padding: 10px 0px 15px 0px;
 }
 
-#findForm {
+#lookupForm {
   padding: 10px 0px 15px 0px;
 }
 
-#findInput {
+#lookupInput {
   padding: 20;
 }
 
@@ -35,7 +35,7 @@ h1 {
   font-size: small;
 }
 
-#findSubmit {
+#lookupSubmit {
   font-weight: bold;
 }
 

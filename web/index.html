@@ -10,26 +10,25 @@
   </head>
   <body>
     <h1>Chinese Notes Chinese-English Dictionary</h1>
-    <p><a href='/'>Home</a></p>
     <div id='output'>
       <p>
         Search for a term. Examples: 玫瑰, 围 (圍), or 五蘊. Also try reverse
         lookup with an English or multi-lingual equivalent.
       </p>
       <div id='formDiv'>
-        <form name='findForm' id='findForm' action='#'>
+        <form name='lookupForm' id='lookupForm' action='#'>
           <div>
-            <label for='findInput'>Search for</label>
-            <input type='text' name='findInput'
-                   id='findInput' size='40' required/>
-            <button type='submit' id='findSubmit'>
+            <label for='lookupInput'>Search for</label>
+            <input type='text' name='lookupInput'
+                   id='lookupInput' size='40' required/>
+            <button type='submit' id='lookupSubmit'>
               <span>Find</span>
             </button>
           </div>
         </form>
       </div>
-      <div id='findResults'></div>
-      <div id='findError'></div>
+      <div id='lookupResults'></div>
+      <div id='lookupError'></div>
       <div class='status' id='status'></div>
     </div>
     <script defer src='main.dart.js'></script>
