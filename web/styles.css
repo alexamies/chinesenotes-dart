@@ -60,6 +60,9 @@ h1 {
   font-weight: bold;
 }
 
+.dict-notes-div {
+  display: block;
+}
 .dict-entry-notes {
   font-size: small;
 }

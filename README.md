@@ -55,6 +55,18 @@ See [JavaScript interoperability](https://dart.dev/web/js-interop).
 
 ## Using the Web Example in Production
 
+Set your Dart SDK home directory in an environment variable
+
+```shell
+DART_HOME=[your dart home]
+```
+
+Compile `web/main.dart` to JavaScript with the command
+
+```shell
+$DART_HOME/bin/dart2js -o main.dart.js web/main.dart 
+```
+
 Copy the most up-to-date dictionary from the URLs at chinesenotes.cnotesJson or 
 chinesenotes.ntiReaderJson to your web server. Makes the styles in the
 index.html page and styles.css match your web site. Follow instructions at

@@ -2,8 +2,6 @@ import 'dart:html';
 
 import 'package:chinesenotes/chinesenotes.dart';
 
-const url = 'dist/ntireader.json';
-
 void main() async {
   print('Starting client app');
   var errorDiv = querySelector('#findError')!;
@@ -13,12 +11,14 @@ void main() async {
   try {
     var cnSource = DictionarySource(
         1,
-        ntiReaderJson,
-        'Chinese Notes',
-        'Chinese Notes Chinese-English Dictionary',
-        'https://github.com/alexamies/chinesenotes.com, accessed 2021-04-01');
+        'ntireader_words.json',
+        'NTI Reader',
+        'NTI Reader Chinese-English Dictionary',
+        'https://github.com/alexamies/buddhist-dictionary',
+        'Alex Amies',
+        'Creative Commons Attribution-Share Alike 3.0');
     var sources = DictionarySources(<int, DictionarySource>{1: cnSource});
-    final jsonString = await HttpRequest.getString(url);
+    final jsonString = await HttpRequest.getString(cnSource.url);
     var forwardIndex = dictFromJson(jsonString, cnSource);
     var reverseIndex = buildReverseIndex(forwardIndex);
     var hwIDIndex = headwordsFromJson(jsonString, cnSource);
@@ -103,6 +103,7 @@ void main() async {
             secondaryDiv.children.add(engSpan);
             li.children.add(secondaryDiv);
             var notesDiv = DivElement();
+            notesDiv.className = 'dict-notes-div';
             var notesSpan = SpanElement();
             notesSpan.className = 'dict-entry-notes';
             if (sense.notes != '') {

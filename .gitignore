@@ -2,6 +2,7 @@
 .local-chromium/
 .packages
 coverage/
+main.dart.js*
 doc/
 ntireader.json
 pubspec.lock

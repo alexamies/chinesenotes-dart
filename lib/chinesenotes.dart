@@ -207,9 +207,11 @@ class DictionarySource {
   final String abbreviation;
   final String title;
   final String citation;
+  final String author;
+  final String license;
 
-  DictionarySource(
-      this.sourceId, this.url, this.abbreviation, this.title, this.citation);
+  DictionarySource(this.sourceId, this.url, this.abbreviation, this.title,
+      this.citation, this.author, this.license);
 }
 
 /// The identity of a dictionary source, how to download it, and a citation.

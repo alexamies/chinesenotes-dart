@@ -9,8 +9,14 @@ const jsonString = """
 {"s":"五蕴","t":"五蘊","p":"wǔ yùn","e":"five aggregates","g":"phrase", "n":"Sanskrit equivalent: pañcaskandha, Pāli: pañcakhandhā, Japanese: goun; the five skandhas are form 色, sensation 受, perception 想, volition 行, and consciousness 识 (FGDB '五蘊'; DJBT 'goun'; Tzu Chuang 2012; Nyanatiloka Thera 1980, 'khandha')","h":"5049"}]
 """;
 
-var cnSource = DictionarySource(1, 'cnotes.json', 'Chinese Notes',
-    'Chinese Notes Chinese-English Dictionary', 'www.com');
+var cnSource = DictionarySource(
+    1,
+    'ntireader_words.json',
+    'NTI Reader',
+    'NTI Reader Chinese-English Dictionary',
+    'https://github.com/alexamies/buddhist-dictionary',
+    'Alex Amies',
+    'Creative Commons Attribution-Share Alike 3.0');
 
 // DictionaryLoader load a dictionary from some source.
 class TestDictionaryLoader {

@@ -34,10 +34,12 @@ Future<String> download(String url) async {
 void main() async {
   var cnSource = DictionarySource(
       1,
-      ntiReaderJson,
-      'Chinese Notes',
-      'Chinese Notes Chinese-English Dictionary',
-      'https://github.com/alexamies/chinesenotes.com, accessed 2021-04-01');
+      'ntireader_words.json',
+      'NTI Reader',
+      'NTI Reader Chinese-English Dictionary',
+      'https://github.com/alexamies/buddhist-dictionary',
+      'Alex Amies',
+      'Creative Commons Attribution-Share Alike 3.0');
   var sources = DictionarySources(<int, DictionarySource>{1: cnSource});
   var jsonString = await download(cnSource.url);
   var forrwardIndex = dictFromJson(jsonString, cnSource);
