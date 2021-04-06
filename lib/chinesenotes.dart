@@ -97,19 +97,19 @@ DictionaryReverseIndex buildReverseIndex(
 ///
 /// The entries are indexed by Chinese headword.
 class DictionaryCollectionIndex {
-  final Map<String, DictionaryEntries> _entries;
+  final Map<String, DictionaryEntries> entries;
 
-  DictionaryCollectionIndex(this._entries);
+  DictionaryCollectionIndex(this.entries);
 
   Iterable<String> keys() {
-    return _entries.keys;
+    return entries.keys;
   }
 
   /// Null safe lookup
   ///
   /// Return: the value or an empty list if there is no match found
   DictionaryEntries lookup(String key) {
-    var dictEntries = _entries[key];
+    var dictEntries = entries[key];
     if (dictEntries == null) {
       return DictionaryEntries(key, []);
     }
@@ -318,6 +318,43 @@ class HeadwordIDIndex {
   final Map<int, DictionaryEntry> entries;
 
   HeadwordIDIndex(this.entries);
+}
+
+/// Build a combined index by combining multiple dictionaries
+DictionaryCollectionIndex mergeDictionaries(
+    List<DictionaryCollectionIndex> dictionaries) {
+  Map<String, DictionaryEntries> index = {};
+  for (var dictionary in dictionaries) {
+    for (var headword in dictionary.keys()) {
+      var entriesToAdd = dictionary.lookup(headword);
+      var e = index[headword];
+      if (e == null) {
+        index[headword] = entriesToAdd;
+      } else {
+        e.entries.addAll(entriesToAdd.entries);
+      }
+    }
+  }
+  return DictionaryCollectionIndex(index);
+}
+
+/// Build a combined headword ID index by combining multiple dictionaries.
+///
+/// Headword IDs for dicttionaries should be unique.
+HeadwordIDIndex mergeHWIDIndexes(List<HeadwordIDIndex> indexes) {
+  Map<int, DictionaryEntry> index = {};
+  for (var dictionary in indexes) {
+    for (var hwid in dictionary.entries.keys) {
+      var entry = dictionary.entries[hwid]!;
+      var e = index[hwid];
+      if (e == null) {
+        index[hwid] = entry;
+      } else {
+        print('Conflict merging headword ID indexes');
+      }
+    }
+  }
+  return HeadwordIDIndex(index);
 }
 
 /// NotesProcessor processes notes in dictonary entries.

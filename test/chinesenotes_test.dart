@@ -9,6 +9,10 @@ const jsonString = """
 {"s":"五蕴","t":"五蘊","p":"wǔ yùn","e":"five aggregates","g":"phrase", "n":"Sanskrit equivalent: pañcaskandha, Pāli: pañcakhandhā, Japanese: goun; the five skandhas are form 色, sensation 受, perception 想, volition 行, and consciousness 识 (FGDB '五蘊'; DJBT 'goun'; Tzu Chuang 2012; Nyanatiloka Thera 1980, 'khandha')","h":"5049"}]
 """;
 
+const jsonString2 = """
+[{"s":"汲引高风","t":"汲引高風","p":"jí yǐn gāo fēng","e": "to imitate a person of lofty character","g":"phrase","n":"Reworded from Mathews 1931 '汲引高風', p. 62)","h":"3001251", "luid": "3001251"}]
+""";
+
 var cnSource = DictionarySource(
     1,
     'ntireader_words.json',
@@ -21,7 +25,7 @@ var cnSource = DictionarySource(
 // DictionaryLoader load a dictionary from some source.
 class TestDictionaryLoader {
   /// fill in real implementation
-  Future<DictionaryCollectionIndex> load() async {
+  DictionaryCollectionIndex load() {
     var chinese = '你好';
     var sense =
         Sense(-1, 42, chinese, '', 'níhǎo', 'hello', 'interjection', 'p. 655');
@@ -33,9 +37,9 @@ class TestDictionaryLoader {
 }
 
 void main() {
-  test('DictionaryCollectionIndex.lookup finds a matching headword.', () async {
+  test('DictionaryCollectionIndex.lookup finds a matching headword.', () {
     var loader = TestDictionaryLoader();
-    var forwardIndex = await loader.load();
+    var forwardIndex = loader.load();
     const headword = '你好';
     var dictEntries = forwardIndex.lookup(headword);
     expect(dictEntries.entries.length, equals(1));
@@ -137,7 +141,7 @@ void main() {
   test('App.lookup can find a word with an English query', () async {
     var sources = DictionarySources(<int, DictionarySource>{1: cnSource});
     var loader = TestDictionaryLoader();
-    var forwardIndex = await loader.load();
+    var forwardIndex = loader.load();
     var reverseIndex = buildReverseIndex(forwardIndex);
     var hwIDIndex = headwordsFromJson('[]', cnSource);
     var app = App(forwardIndex, sources, reverseIndex, hwIDIndex);
@@ -177,7 +181,7 @@ void main() {
       }
     }
   });
-  test('App.lookup can find a word from an equivalent in the notes', () async {
+  test('App.lookup can find a word from an equivalent in the notes', () {
     var sources = DictionarySources(<int, DictionarySource>{1: cnSource});
     var forwardIndex = dictFromJson(jsonString, cnSource);
     var reverseIndex = buildReverseIndex(forwardIndex);
@@ -194,5 +198,31 @@ void main() {
         expect(sense.simplified, equals(simplified));
       }
     }
+  });
+  test('mergeDictionaries works as expected.', () {
+    var loader = TestDictionaryLoader();
+    var index1 = loader.load();
+    var simplified = '再见';
+    var sense = Sense(
+        -2, 43, simplified, '再見', 'zàijiàn', 'goodbye', 'interjection', '');
+    var entry = DictionaryEntry(simplified, 43, 2, [sense]);
+    var entryList = DictionaryEntries(simplified, [entry]);
+    var entries = <String, DictionaryEntries>{simplified: entryList};
+    var index2 = DictionaryCollectionIndex(entries);
+    var indexes = [index1, index2];
+    var mergedIndex = mergeDictionaries(indexes);
+    expect(mergedIndex.entries.length, equals(2));
+    var result = mergedIndex.lookup(simplified);
+    expect(result.entries.length, equals(1));
+    var first = result.entries.first;
+    expect(first.headword, equals(simplified));
+  });
+  test('mergeHWIDIndexes works as expected.', () {
+    var hwIDIndex1 = headwordsFromJson(jsonString, cnSource);
+    var hwIDIndex2 = headwordsFromJson(jsonString2, cnSource);
+    var indexes = [hwIDIndex1, hwIDIndex2];
+    var mergedIndex = mergeHWIDIndexes(indexes);
+    var entry = mergedIndex.entries[3001251]!;
+    expect(entry.headword, equals('汲引高风'));
   });
 }
