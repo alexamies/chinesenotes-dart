@@ -1,4 +1,7 @@
 [{"s":"围","t":"圍","p":"wéi","e":"to surround / to encircle / to corral","g":"verb", "n":"(Unihan '圍')","h":"3493"},
 {"s":"玫瑰","t":"","p":"méiguī","e":"rose","g":"noun", "n":"Scientific name: Rosa rugosa (CC-CEDICT '玫瑰'; Guoyu '玫瑰' 1; Wikipedia '玫瑰')","h":"3492"},
-{"s":"五蕴","t":"五蘊","p":"wǔ yùn","e":"five aggregates","g":"phrase", "n":"Sanskrit equivalent: pañcaskandha, Pāli: pañcakhandhā, Japanese: goun; the five skandhas are form 色, sensation 受, perception 想, volition 行, and consciousness 识 (FGDB '五蘊'; DJBT 'goun'; Tzu Chuang 2012; Nyanatiloka Thera 1980, 'khandha')","h":"5049"}
+{"s":"五蕴","t":"五蘊","p":"wǔ yùn","e":"five aggregates","g":"phrase", "n":"Sanskrit equivalent: pañcaskandha, Pāli: pañcakhandhā, Japanese: goun; the five skandhas are form 色, sensation 受, perception 想, volition 行, and consciousness 识 (FGDB '五蘊'; DJBT 'goun'; Tzu Chuang 2012; Nyanatiloka Thera 1980, 'khandha')","h":"5049"},
+{"s":"陈","t":"陳","p":"chén","e": "Chen","g":"proper noun","n":"(CC-CEDICT '陳'; Guoyu '陳' n 3; Kroll 2015 '陳' 7, p. 46; Unihan '陳')","h":"4911"},
+{"s":"陈","t":"陳","p":"chén","e": "Chen of the Southern dynasties","g":"proper noun","n":"557-589 CE (CC-CEDICT '陳'; Guoyu '陳' n 2; Kroll 2015 '陳' 6, p. 46; Mathews 1931 '陳', p. 41; XHZD '陈' 5, p. 83)","h":"4911"},
+{"s":"陈","t":"陳","p":"chén","e": "to arrange","g":"verb","n":"In the sense of 排列 (CC-CEDICT '陳'; Guoyu '陳' v 1; Kroll 2015 '陳' 1, p. 46; Mathews 1931 '陳', p. 41; XHZD '陈' 1, p. 83)","h":"4911"}
 ]

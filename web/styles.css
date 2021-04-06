@@ -18,6 +18,16 @@ h1 {
   font-size: x-large;
 }
 
+h2 {
+  padding: 20;
+  font-size: large;
+}
+
+h3 {
+  padding: 10;
+  font-size: medium;
+}
+
 #formDiv {
   padding: 10px 0px 15px 0px;
 }
@@ -77,4 +87,10 @@ h1 {
 
 .dict-sense-secondary {
   font-size: medium;
+}
+
+fieldset.source-form-element {
+  margin: 20;
+  padding: 20;
+  border: 0;
 }

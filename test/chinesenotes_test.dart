@@ -129,6 +129,7 @@ void main() {
       expect(term.entries.entries.length, equals(1));
       for (var entry in term.entries.entries) {
         expect(entry.headword, equals(query));
+        expect(entry.hwRollup, equals(query));
         expect(entry.pinyin, equals(pinyin));
       }
     }

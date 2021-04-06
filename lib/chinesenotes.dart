@@ -158,16 +158,15 @@ class DictionaryEntry {
   /// The headword may have simplified, traditional, and variant forms. For
   /// example, 围 (圍).
   String get hwRollup {
-    var rollup = headword;
     var variants = <String, bool>{};
     for (var sense in senses) {
       if (sense.traditional != '') {
         variants[sense.traditional] = true;
       }
     }
-    var variantRollup = variants.isEmpty ? '' : variants.keys.join('、').trim();
+    var rollup = variants.isEmpty ? '' : variants.keys.join('、').trim();
     ;
-    return '$rollup （$variantRollup）';
+    return rollup == '' ? headword : '$headword （$rollup）';
   }
 
   /// Rolls up different writings of Hanyun pinyin from all senses
@@ -216,12 +215,12 @@ class DictionarySource {
 
 /// The identity of a dictionary source, how to download it, and a citation.
 class DictionarySources {
-  final Map<int, DictionarySource> _sources;
+  final Map<int, DictionarySource> sources;
 
-  DictionarySources(this._sources);
+  DictionarySources(this.sources);
 
   DictionarySource lookup(int key) {
-    var source = _sources[key];
+    var source = sources[key];
     if (source == null) {
       throw Exception('dictionary source not found');
     }

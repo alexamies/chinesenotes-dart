@@ -2,6 +2,19 @@ import 'dart:html';
 
 import 'package:chinesenotes/chinesenotes.dart';
 
+DictionarySources getSources() {
+  const sourceNum = 1;
+  const nameID = '#source${sourceNum}Name';
+  var sourceCB = querySelector(nameID) as CheckboxInputElement;
+  var sourceTokens = sourceCB.value!.split(',');
+  const urlID = '#source${sourceNum}URL';
+  var sourceTF = querySelector(urlID) as CheckboxInputElement;
+  var sourceURL = sourceTF.value!;
+  var source = DictionarySource(sourceNum, sourceURL, sourceTokens[1],
+      sourceTokens[2], sourceTokens[3], sourceTokens[4], sourceTokens[5]);
+  return DictionarySources({1: source});
+}
+
 void main() async {
   print('Starting client app');
   var errorDiv = querySelector('#lookupError')!;
@@ -9,15 +22,8 @@ void main() async {
   statusDiv.text = 'Loading dictionary';
 
   try {
-    var cnSource = DictionarySource(
-        1,
-        'ntireader_words.json',
-        'NTI Reader',
-        'NTI Reader Chinese-English Dictionary',
-        'https://github.com/alexamies/buddhist-dictionary',
-        'Alex Amies',
-        'Creative Commons Attribution-Share Alike 3.0');
-    var sources = DictionarySources(<int, DictionarySource>{1: cnSource});
+    var sources = getSources();
+    var cnSource = sources.lookup(1);
     final jsonString = await HttpRequest.getString(cnSource.url);
     var forwardIndex = dictFromJson(jsonString, cnSource);
     var reverseIndex = buildReverseIndex(forwardIndex);
@@ -62,10 +68,10 @@ void main() async {
               engSpan.className = 'dict-entry-equivalent';
               engSpan.text = '${sense.english} ';
               li.children.add(engSpan);
-              var notesSpan = SpanElement();
-              notesSpan.className = 'dict-entry-notes';
-              notesSpan.text = sense.notes;
-              li.children.add(notesSpan);
+              var notesDiv = DivElement();
+              notesDiv.className = 'dict-entry-notes';
+              notesDiv.text = sense.notes;
+              li.children.add(notesDiv);
             }
             ul.children.add(li);
             var source = sources.lookup(ent.sourceId);

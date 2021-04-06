@@ -29,6 +29,28 @@
       </div>
       <div id='lookupResults'></div>
       <div id='lookupError'></div>
+      <h2>Dictionary Sources</h2>
+      <div id='sourcesDiv'>
+        <form name='sourcesForm' id='sourcesForm' action='#'>
+          <fieldset class='source-form-element'>
+            <input type='checkbox' name='source1Name'
+                   id='source1Name' size='40'
+                   value='1,NTI Reader,NTI Reader Chinese-English Dictionary,https://github.com/alexamies/buddhist-dictionary,Alex Amies,Creative Commons Attribution-Share Alike 3.0'
+                   checked='true'
+                   disabled='true'/>
+            <label for='source1Name'
+                   >NTI Reader Chinese-English Dictionary</label>
+          </fieldset>
+          <fieldset class='source-form-element'>
+              <label for='source1URL'
+                   >URL: </label>
+            <input type='text' name='source1URL'
+                   id='source1URL' size='40'
+                   value='ntireader_words.json'
+                   readonly='true'/>
+          </fieldset>
+        </form>
+      </div>
       <div class='status' id='status'></div>
     </div>
     <script defer src='main.dart.js'></script>
