@@ -3,16 +3,31 @@ import 'dart:html';
 import 'package:chinesenotes/chinesenotes.dart';
 
 DictionarySources getSources() {
-  const sourceNum = 1;
-  const nameID = '#source${sourceNum}Name';
-  var sourceCB = querySelector(nameID) as CheckboxInputElement;
-  var sourceTokens = sourceCB.value!.split(',');
-  const urlID = '#source${sourceNum}URL';
-  var sourceTF = querySelector(urlID) as CheckboxInputElement;
-  var sourceURL = sourceTF.value!;
-  var source = DictionarySource(sourceNum, sourceURL, sourceTokens[1],
-      sourceTokens[2], sourceTokens[3], sourceTokens[4], sourceTokens[5]);
-  return DictionarySources({1: source});
+  const sourceNums = [1, 2, 3, 4];
+  Map<int, DictionarySource> sources = {};
+  for (var sourceNum in sourceNums) {
+    var nameID = '#sourceName${sourceNum}';
+    var sourceCB = querySelector(nameID);
+    if (sourceCB != null) {
+      var cb = sourceCB as CheckboxInputElement;
+      var tokens = cb.value;
+      if (tokens != null) {
+        var sourceTokens = tokens.split(',');
+        var urlID = '#sourceURL${sourceNum}';
+        var sourceTF = querySelector(urlID) as CheckboxInputElement;
+        var sourceURL = sourceTF.value!;
+        sources[sourceNum] = DictionarySource(
+            sourceNum,
+            sourceURL,
+            sourceTokens[1],
+            sourceTokens[2],
+            sourceTokens[3],
+            sourceTokens[4],
+            sourceTokens[5]);
+      }
+    }
+  }
+  return DictionarySources(sources);
 }
 
 void main() async {
@@ -23,14 +38,21 @@ void main() async {
 
   try {
     var sources = getSources();
-    var cnSource = sources.lookup(1);
-    final jsonString = await HttpRequest.getString(cnSource.url);
-    var forwardIndex = dictFromJson(jsonString, cnSource);
-    var reverseIndex = buildReverseIndex(forwardIndex);
-    var hwIDIndex = headwordsFromJson(jsonString, cnSource);
+    List<DictionaryCollectionIndex> forwardIndexes = [];
+    List<HeadwordIDIndex> hwIDIndexes = [];
+    for (var source in sources.sources.values) {
+      final jsonString = await HttpRequest.getString(source.url);
+      var forwardIndex = dictFromJson(jsonString, source);
+      forwardIndexes.add(forwardIndex);
+      var hwIDIndex = headwordsFromJson(jsonString, source);
+      hwIDIndexes.add(hwIDIndex);
+    }
     statusDiv.text = 'Dictionary loaded';
 
-    var app = App(forwardIndex, sources, reverseIndex, hwIDIndex);
+    var mergedFwdIndex = mergeDictionaries(forwardIndexes);
+    var mergedHwIdIndex = mergeHWIDIndexes(hwIDIndexes);
+    var reverseIndex = buildReverseIndex(mergedFwdIndex);
+    var app = App(mergedFwdIndex, sources, reverseIndex, mergedHwIdIndex);
 
     var textField = querySelector('#lookupInput') as TextInputElement;
     var div = querySelector('#lookupResults')!;

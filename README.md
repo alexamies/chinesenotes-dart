@@ -43,11 +43,14 @@ Update your depenendencies with the command:
 dart pub get
 ```
 
-Enable CORS for downloading the most up-to-date dictionary from the URLs at
-chinesenotes.cnotesJson (included named modern entities) or 
-chinesenotes.ntiReaderJson (optimized for Buddhist texts). You can copy the
-dictionary to your site if enabling CORS is hard but beware the dictionary will
-be updated.
+Copy the latest versions of the dictionary files to your site with the commands
+
+```shell
+curl -o web/chinesenotes_words.json https://raw.githubusercontent.com/alexamies/chinesenotes.com/master/downloads/chinesenotes_words.json
+curl -o web/modern_named_entities.json https://raw.githubusercontent.com/alexamies/chinesenotes.com/master/downloads/modern_named_entities.json
+curl -o web/translation_memory_literary.json https://raw.githubusercontent.com/alexamies/chinesenotes.com/master/downloads/translation_memory_literary.json
+curl -o web/translation_memory_modern.json https://raw.githubusercontent.com/alexamies/chinesenotes.com/master/downloads/translation_memory_modern.json
+```
 
 ### Calling from JavaScript
 
