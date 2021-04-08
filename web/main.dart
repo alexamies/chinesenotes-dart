@@ -32,6 +32,7 @@ DictionarySources getSources() {
 
 void main() async {
   print('Starting client app');
+  var lookupSubmit = querySelector('#lookupSubmit') as ButtonElement;
   var errorDiv = querySelector('#lookupError')!;
   var statusDiv = querySelector('#status')!;
   statusDiv.text = 'Loading dictionary';
@@ -47,6 +48,7 @@ void main() async {
       var hwIDIndex = headwordsFromJson(jsonString, source);
       hwIDIndexes.add(hwIDIndex);
     }
+    lookupSubmit.disabled = false;
     statusDiv.text = 'Dictionary loaded';
 
     var mergedFwdIndex = mergeDictionaries(forwardIndexes);

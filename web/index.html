@@ -13,7 +13,8 @@
     <div id='output'>
       <p>
         Search for a term. Examples: 玫瑰, 围 (圍), or 五蘊. Also try reverse
-        lookup with an English or multi-lingual equivalent.
+        lookup with an English or multi-lingual equivalent. For example,
+        'rose' or 'Rosa rugosa'.
       </p>
       <div id='formDiv'>
         <form name='lookupForm' id='lookupForm' action='#'>
@@ -21,7 +22,7 @@
             <label for='lookupInput'>Search for</label>
             <input type='text' name='lookupInput'
                    id='lookupInput' size='40' required/>
-            <button type='submit' id='lookupSubmit'>
+            <button type='submit' id='lookupSubmit' disabled>
               <span>Find</span>
             </button>
           </div>
@@ -29,6 +30,7 @@
       </div>
       <div id='lookupResults'></div>
       <div id='lookupError'></div>
+      <div class='status' id='status'></div>
       <h2>Settings</h2>
       <p>Configuration settings for the dictionary.</p>
       <h3>Dictionary Sources</h3>
@@ -96,7 +98,6 @@
           </fieldset>
         </form>
       </div>
-      <div class='status' id='status'></div>
     </div>
     <script defer src='main.dart.js'></script>
   </body>
