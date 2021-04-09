@@ -3,7 +3,7 @@ import 'dart:html';
 import 'package:chinesenotes/chinesenotes.dart';
 
 DictionarySources getSources() {
-  const sourceNums = [1, 2, 3, 4];
+  const sourceNums = [1, 2, 3, 4, 5];
   Map<int, DictionarySource> sources = {};
   for (var sourceNum in sourceNums) {
     var nameID = '#sourceName${sourceNum}';

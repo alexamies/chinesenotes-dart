@@ -31,73 +31,75 @@
       <div id='lookupResults'></div>
       <div id='lookupError'></div>
       <div class='status' id='status'></div>
-      <h2>Settings</h2>
-      <p>Configuration settings for the dictionary.</p>
-      <h3>Dictionary Sources</h3>
-      <div id='sourcesDiv'>
-        <form name='sourcesForm' id='sourcesForm' action='#'>
-          <fieldset class='source-form-element'>
-            <input type='checkbox' name='sourceName1'
-                   id='sourceName1' size='40'
-                   value='1,Chinese Notes,Chinese Notes Chinese-English Dictionary,https://github.com/alexamies/chinesenotes.com,Alex Amies,Creative Commons Attribution-Share Alike 3.0'
-                   checked='true'
-                   disabled='true'/>
-            <label for='sourceName1'
-                   >Chinese Notes Chinese-English Dictionary</label>
-          </fieldset>
-          <fieldset class='source-form-element'>
-            <input type='hidden' name='sourceURL1'
-                   id='sourceURL1' size='40'
-                   value='chinesenotes_words.json'
-                   readonly='true'/>
-          </fieldset>
-          <fieldset class='source-form-element'>
-            <input type='checkbox' name='sourceName2'
-                   id='sourceName2' size='40'
-                   value='1,Modern Entities,Chinese Notes modern named entities,https://github.com/alexamies/chinesenotes.com,Alex Amies,Creative Commons Attribution-Share Alike 3.0'
-                   checked='true'
-                   disabled='true'/>
-            <label for='sourceName2'
-                   >Chinese Notes modern named entities</label>
-          </fieldset>
-          <fieldset class='source-form-element'>
-            <input type='hidden' name='sourceURL2'
-                   id='sourceURL2' size='40'
-                   value='modern_named_entities.json'
-                   readonly='true'/>
-          </fieldset>
-          <fieldset class='source-form-element'>
-            <input type='checkbox' name='sourceName3'
-                   id='sourceName3' size='40'
-                   value='1,Literary Chinese quotations,Chinese Notes Literary Chinese quotations,https://github.com/alexamies/chinesenotes.com,Alex Amies,Creative Commons Attribution-Share Alike 3.0'
-                   checked='true'
-                   disabled='true'/>
-            <label for='sourceName3'
-                   >Literary Chinese quotations</label>
-          </fieldset>
-          <fieldset class='source-form-element'>
-            <input type='hidden' name='sourceURL3'
-                   id='sourceURL3' size='40'
-                   value='translation_memory_literary.json'
-                   readonly='true'/>
-          </fieldset>
-          <fieldset class='source-form-element'>
-            <input type='checkbox' name='sourceName4'
-                   id='sourceName4' size='40'
-                   value='1,Modern Chinese quotations,Chinese Notes Modern Chinese quotations,https://github.com/alexamies/chinesenotes.com,Alex Amies,Creative Commons Attribution-Share Alike 3.0'
-                   checked='true'
-                   disabled='true'/>
-            <label for='sourceName4'
-                   >Modern Chinese quotations</label>
-          </fieldset>
-          <fieldset class='source-form-element'>
-            <input type='hidden' name='sourceURL4'
-                   id='sourceURL4' size='40'
-                   value='translation_memory_modern.json'
-                   readonly='true'/>
-          </fieldset>
-        </form>
-      </div>
+      <details>
+        <summary>Settings</summary>
+        <h2>Configuration Settings</h2>
+        <h3>Dictionary Sources</h3>
+        <div id='sourcesDiv'>
+          <form name='sourcesForm' id='sourcesForm' action='#'>
+            <fieldset class='source-form-element'>
+              <input type='checkbox' name='sourceName1'
+                     id='sourceName1' size='40'
+                     value='1,Chinese Notes,Chinese Notes Chinese-English Dictionary,https://github.com/alexamies/chinesenotes.com,Alex Amies,Creative Commons   Attribution-Share Alike 3.0'
+                     checked='true'
+                     disabled='true'/>
+              <label for='sourceName1'
+                     >Chinese Notes Chinese-English Dictionary</label>
+            </fieldset>
+            <fieldset class='source-form-element'>
+              <input type='hidden' name='sourceURL1'
+                     id='sourceURL1' size='40'
+                     value='chinesenotes_words.json'
+                     readonly='true'/>
+            </fieldset>
+            <fieldset class='source-form-element'>
+              <input type='checkbox' name='sourceName2'
+                     id='sourceName2' size='40'
+                     value='2,Modern Entities,Chinese Notes modern named entities,https://github.com/alexamies/chinesenotes.com,Alex Amies,Creative Commons   Attribution-Share Alike 3.0'
+                     checked='true'
+                     disabled='true'/>
+              <label for='sourceName2'
+                     >Chinese Notes modern named entities</label>
+             </fieldset>
+            <fieldset class='source-form-element'>
+              <input type='hidden' name='sourceURL2'
+                     id='sourceURL2' size='40'
+                     value='modern_named_entities.json'
+                     readonly='true'/>
+            </fieldset>
+            <fieldset class='source-form-element'>
+              <input type='checkbox' name='sourceName3'
+                     id='sourceName3' size='40'
+                     value='3,Literary Chinese quotations,Chinese Notes Literary Chinese quotations,https://github.com/alexamies/chinesenotes.com,Alex Amies,Creative   Commons Attribution-Share Alike 3.0'
+                     checked='true'
+                     disabled='true'/>
+              <label for='sourceName3'
+                     >Literary Chinese quotations</label>
+            </fieldset>
+            <fieldset class='source-form-element'>
+              <input type='hidden' name='sourceURL3'
+                     id='sourceURL3' size='40'
+                     value='translation_memory_literary.json'
+                     readonly='true'/>
+            </fieldset>
+            <fieldset class='source-form-element'>
+              <input type='checkbox' name='sourceName4'
+                     id='sourceName4' size='40'
+                     value='4,Modern Chinese quotations,Chinese Notes Modern Chinese quotations,https://github.com/alexamies/chinesenotes.com,Alex Amies,Creative Commons Attribution-Share Alike 3.0'
+                     checked='true'
+                     disabled='true'/>
+              <label for='sourceName4'
+                     >Modern Chinese quotations</label>
+            </fieldset>
+            <fieldset class='source-form-element'>
+              <input type='hidden' name='sourceURL4'
+                     id='sourceURL4' size='40'
+                     value='translation_memory_modern.json'
+                     readonly='true'/>
+            </fieldset>
+          </form>
+        </div>
+      </details>
     </div>
     <script defer src='main.dart.js'></script>
   </body>
