@@ -52,6 +52,9 @@ curl -o web/translation_memory_literary.json https://raw.githubusercontent.com/a
 curl -o web/translation_memory_modern.json https://raw.githubusercontent.com/alexamies/chinesenotes.com/master/downloads/translation_memory_modern.json
 ```
 
+There are some Buddhist dictionaries in JSON format that can be downloaded from
+https://github.com/alexamies/buddhist-dictionary/tree/master/downloads
+
 ### Calling from JavaScript
 
 See [JavaScript interoperability](https://dart.dev/web/js-interop).

@@ -3,33 +3,38 @@ import 'dart:html';
 import 'package:chinesenotes/chinesenotes.dart';
 
 DictionarySources getSources() {
-  const sourceNums = [1, 2, 3, 4, 5];
+  const sourceNums = [1, 2, 3, 4, 5, 6];
   Map<int, DictionarySource> sources = {};
   for (var sourceNum in sourceNums) {
     var nameID = '#sourceName${sourceNum}';
     var sourceCB = querySelector(nameID);
-    if (sourceCB != null) {
-      var cb = sourceCB as CheckboxInputElement;
-      var tokens = cb.value;
-      if (tokens != null) {
-        var sourceTokens = tokens.split(',');
-        if (sourceTokens.length < 7) {
-          throw Exception('Not enough information to identify source: $tokens');
-        }
-        var urlID = '#sourceURL${sourceNum}';
-        var sourceTF = querySelector(urlID) as CheckboxInputElement;
-        var sourceURL = sourceTF.value!;
-        sources[sourceNum] = DictionarySource(
-            sourceNum,
-            sourceURL,
-            sourceTokens[1],
-            sourceTokens[2],
-            sourceTokens[3],
-            sourceTokens[4],
-            sourceTokens[5],
-            int.parse(sourceTokens[6]));
-      }
+    if (sourceCB == null) {
+      continue;
     }
+    var cb = sourceCB as CheckboxInputElement;
+    if ((cb.checked == null) || !cb.checked!) {
+      continue;
+    }
+    var tokens = cb.value;
+    if (tokens == null) {
+      continue;
+    }
+    var sourceTokens = tokens.split(',');
+    if (sourceTokens.length < 7) {
+      throw Exception('Not enough information to identify source: $tokens');
+    }
+    var urlID = '#sourceURL${sourceNum}';
+    var sourceTF = querySelector(urlID) as CheckboxInputElement;
+    var sourceURL = sourceTF.value!;
+    sources[sourceNum] = DictionarySource(
+        sourceNum,
+        sourceURL,
+        sourceTokens[1],
+        sourceTokens[2],
+        sourceTokens[3],
+        sourceTokens[4],
+        sourceTokens[5],
+        int.parse(sourceTokens[6]));
   }
   return DictionarySources(sources);
 }
@@ -46,11 +51,16 @@ void main() async {
     List<DictionaryCollectionIndex> forwardIndexes = [];
     List<HeadwordIDIndex> hwIDIndexes = [];
     for (var source in sources.sources.values) {
-      final jsonString = await HttpRequest.getString(source.url);
-      var forwardIndex = dictFromJson(jsonString, source);
-      forwardIndexes.add(forwardIndex);
-      var hwIDIndex = headwordsFromJson(jsonString, source);
-      hwIDIndexes.add(hwIDIndex);
+      try {
+        final jsonString = await HttpRequest.getString(source.url);
+        var forwardIndex = dictFromJson(jsonString, source);
+        forwardIndexes.add(forwardIndex);
+        var hwIDIndex = headwordsFromJson(jsonString, source);
+        hwIDIndexes.add(hwIDIndex);
+      } catch (ex) {
+        print('Could not load dicitonary ${source.abbreviation}: $ex');
+        errorDiv.text = 'Could not load dicitonary ${source.abbreviation}';
+      }
     }
     lookupSubmit.disabled = false;
     statusDiv.text = 'Dictionary loaded';
