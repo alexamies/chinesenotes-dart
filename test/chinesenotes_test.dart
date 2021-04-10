@@ -20,7 +20,8 @@ var cnSource = DictionarySource(
     'NTI Reader Chinese-English Dictionary',
     'https://github.com/alexamies/buddhist-dictionary',
     'Alex Amies',
-    'Creative Commons Attribution-Share Alike 3.0');
+    'Creative Commons Attribution-Share Alike 3.0',
+    0);
 
 // DictionaryLoader load a dictionary from some source.
 class TestDictionaryLoader {
@@ -224,5 +225,37 @@ void main() {
     var mergedIndex = mergeHWIDIndexes(indexes);
     var entry = mergedIndex.entries[3001251]!;
     expect(entry.headword, equals('汲引高风'));
+  });
+  test('Sense == equals with same LUID and HWID.', () {
+    var chinese = '你好';
+    var hello1 =
+        Sense(42, 42, chinese, '', 'níhǎo', 'hello', 'interjection', 'p. 655');
+    var hello2 =
+        Sense(42, 42, chinese, '', 'níhǎo', 'hello', 'interjection', 'p. 655');
+    expect(hello1, equals(hello2));
+  });
+  test('Sense == not equals with different LUID and HWID.', () {
+    var chinese = '你好';
+    var hello1 =
+        Sense(42, 42, chinese, '', 'níhǎo', 'hello', 'interjection', 'p. 655');
+    var hello2 =
+        Sense(43, 43, chinese, '', 'níhǎo', 'hello', 'interjection', 'p. 655');
+    expect(hello1, isNot(hello2));
+  });
+  test('Sense == equivalent is equals with no LUID.', () {
+    var chinese = '你好';
+    var hello1 =
+        Sense(-1, 42, chinese, '', 'níhǎo', 'hello', 'interjection', 'p. 655');
+    var hello2 =
+        Sense(-1, 43, chinese, '', 'níhǎo', 'hello', 'interjection', 'p. 655');
+    expect(hello1, equals(hello2));
+  });
+  test('Sense == not equals with same LUID, different HWID.', () {
+    var chinese = '你好';
+    var hello1 =
+        Sense(1, 42, chinese, '', 'níhǎo', 'hello', 'interjection', 'p. 655');
+    var hello2 =
+        Sense(1, 43, chinese, '', 'níhǎo', 'hello', 'interjection', 'p. 655');
+    expect(hello1, isNot(hello2));
   });
 }

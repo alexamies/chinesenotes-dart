@@ -13,6 +13,9 @@ DictionarySources getSources() {
       var tokens = cb.value;
       if (tokens != null) {
         var sourceTokens = tokens.split(',');
+        if (sourceTokens.length < 7) {
+          throw Exception('Not enough information to identify source: $tokens');
+        }
         var urlID = '#sourceURL${sourceNum}';
         var sourceTF = querySelector(urlID) as CheckboxInputElement;
         var sourceURL = sourceTF.value!;
@@ -23,7 +26,8 @@ DictionarySources getSources() {
             sourceTokens[2],
             sourceTokens[3],
             sourceTokens[4],
-            sourceTokens[5]);
+            sourceTokens[5],
+            int.parse(sourceTokens[6]));
       }
     }
   }

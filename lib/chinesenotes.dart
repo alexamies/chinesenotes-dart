@@ -201,16 +201,35 @@ class DictionaryReverseIndex {
 
 /// DictionarySource is a collection of dictionary entries from a single source.
 class DictionarySource {
+  /// A numeric identifier for the source
   final int sourceId;
+
+  /// The URL that the source can be loaded from
   final String url;
+
+  /// A short title for the source
   final String abbreviation;
+
+  /// The full title of the source
   final String title;
+
+  /// A citation
   final String citation;
+
+  /// The author(s)
   final String author;
+
+  /// Licence or copyright
   final String license;
 
+  /// Each source should have a unique range of headword ids, starting with
+  /// this. Some sources, such as Chinese Notes, have their own headword ids,
+  /// which will be used instead of computing a headword id starting with this
+  /// value.
+  final int startHeadwords;
+
   DictionarySource(this.sourceId, this.url, this.abbreviation, this.title,
-      this.citation, this.author, this.license);
+      this.citation, this.author, this.license, this.startHeadwords);
 }
 
 /// The identity of a dictionary source, how to download it, and a citation.
@@ -233,12 +252,13 @@ class DictionarySources {
 /// Indended for the Chinese Notes and NTI Reader native dictionary structure
 DictionaryCollectionIndex dictFromJson(
     String jsonString, DictionarySource source) {
+  var i = source.startHeadwords;
   List data = json.decode(jsonString) as List;
   Map<String, DictionaryEntries> entryMap = {};
   for (var lu in data) {
     try {
-      var luid = (lu['luid'] != null) ? int.parse(lu['luid']) : -1;
-      var hwid = (lu['h'] != null) ? int.parse(lu['h']) : -1;
+      var luid = (lu['luid'] != null) ? int.parse(lu['luid']) : i;
+      var hwid = (lu['h'] != null) ? int.parse(lu['h']) : i;
       var s = lu['s'] ?? '';
       var t = lu['t'] ?? '';
       var p = lu['p'] ?? '';
@@ -262,6 +282,7 @@ DictionaryCollectionIndex dictFromJson(
           entries.entries[0].senses.add(sense);
         }
       }
+      i++;
     } on Exception catch (ex) {
       print('Could not load parse entry ${lu['h']}, ${lu['s']}: $ex');
       rethrow;
@@ -275,12 +296,13 @@ DictionaryCollectionIndex dictFromJson(
 ///
 /// Indended for the Chinese Notes and NTI Reader native dictionary structure
 HeadwordIDIndex headwordsFromJson(String jsonString, DictionarySource source) {
+  var i = source.startHeadwords;
   List data = json.decode(jsonString) as List;
   Map<int, DictionaryEntry> entryMap = {};
   for (var lu in data) {
     try {
-      var luid = (lu['luid'] != null) ? int.parse(lu['luid']) : -1;
-      var hwid = (lu['h'] != null) ? int.parse(lu['h']) : -1;
+      var luid = (lu['luid'] != null) ? int.parse(lu['luid']) : i;
+      var hwid = (lu['h'] != null) ? int.parse(lu['h']) : i;
       var s = lu['s'] ?? '';
       var t = lu['t'] ?? '';
       var p = lu['p'] ?? '';
@@ -302,6 +324,7 @@ HeadwordIDIndex headwordsFromJson(String jsonString, DictionarySource source) {
           entry.senses.add(sense);
         }
       }
+      i++;
     } on Exception catch (ex) {
       print('Could not load parse entry ${lu['h']}, ${lu['s']}: $ex');
       rethrow;
@@ -350,7 +373,9 @@ HeadwordIDIndex mergeHWIDIndexes(List<HeadwordIDIndex> indexes) {
       if (e == null) {
         index[hwid] = entry;
       } else {
-        print('Conflict merging headword ID indexes');
+        print('Conflict merging headword ID indexes: entry ${entry.headword}, '
+            '${entry.headwordId}, ${entry.sourceId} conflicts with entry '
+            '${e.headword}, ${e.sourceId}');
       }
     }
   }
@@ -398,7 +423,7 @@ class QueryResults {
 
 /// Sense is the meaning of a dictionary entry.
 class Sense {
-  /// Lexical unit ID, uniquely identifies the word sense in a dictionary
+  /// Lexical unit ID, uniquely identifies the word sense for a given headword
   final int luid;
 
   /// Headword ID, uniquely determines the headword in a specific dictionary
@@ -427,7 +452,9 @@ class Sense {
 
   @override
   bool operator ==(dynamic other) {
-    return other is Sense && other.english == english;
+    return other is Sense &&
+        (((luid > 0) && (other.luid == luid) && (other.hwid == hwid)) ||
+            (((luid <= 0) && (other.english == english))));
   }
 
   // Combines simplified and traditional if they differe, eg 围 (圍)
