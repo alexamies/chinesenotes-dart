@@ -59,21 +59,26 @@ h3 {
 }
 
 .dict-entry-headword {
-  font-size: large;
+  font-size: 200%;
+  font-weight: normal;
 }
 
-.dict-entry-pinyin {
+.cnnotes-pinyin {
   font-style: italic;
 }
 
-.dict-entry-equivalent {
+.dict-entry-grammar {
+  font-weight: normal;
+}
+
+span.dict-entry-definition {
   font-weight: bold;
 }
 
 .dict-notes-div {
   display: block;
 }
-.dict-entry-notes {
+.dict-entry-notes-content {
   font-size: small;
 }
 

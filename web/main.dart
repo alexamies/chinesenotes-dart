@@ -24,7 +24,7 @@ DictionarySources getSources() {
       throw Exception('Not enough information to identify source: $tokens');
     }
     var urlID = '#sourceURL${sourceNum}';
-    var sourceTF = querySelector(urlID) as CheckboxInputElement;
+    var sourceTF = querySelector(urlID) as InputElement;
     var sourceURL = sourceTF.value!;
     sources[sourceNum] = DictionarySource(
         sourceNum,
@@ -41,7 +41,7 @@ DictionarySources getSources() {
 
 void main() async {
   print('Starting client app');
-  var lookupSubmit = querySelector('#lookupSubmit') as ButtonElement;
+  var multiLookupSubmit = querySelector('#multiLookupSubmit') as ButtonElement;
   var errorDiv = querySelector('#lookupError')!;
   var statusDiv = querySelector('#status')!;
   statusDiv.text = 'Loading dictionary';
@@ -62,7 +62,7 @@ void main() async {
         errorDiv.text = 'Could not load dicitonary ${source.abbreviation}';
       }
     }
-    lookupSubmit.disabled = false;
+    multiLookupSubmit.disabled = false;
     statusDiv.text = 'Dictionary loaded';
 
     var mergedFwdIndex = mergeDictionaries(forwardIndexes);
@@ -70,7 +70,7 @@ void main() async {
     var reverseIndex = buildReverseIndex(mergedFwdIndex);
     var app = App(mergedFwdIndex, sources, reverseIndex, mergedHwIdIndex);
 
-    var textField = querySelector('#lookupInput') as TextInputElement;
+    var textField = querySelector('#multiLookupInput') as TextInputElement;
     var div = querySelector('#lookupResults')!;
 
     void lookup(Event evt) {
@@ -97,20 +97,30 @@ void main() async {
             var ul = UListElement();
             entryDiv.children.add(ul);
             var li = LIElement();
+            var senseOL = OListElement();
             for (var sense in ent.senses) {
+              var senseLi = LIElement();
+              var sensePrimary = DivElement();
               var pinyinSpan = SpanElement();
-              pinyinSpan.className = 'dict-entry-pinyin';
+              pinyinSpan.className = 'cnnotes-pinyin';
               pinyinSpan.text = '${sense.pinyin} ';
-              li.children.add(pinyinSpan);
+              sensePrimary.children.add(pinyinSpan);
+              var posSpan = SpanElement();
+              posSpan.className = 'dict-entry-grammar';
+              posSpan.text = '${sense.grammar} ';
+              sensePrimary.children.add(posSpan);
               var engSpan = SpanElement();
-              engSpan.className = 'dict-entry-equivalent';
+              engSpan.className = 'dict-entry-definition';
               engSpan.text = '${sense.english} ';
-              li.children.add(engSpan);
+              sensePrimary.children.add(engSpan);
+              senseLi.children.add(sensePrimary);
               var notesDiv = DivElement();
-              notesDiv.className = 'dict-entry-notes';
+              notesDiv.className = 'dict-entry-notes-content';
               notesDiv.text = sense.notes;
-              li.children.add(notesDiv);
+              senseLi.children.add(notesDiv);
+              senseOL.children.add(senseLi);
             }
+            li.children.add(senseOL);
             ul.children.add(li);
             var source = sources.lookup(ent.sourceId);
             var sourceDiv = DivElement();
@@ -121,7 +131,7 @@ void main() async {
         } else if (term.senses.senses.length > 0) {
           var counttDiv = DivElement();
           counttDiv.className = 'counttDiv';
-          if (dictEntries.length == 1) {
+          if (term.senses.senses == 1) {
             counttDiv.text = 'Found 1 sense.';
           } else {
             counttDiv.text = 'Found ${term.senses.senses.length} senses.';
@@ -172,7 +182,7 @@ void main() async {
       evt.preventDefault();
     }
 
-    var findForm = querySelector('#lookupForm')!;
+    var findForm = querySelector('#multiLookupForm')!;
     findForm.onSubmit.listen(lookup);
   } catch (e) {
     errorDiv.text = 'Unable to load dictionary';
