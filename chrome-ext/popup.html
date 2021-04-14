@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+    <title>Chinese Notes Chinese-English Dictionary</title>
+    <link rel='stylesheet' href='styles.css'>
+  </head>
+  <body>
+    <h1>Chinese Notes Chinese-English Dictionary</h1>
+    <div id='output'>
+      <p>
+        Search for a term. Examples: 玫瑰, 围 (圍), or 金山.
+      </p>
+      <div id='formDiv'>
+        <form name='multiLookupForm' id='multiLookupForm' action='#'>
+          <div>
+            <label for='multiLookupInput'>Search for</label>
+            <input type='text' name='multiLookupInput'
+                   id='multiLookupInput' size='40' required/>
+            <button type='submit' id='multiLookupSubmit' disabled>
+              <span>Find</span>
+            </button>
+          </div>
+        </form>
+      </div>
+      <div id='lookupResults'></div>
+      <div id='lookupError'></div>
+      <div class='status' id='status'></div>
+      <details>
+        <summary>Settings</summary>
+        <h2>Configuration Settings</h2>
+        <h3>Dictionary Sources</h3>
+        <div id='sourcesDiv'>
+          <form name='sourcesForm' id='sourcesForm' action='#'>
+            <fieldset class='source-form-element'>
+              <input type='checkbox' name='sourceName1'
+                     id='sourceName1' size='40'
+                     value='1,Chinese Notes,Chinese Notes Chinese-English Dictionary,https://github.com/alexamies/chinesenotes.com,Alex Amies,Creative Commons   Attribution-Share Alike 3.0, 2'
+                     checked='true'
+                     disabled='true'/>
+              <label for='sourceName1'
+                     >Chinese Notes Chinese-English Dictionary</label>
+            </fieldset>
+            <fieldset class='source-form-element'>
+              <input type='hidden' name='sourceURL1'
+                     id='sourceURL1' size='40'
+                     value='chinesenotes_words.json'
+                     readonly='true'/>
+            </fieldset>
+            <fieldset class='source-form-element'>
+              <input type='checkbox' name='sourceName2'
+                     id='sourceName2' size='40'
+                     value='2,Modern Entities,Chinese Notes modern named entities,https://github.com/alexamies/chinesenotes.com,Alex Amies,Creative Commons   Attribution-Share Alike 3.0, 6000002'
+                     checked='true'
+                     disabled='true'/>
+              <label for='sourceName2'
+                     >Chinese Notes modern named entities</label>
+             </fieldset>
+            <fieldset class='source-form-element'>
+              <input type='hidden' name='sourceURL2'
+                     id='sourceURL2' size='40'
+                     value='modern_named_entities.json'
+                     readonly='true'/>
+            </fieldset>
+            <fieldset class='source-form-element'>
+              <input type='checkbox' name='sourceName3'
+                     id='sourceName3' size='40'
+                     value='3,Literary Chinese quotations,Chinese Notes Literary Chinese quotations,https://github.com/alexamies/chinesenotes.com,Alex Amies,Creative   Commons Attribution-Share Alike 3.0, 3000002'
+                     checked='true'
+                     disabled='true'/>
+              <label for='sourceName3'
+                     >Literary Chinese quotations</label>
+            </fieldset>
+            <fieldset class='source-form-element'>
+              <input type='hidden' name='sourceURL3'
+                     id='sourceURL3' size='40'
+                     value='translation_memory_literary.json'
+                     readonly='true'/>
+            </fieldset>
+            <fieldset class='source-form-element'>
+              <input type='checkbox' name='sourceName4'
+                     id='sourceName4' size='40'
+                     value='4,Modern Chinese quotations,Chinese Notes Modern Chinese quotations,https://github.com/alexamies/chinesenotes.com,Alex Amies,Creative Commons Attribution-Share Alike 3.0, 5000002'
+                     checked='true'
+                     disabled='true'/>
+              <label for='sourceName4'
+                     >Modern Chinese quotations</label>
+            </fieldset>
+            <fieldset class='source-form-element'>
+              <input type='hidden' name='sourceURL4'
+                     id='sourceURL4' size='40'
+                     value='translation_memory_modern.json'
+                     readonly='true'/>
+            </fieldset>
+          </form>
+        </div>
+      </details>
+    </div>
+    <script defer src='popup.dart.js'></script>
+  </body>
+</html>

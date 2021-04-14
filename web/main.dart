@@ -151,15 +151,19 @@ void main() async {
             pinyinSpan.className = 'dict-entry-pinyin';
             pinyinSpan.text = '${sense.pinyin} ';
             secondaryDiv.children.add(pinyinSpan);
+            var posSpan = SpanElement();
+            posSpan.className = 'dict-entry-grammar';
+            posSpan.text = '${sense.grammar} ';
+            secondaryDiv.children.add(posSpan);
             var engSpan = SpanElement();
-            engSpan.className = 'dict-entry-equivalent';
+            engSpan.className = 'dict-entry-definition';
             engSpan.text = '${sense.english} ';
             secondaryDiv.children.add(engSpan);
             li.children.add(secondaryDiv);
             var notesDiv = DivElement();
             notesDiv.className = 'dict-notes-div';
             var notesSpan = SpanElement();
-            notesSpan.className = 'dict-entry-notes';
+            notesSpan.className = 'dict-entry-notes-content';
             if (sense.notes != '') {
               notesSpan.text = 'Notes: ${sense.notes} ';
             }

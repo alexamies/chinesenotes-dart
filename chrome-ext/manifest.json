@@ -1,0 +1,16 @@
+{
+  "name": "Chinese Notes Chinese-English Dictionary",
+  "description": "Chinese-English Dictionary",
+  "version": "0.0.1",
+  "manifest_version": 3,
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_popup": "popup.html"
+  },
+  "host_permissions": [
+    "https://raw.githubusercontent.com/"
+  ],
+  "options_page": "options.html"
+}
