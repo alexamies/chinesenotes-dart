@@ -1,5 +1,6 @@
 .dart_tool/
 .local-chromium/
+.idea/
 .packages
 coverage/
 main.dart.js*

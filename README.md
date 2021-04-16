@@ -1,6 +1,6 @@
-# chinesenotes
+# Chinese Notes Dictionary App
 
-A Chinese-English dictionary in Dart.
+App for the Chinese Notes Chinese-English dictionary in Dart.
 
 Add a Chinese-English dictionary to your website or web app with no backend
 application server or database required. This includes a Dart API.

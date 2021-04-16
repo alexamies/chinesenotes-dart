@@ -1,13 +1,20 @@
 {
   "name": "Chinese Notes Chinese-English Dictionary",
   "description": "Chinese-English Dictionary",
+  "short_name": "Chinese Notes",
+  "author": "Alex Amies",
   "version": "0.0.1",
   "manifest_version": 3,
+  "permissions": [
+    "activeTab",
+    "contextMenus"
+  ],
   "background": {
     "service_worker": "background.js"
   },
   "action": {
     "default_popup": "popup.html",
+    "default_title": "Chinese Notes Chinese-English Dictionary",
     "default_icon": {
       "16": "/images/icon16.png",
       "32": "/images/icon32.png",
@@ -15,6 +22,13 @@
       "128": "/images/icon128.png"
     }
   },
+  "content_scripts": [
+   {
+     "matches": ["https://*/*", "http://*/*"],
+     "css": ["styles.css"],
+     "js": ["contentscript.js"]
+   }
+  ],
   "icons": {
     "16": "/images/icon16.png",
     "32": "/images/icon32.png",
