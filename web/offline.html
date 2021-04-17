@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Chinese Notes - offline app</title>
+    <link rel='stylesheet' href='styles.css'>
+    <link rel='icon' sizes='32x32' href='images/icon32.png'>
+  </head>
+  <body>
+    <h1>Chinese Notes - offline app</h1>
+
+    <p>
+      You can still the dictionary when you are offline.
+    </p>
+    <div id='formDiv'>
+      <form name='multiLookupForm' id='multiLookupForm' action='#'>
+        <div>
+          <label for='multiLookupInput'>Search for</label>
+          <input type='text' name='multiLookupInput'
+                 id='multiLookupInput' size='40' required/>
+          <button type='submit' id='multiLookupSubmit' disabled>
+            <span>Find</span>
+          </button>
+        </div>
+      </form>
+    </div>
+    <div id='lookupResults'></div>
+    <div id='lookupError'></div>
+    <div class='status' id='status'></div>
+
+    <p>Click the button below to try reloading the main page.</p>
+    <button type="button">⤾ Reload main page</button>
+    <details>
+      <summary>Settings</summary>
+      <h2>Configuration Settings</h2>
+      <h3>Dictionary Sources</h3>
+      <div id='sourcesDiv'>
+        <form name='sourcesForm' id='sourcesForm' action='#'>
+          <fieldset class='source-form-element'>
+            <input type='checkbox' name='sourceName1'
+                   id='sourceName1' size='40'
+                   value='1,Chinese Notes,Chinese Notes Chinese-English Dictionary,https://github.com/alexamies/chinesenotes.com,Alex Amies,Creative Commons   Attribution-Share Alike 3.0, 2'
+                   checked='true'
+                   disabled='true'/>
+            <label for='sourceName1'
+                   >Chinese Notes Chinese-English Dictionary</label>
+          </fieldset>
+          <fieldset class='source-form-element'>
+            <input type='hidden' name='sourceURL1'
+                   id='sourceURL1' size='40'
+                   value='chinesenotes_words.json'
+                   readonly='true'/>
+          </fieldset>
+        </form>
+      </div>
+    </details>
+
+    <script>
+      document.querySelector("button").addEventListener("click", () => {
+        window.location.reload();
+      });
+      window.addEventListener('online', () => {
+        window.location.reload();
+      });
+      async function checkNetworkAndReload() {
+        try {
+          const response = await fetch('.');
+          if (response.status >= 200 && response.status < 500) {
+            window.location.reload();
+            return;
+          }
+        } catch {
+          console.log('Unable to connect to the server, ignore');
+        }
+        window.setTimeout(checkNetworkAndReload, 2500);
+      }
+      checkNetworkAndReload();
+    </script>
+  </body>
+</html>

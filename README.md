@@ -70,7 +70,7 @@ DART_HOME=[your dart home]
 If you have installed Flutter, it may be somewhere like
 
 ```shell
-DART_HOME=$HOME/flutter/bin/cache/dart-sdk
+DART_HOME=$HOME/development/flutter/bin/cache/dart-sdk
 ```
 
 Compile `web/main.dart` to JavaScript with the command

@@ -194,4 +194,12 @@ void main() async {
     print('Unable to load dictionary, error: $e');
     rethrow;
   }
+
+  try {
+    print('Preparing for offline use');
+    var res = await window.navigator.serviceWorker?.register('sworker.dart.js');
+    print('Registered service worker: ${res?.active}');
+  } catch (e) {
+    print('Unable to registere service worker: $e');
+  }
 }
