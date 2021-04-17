@@ -16,7 +16,8 @@ const notesPatterns = [
   r'Pāli: (.+?)(\(|,|;)',
   r'Pali: (.+?)(\(|,|;)',
   r'Japanese: (.+?)(\(|,|;)',
-  r'Tibetan: (.+?)(\(|,|;)'
+  r'Tibetan: (.+?)(\(|,|;)',
+  r'or: (.+?)(\(|,|;)'
 ];
 
 /// App is a top level class that holds state of resources.

@@ -1,4 +1,5 @@
 import 'dart:html';
+import 'dart:js';
 
 import 'package:chinesenotes/chinesenotes.dart';
 
@@ -39,15 +40,14 @@ DictionarySources getSources() {
   return DictionarySources(sources);
 }
 
-void main() async {
+Future<App?> initApp(DictionarySources sources, Element statusDiv,
+    Element errorDiv, Element? submitButton) async {
+  var sw = Stopwatch();
+  sw.start();
   print('Starting client app');
-  var multiLookupSubmit = querySelector('#multiLookupSubmit') as ButtonElement;
-  var errorDiv = querySelector('#lookupError')!;
-  var statusDiv = querySelector('#status')!;
   statusDiv.text = 'Loading dictionary';
 
   try {
-    var sources = getSources();
     List<DictionaryCollectionIndex> forwardIndexes = [];
     List<HeadwordIDIndex> hwIDIndexes = [];
     for (var source in sources.sources.values) {
@@ -62,20 +62,67 @@ void main() async {
         errorDiv.text = 'Could not load dicitonary ${source.abbreviation}';
       }
     }
-    multiLookupSubmit.disabled = false;
-    statusDiv.text = 'Dictionary loaded';
 
     var mergedFwdIndex = mergeDictionaries(forwardIndexes);
     var mergedHwIdIndex = mergeHWIDIndexes(hwIDIndexes);
     var reverseIndex = buildReverseIndex(mergedFwdIndex);
     var app = App(mergedFwdIndex, sources, reverseIndex, mergedHwIdIndex);
+    if (submitButton != null) {
+      var multiLookupSubmit = submitButton as ButtonElement;
+      multiLookupSubmit.disabled = false;
+    }
+    sw.stop();
+    print('Dictionary loaded in ${sw.elapsedMilliseconds} ms');
+    statusDiv.text = 'Dictionary loaded';
+    return app;
+  } catch (e) {
+    errorDiv.text = 'Unable to load dictionary';
+    statusDiv.text = 'Try a hard refresh of the page and search again';
+    print('Unable to load dictionary, error: $e');
+  }
+}
 
-    var textField = querySelector('#multiLookupInput') as TextInputElement;
-    var div = querySelector('#lookupResults')!;
+void cnLookup(Object msg) {
+  print('cnLookup enter ${msg}');
+}
 
+void main() async {
+  print('cnotes main enter');
+  var sources = getSources();
+  var body = querySelector('body')!;
+  var cnOutput = querySelector('#cnOutput');
+  if (cnOutput == null) {
+    // In a Chrome extension content script, create a DOM container for output
+    print('In a Chrome extension content script');
+    cnOutput = DivElement();
+    cnOutput.id = 'cnOutput';
+    body.children.insert(0, cnOutput);
+  }
+  var statusDiv = querySelector('#status');
+  if (statusDiv == null) {
+    statusDiv = DivElement();
+    statusDiv.id = 'status';
+    cnOutput.children.add(statusDiv);
+  }
+  var errorDiv = querySelector('#lookupError');
+  if (errorDiv == null) {
+    errorDiv = DivElement();
+    errorDiv.id = 'lookupError';
+    cnOutput.children.add(errorDiv);
+  }
+  var submitButton = querySelector('#multiLookupSubmit');
+  var app = await initApp(sources, statusDiv, errorDiv, submitButton);
+  if (app == null) {
+    print('Could not init the app, giving up');
+    return;
+  }
+  var textField = querySelector('#multiLookupInput') as TextInputElement;
+  var div = querySelector('#lookupResults')!;
+  try {
     void lookup(Event evt) {
       div.children = [];
-      var results = app.lookup(textField.value!);
+      var query = textField.value!.trim();
+      var results = app.lookup(query);
       for (var term in results.terms) {
         var dictEntries = term.entries;
         if (dictEntries.length > 0) {
@@ -181,7 +228,7 @@ void main() async {
         } else {
           div.text = 'Did not find any results.';
         }
-        statusDiv.text = '';
+        statusDiv?.text = '';
       }
       evt.preventDefault();
     }
@@ -192,9 +239,28 @@ void main() async {
     errorDiv.text = 'Unable to load dictionary';
     statusDiv.text = 'Try a hard refresh of the page and search again';
     print('Unable to load dictionary, error: $e');
-    rethrow;
   }
 
+  void onMessageListener(Object? msg) {
+    if (msg == null) {
+      print('onMessageListener msg is null');
+    }
+    print('onMessageListener: $msg');
+  }
+
+  // If we are a Chrome extension, then listen for messages
+  try {
+    var jsOnMessageEvent = context['chrome']['runtime']['onMessage'];
+    JsObject dartOnMessageEvent = (jsOnMessageEvent is JsObject
+        ? jsOnMessageEvent
+        : new JsObject.fromBrowserObject(jsOnMessageEvent));
+    dartOnMessageEvent.callMethod('addListener', [onMessageListener]);
+  } catch (e) {
+    print('Unable to listen for Chrome content events: $e');
+  }
+
+  // The service worker is a work in progress
+  /*
   try {
     print('Preparing for offline use');
     var res = await window.navigator.serviceWorker?.register('sworker.dart.js');
@@ -202,4 +268,5 @@ void main() async {
   } catch (e) {
     print('Unable to registere service worker: $e');
   }
+  */
 }

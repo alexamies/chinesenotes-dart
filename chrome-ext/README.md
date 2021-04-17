@@ -19,7 +19,7 @@ DART_HOME=$HOME/flutter/bin/cache/dart-sdk
 From the top level directory, compile `main.dart` to JavaScript with the command
 
 ```shell
-$DART_HOME/bin/dart2js --csp -o chrome-ext/popup.dart.js web/main.dart 
+$DART_HOME/bin/dart2js --csp -o chrome-ext/main.dart.js web/main.dart 
 ```
 
 ## Try it out

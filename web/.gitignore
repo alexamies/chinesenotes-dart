@@ -1,2 +1,5 @@
 *.json
+*.deps
+*.map
+*.dart.js
 !manifest.json

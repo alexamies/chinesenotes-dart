@@ -27,7 +27,7 @@
    {
      "matches": ["http://*/*", "https://*/*"],
      "css": ["styles.css"],
-     "js": ["content.js"]
+     "js": ["main.dart.js"]
    }
   ],
   "icons": {
