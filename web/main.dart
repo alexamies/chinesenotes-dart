@@ -328,15 +328,4 @@ void main() async {
   } catch (e) {
     print('Unable to listen for Chrome content events: $e');
   }
-
-  // The service worker is a work in progress
-  /*
-  try {
-    print('Preparing for offline use');
-    var res = await window.navigator.serviceWorker?.register('sworker.dart.js');
-    print('Registered service worker: ${res?.active}');
-  } catch (e) {
-    print('Unable to registere service worker: $e');
-  }
-  */
 }

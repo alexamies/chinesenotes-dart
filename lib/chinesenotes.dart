@@ -6,9 +6,7 @@ library chinesenotes;
 
 import 'dart:convert';
 
-const ntiReaderJson = 'https://ntireader.org/dist/ntireader.json';
-const cnotesJson = 'https://chinesenotes.com/dist/ntireader.json';
-const separator = ' / ';
+const separator = '; ';
 const stopWords = ['a ', 'an ', 'to '];
 const notesPatterns = [
   r'Scientific name: (.+?)(\(|,|;)',
