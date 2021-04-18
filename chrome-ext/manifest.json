@@ -1,7 +1,7 @@
 {
   "name": "Chinese Notes Chinese-English Dictionary",
   "short_name": "Chinese Notes",
-  "description": "The Chinese Notes Chinese-English Dictionary can be used to lookup Chinese words by simplified or traditional Chinese or reverse lookup from English equivalent. Use the dicitonary either from the context menu by selecting text and right clicking or from the popup page.",
+  "description": "The dictionary can be used to lookup Chinese words by simplified or traditional Chinese or reverse lookup from English equivalent.",
   "author": "Alex Amies",
   "version": "0.0.1",
   "manifest_version": 3,
