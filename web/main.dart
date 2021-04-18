@@ -37,6 +37,26 @@ DictionarySources getSources() {
         sourceTokens[5],
         int.parse(sourceTokens[6]));
   }
+  if (sources.isEmpty) {
+    sources[1] = DictionarySource(
+        1,
+        'https://raw.githubusercontent.com/alexamies/chinesenotes.com/master/downloads/chinesenotes_words.json',
+        'Chinese Notes',
+        'Chinese Notes Chinese-English Dictionary',
+        'https://github.com/alexamies/chinesenotes.com',
+        'Alex Amies',
+        'Creative Commons Attribution-Share Alike 3.0',
+        2);
+    sources[2] = DictionarySource(
+        2,
+        'https://raw.githubusercontent.com/alexamies/chinesenotes.com/master/downloads/modern_named_entities.json',
+        'Modern Entities',
+        'Chinese Notes modern named entities',
+        'https://github.com/alexamies/chinesenotes.com',
+        'Alex Amies',
+        'Creative Commons Attribution-Share Alike 3.0',
+        6000002);
+  }
   return DictionarySources(sources);
 }
 
@@ -72,7 +92,8 @@ Future<App?> initApp(DictionarySources sources, Element statusDiv,
       multiLookupSubmit.disabled = false;
     }
     sw.stop();
-    print('Dictionary loaded in ${sw.elapsedMilliseconds} ms');
+    print('Dictionary loaded in ${sw.elapsedMilliseconds} ms with '
+        '${mergedFwdIndex.entries.length} entries');
     statusDiv.text = 'Dictionary loaded';
     return app;
   } catch (e) {
@@ -80,10 +101,6 @@ Future<App?> initApp(DictionarySources sources, Element statusDiv,
     statusDiv.text = 'Try a hard refresh of the page and search again';
     print('Unable to load dictionary, error: $e');
   }
-}
-
-void cnLookup(Object msg) {
-  print('cnLookup enter ${msg}');
 }
 
 void main() async {
@@ -116,15 +133,22 @@ void main() async {
     print('Could not init the app, giving up');
     return;
   }
-  var textField = querySelector('#multiLookupInput') as TextInputElement;
-  var div = querySelector('#lookupResults')!;
-  try {
-    void lookup(Event evt) {
-      div.children = [];
-      var query = textField.value!.trim();
+  var textField = querySelector('#multiLookupInput');
+  var div = querySelector('#lookupResults');
+  if (div == null) {
+    div = DivElement();
+    div.id = 'lookupResults';
+    cnOutput.children.add(div);
+  }
+
+  void displayLookup(String query) {
+    print('displayLookup, $query');
+    try {
       var results = app.lookup(query);
+      print('displayLookup, got ${results.terms.length} terms');
       for (var term in results.terms) {
         var dictEntries = term.entries;
+        print('displayLookup, got ${dictEntries.length} entries');
         if (dictEntries.length > 0) {
           var counttDiv = DivElement();
           counttDiv.className = 'counttDiv';
@@ -133,9 +157,9 @@ void main() async {
           } else {
             counttDiv.text = 'Found ${dictEntries.length} entries.';
           }
-          div.children.add(counttDiv);
+          div?.children.add(counttDiv);
           var entryDiv = DivElement();
-          div.children.add(entryDiv);
+          div?.children.add(entryDiv);
           for (var ent in dictEntries.entries) {
             var hwDiv = DivElement();
             hwDiv.text = ent.hwRollup;
@@ -183,9 +207,9 @@ void main() async {
           } else {
             counttDiv.text = 'Found ${term.senses.senses.length} senses.';
           }
-          div.children.add(counttDiv);
+          div?.children.add(counttDiv);
           var ul = UListElement();
-          div.children.add(ul);
+          div?.children.add(ul);
           for (var sense in term.senses.senses) {
             var li = LIElement();
             var primaryDiv = DivElement();
@@ -226,27 +250,42 @@ void main() async {
             ul.children.add(li);
           }
         } else {
-          div.text = 'Did not find any results.';
+          div?.text = 'Did not find any results.';
         }
         statusDiv?.text = '';
       }
-      evt.preventDefault();
+    } catch (e) {
+      errorDiv?.text = 'Unable to load dictionary';
+      statusDiv?.text = 'Try a hard refresh of the page and search again';
+      print('Unable to load dictionary, error: $e');
     }
-
-    var findForm = querySelector('#multiLookupForm')!;
-    findForm.onSubmit.listen(lookup);
-  } catch (e) {
-    errorDiv.text = 'Unable to load dictionary';
-    statusDiv.text = 'Try a hard refresh of the page and search again';
-    print('Unable to load dictionary, error: $e');
   }
 
-  void onMessageListener(Object? msg) {
+  void onMessageListener(msg, sender, sendResponse) {
     if (msg == null) {
       print('onMessageListener msg is null');
     }
-    print('onMessageListener: $msg');
+    if (!msg.hasProperty('term')) {
+      print('onMessageListener msg does not have term');
+    }
+    var query = msg['term'];
+    print('onMessageListener, term: ${query}');
+    displayLookup(query);
   }
+
+  void lookup(Event evt) {
+    div?.children = [];
+    var query = '';
+    if (textField != null) {
+      var tf = textField as TextInputElement;
+      query = tf.value!.trim();
+      displayLookup(query);
+    }
+    evt.preventDefault();
+  }
+
+  var findForm = querySelector('#multiLookupForm');
+  findForm?.onSubmit.listen(lookup);
 
   // If we are a Chrome extension, then listen for messages
   try {

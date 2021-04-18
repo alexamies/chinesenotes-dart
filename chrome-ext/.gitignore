@@ -1,3 +1,5 @@
+
+*.dart.js*
 chinesenotes_words.json
 modern_named_entities.json
 translation_memory_literary.json
