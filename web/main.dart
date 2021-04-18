@@ -103,30 +103,65 @@ Future<App?> initApp(DictionarySources sources, Element statusDiv,
   }
 }
 
+DivElement makeDialog() {
+  // In a Chrome extension content script, create a DOM container for output
+  print('In a Chrome extension content script');
+  var cnOutput = DivElement();
+  cnOutput.id = 'cnOutput';
+  cnOutput.style.display = 'none';
+  cnOutput.style.height = '150px;';
+  cnOutput.style.maxHeight = '200px;';
+  cnOutput.style.width = '200px;';
+  cnOutput.style.maxWidth = '300px';
+  cnOutput.style.border = '1px solid black';
+  cnOutput.style.zIndex = '2';
+  cnOutput.style.background = '#FFFFFF';
+  cnOutput.style.opacity = '80%';
+  cnOutput.style.position = 'absolute';
+  cnOutput.style.top = '200px';
+  cnOutput.style.left = '300px';
+  cnOutput.style.padding = '20px';
+
+  var h2 = HeadingElement.h2();
+  h2.text = 'Chinese Notes Chinese-English Dictionary';
+  h2.style.fontSize = 'medium;';
+  cnOutput.children.add(h2);
+
+  var statusDiv = DivElement();
+  statusDiv.id = 'status';
+  cnOutput.children.add(statusDiv);
+
+  var errorDiv = DivElement();
+  errorDiv.id = 'lookupError';
+  cnOutput.children.add(errorDiv);
+
+  var div = DivElement();
+  div.id = 'lookupResults';
+  cnOutput.children.add(div);
+
+  var dismissButton = ButtonElement();
+  dismissButton.style.right = '20px;';
+  dismissButton.text = 'OK';
+  dismissButton.addEventListener('click', (Event event) {
+    cnOutput.style.display = 'none';
+    event.preventDefault();
+  });
+  cnOutput.children.add(dismissButton);
+
+  return cnOutput;
+}
+
 void main() async {
   print('cnotes main enter');
   var sources = getSources();
   var body = querySelector('body')!;
   var cnOutput = querySelector('#cnOutput');
   if (cnOutput == null) {
-    // In a Chrome extension content script, create a DOM container for output
-    print('In a Chrome extension content script');
-    cnOutput = DivElement();
-    cnOutput.id = 'cnOutput';
+    cnOutput = makeDialog();
     body.children.insert(0, cnOutput);
   }
-  var statusDiv = querySelector('#status');
-  if (statusDiv == null) {
-    statusDiv = DivElement();
-    statusDiv.id = 'status';
-    cnOutput.children.add(statusDiv);
-  }
-  var errorDiv = querySelector('#lookupError');
-  if (errorDiv == null) {
-    errorDiv = DivElement();
-    errorDiv.id = 'lookupError';
-    cnOutput.children.add(errorDiv);
-  }
+  var statusDiv = querySelector('#status')!;
+  var errorDiv = querySelector('#lookupError')!;
   var submitButton = querySelector('#multiLookupSubmit');
   var app = await initApp(sources, statusDiv, errorDiv, submitButton);
   if (app == null) {
@@ -135,14 +170,10 @@ void main() async {
   }
   var textField = querySelector('#multiLookupInput');
   var div = querySelector('#lookupResults');
-  if (div == null) {
-    div = DivElement();
-    div.id = 'lookupResults';
-    cnOutput.children.add(div);
-  }
 
   void displayLookup(String query) {
     print('displayLookup, $query');
+    div?.children = [];
     try {
       var results = app.lookup(query);
       print('displayLookup, got ${results.terms.length} terms');
@@ -252,13 +283,14 @@ void main() async {
         } else {
           div?.text = 'Did not find any results.';
         }
-        statusDiv?.text = '';
+        statusDiv.text = '';
       }
     } catch (e) {
-      errorDiv?.text = 'Unable to load dictionary';
-      statusDiv?.text = 'Try a hard refresh of the page and search again';
+      errorDiv.text = 'Unable to load dictionary';
+      statusDiv.text = 'Try a hard refresh of the page and search again';
       print('Unable to load dictionary, error: $e');
     }
+    cnOutput?.style.display = 'block';
   }
 
   void onMessageListener(msg, sender, sendResponse) {
@@ -274,7 +306,6 @@ void main() async {
   }
 
   void lookup(Event evt) {
-    div?.children = [];
     var query = '';
     if (textField != null) {
       var tf = textField as TextInputElement;
