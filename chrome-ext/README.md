@@ -20,7 +20,6 @@ From the top level directory, compile `main.dart` to JavaScript with the command
 
 ```shell
 $DART_HOME/bin/dart2js --csp -o chrome-ext/main.dart.js web/main.dart 
-$DART_HOME/bin/dart2js --csp -o chrome-ext/sworker.dart.js web/sworker.dart 
 ```
 
 ## Try it out

@@ -3,6 +3,8 @@ import 'dart:js';
 
 import 'package:chinesenotes/chinesenotes.dart';
 
+const maxSenses = 10;
+
 DictionarySources getSources() {
   const sourceNums = [1, 2, 3, 4, 5, 6];
   Map<int, DictionarySource> sources = {};
@@ -108,24 +110,49 @@ DivElement makeDialog() {
   print('In a Chrome extension content script');
   var cnOutput = DivElement();
   cnOutput.id = 'cnOutput';
+  cnOutput.style.position = 'fixed';
   cnOutput.style.display = 'none';
-  cnOutput.style.height = '150px;';
-  cnOutput.style.maxHeight = '200px;';
-  cnOutput.style.width = '200px;';
-  cnOutput.style.maxWidth = '300px';
+  cnOutput.style.height = '250px;';
+  cnOutput.style.maxHeight = '800px;';
+  cnOutput.style.width = '300px;';
+  cnOutput.style.maxWidth = '400px';
   cnOutput.style.border = '1px solid black';
-  cnOutput.style.zIndex = '2';
+  cnOutput.style.zIndex = '5';
   cnOutput.style.background = '#FFFFFF';
-  cnOutput.style.opacity = '80%';
-  cnOutput.style.position = 'absolute';
-  cnOutput.style.top = '200px';
-  cnOutput.style.left = '300px';
+  //cnOutput.style.opacity = '80%';
   cnOutput.style.padding = '20px';
 
-  var h2 = HeadingElement.h2();
-  h2.text = 'Chinese Notes Chinese-English Dictionary';
-  h2.style.fontSize = 'medium;';
-  cnOutput.children.add(h2);
+  var closeButton = ButtonElement();
+  closeButton.style.position = 'absolute';
+  closeButton.style.right = '20px;';
+  closeButton.style.top = '20px';
+  closeButton.style.right = '20px';
+  closeButton.text = 'x';
+  closeButton.title = 'Close dialog';
+  closeButton.addEventListener('click', (Event event) {
+    cnOutput.style.display = 'none';
+    event.preventDefault();
+  });
+  cnOutput.children.add(closeButton);
+
+  var header = HeadingElement.h4();
+  header.text = 'Chinese-English Dictionary';
+  header.style.fontSize = 'medium;';
+  cnOutput.children.add(header);
+
+  var findForm = FormElement();
+  findForm.style.padding = '20px';
+  findForm.id = 'multiLookupForm';
+
+  var textField = TextInputElement();
+  textField.id = 'multiLookupInput';
+  findForm.children.add(textField);
+
+  var submitButton = ButtonElement();
+  submitButton.text = 'Find';
+  submitButton.id = 'multiLookupSubmit';
+  findForm.children.add(submitButton);
+  cnOutput.children.add(findForm);
 
   var statusDiv = DivElement();
   statusDiv.id = 'status';
@@ -142,6 +169,7 @@ DivElement makeDialog() {
   var dismissButton = ButtonElement();
   dismissButton.style.right = '20px;';
   dismissButton.text = 'OK';
+  dismissButton.title = 'Close dialog';
   dismissButton.addEventListener('click', (Event event) {
     cnOutput.style.display = 'none';
     event.preventDefault();
@@ -149,6 +177,16 @@ DivElement makeDialog() {
   cnOutput.children.add(dismissButton);
 
   return cnOutput;
+}
+
+void openDialog(Element? cnOutput, Element? textfield, String query) {
+  if (textfield != null) {
+    var tf = textfield as TextInputElement;
+    tf.value = query;
+  }
+  cnOutput?.style.top = '200px';
+  cnOutput?.style.left = '300px';
+  cnOutput?.style.display = 'block';
 }
 
 void main() async {
@@ -233,14 +271,21 @@ void main() async {
         } else if (term.senses.senses.length > 0) {
           var counttDiv = DivElement();
           counttDiv.className = 'counttDiv';
-          if (term.senses.senses == 1) {
+          var numFound = term.senses.senses.length;
+          if (numFound == 1) {
             counttDiv.text = 'Found 1 sense.';
           } else {
-            counttDiv.text = 'Found ${term.senses.senses.length} senses.';
+            if (numFound <= maxSenses) {
+              counttDiv.text = 'Found ${numFound} senses.';
+            } else {
+              counttDiv.text =
+                  'Found ${numFound} senses, showing ${maxSenses}.';
+            }
           }
           div?.children.add(counttDiv);
           var ul = UListElement();
           div?.children.add(ul);
+          var numAdded = 0;
           for (var sense in term.senses.senses) {
             var li = LIElement();
             var primaryDiv = DivElement();
@@ -279,6 +324,10 @@ void main() async {
             notesDiv.children.add(sourceSpan);
             li.children.add(notesDiv);
             ul.children.add(li);
+            numAdded++;
+            if (numAdded >= maxSenses) {
+              break;
+            }
           }
         } else {
           div?.text = 'Did not find any results.';
@@ -290,7 +339,7 @@ void main() async {
       statusDiv.text = 'Try a hard refresh of the page and search again';
       print('Unable to load dictionary, error: $e');
     }
-    cnOutput?.style.display = 'block';
+    openDialog(cnOutput, textField, query);
   }
 
   void onMessageListener(msg, sender, sendResponse) {
@@ -301,7 +350,7 @@ void main() async {
       print('onMessageListener msg does not have term');
     }
     var query = msg['term'];
-    print('onMessageListener, term: ${query}');
+    print('onMessageListener, term: ${query} from $sender');
     displayLookup(query);
   }
 

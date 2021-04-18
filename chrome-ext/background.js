@@ -2,7 +2,7 @@ chrome.runtime.onInstalled.addListener(() => {
   console.log('running background script');
   chrome.contextMenus.create({
     "id": "cnotes",
-    "title": "Chinese Notes ...",
+    "title": "Lookup with Chinese Notes ...",
     "contexts": ["selection"]
   });
 });
