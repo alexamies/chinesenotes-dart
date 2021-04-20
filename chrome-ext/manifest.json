@@ -3,7 +3,7 @@
   "short_name": "Chinese Notes",
   "description": "The dictionary can be used to lookup Chinese words by simplified or traditional Chinese or reverse lookup from English equivalent.",
   "author": "Alex Amies",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "manifest_version": 3,
   "permissions": [
     "activeTab",
@@ -11,7 +11,7 @@
     "scripting"
   ],
   "background": {
-    "service_worker": "background.js"
+    "service_worker": "serviceworker_ext.dart.js"
   },
   "action": {
     "default_popup": "popup.html",
@@ -42,7 +42,7 @@
         "https://*.stackoverflow.com/*"
       ],
      "css": ["styles.css"],
-     "js": ["main.dart.js"]
+     "js": ["content.dart.js"]
    }
   ],
   "icons": {

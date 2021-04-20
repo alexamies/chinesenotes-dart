@@ -3,6 +3,7 @@
 .local-chromium/
 .idea/
 .packages
+archive/
 coverage/
 main.dart.js*
 doc/

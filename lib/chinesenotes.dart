@@ -31,7 +31,7 @@ class App {
     var entries = forrwardIndex.lookup(query);
     var senses = reverseIndex.lookup(query);
     var term = Term(query, entries, senses);
-    return QueryResults([term]);
+    return QueryResults(query, [term]);
   }
 
   DictionarySource? getSource(int hwID) {
@@ -291,6 +291,31 @@ DictionaryCollectionIndex dictFromJson(
   return DictionaryCollectionIndex(entryMap);
 }
 
+/// Gets the dictionary configuration from a JSON string
+DictionarySources getConfig(String jsonString) {
+  Map<int, DictionarySource> dSources = {};
+  Map data = json.decode(jsonString) as Map;
+  List sources = data['data'];
+  var i = 0;
+  for (var source in sources) {
+    i++;
+    var sid = (source['sourceId'] != null) ? int.parse(source['sourceId']) : i;
+    var startHeadwords = (source['startHeadwords'] != null)
+        ? int.parse(source['startHeadwords'])
+        : (i - 1) * 1000000 + 2;
+    dSources[sid] = DictionarySource(
+        sid,
+        source['url'],
+        source['abbreviation'],
+        source['title'],
+        source['citation'],
+        source['author'],
+        source['license'],
+        startHeadwords);
+  }
+  return DictionarySources(dSources);
+}
+
 /// Build a forward index by parsing a dictionary from a JSON string.
 ///
 /// Indended for the Chinese Notes and NTI Reader native dictionary structure
@@ -415,9 +440,10 @@ class NotesProcessor {
 
 /// Contains the result of a lookup checking both forward and reverse indexes.
 class QueryResults {
+  String query;
   List<Term> terms;
 
-  QueryResults(this.terms);
+  QueryResults(this.query, this.terms);
 }
 
 /// Sense is the meaning of a dictionary entry.

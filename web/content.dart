@@ -1,4 +1,4 @@
-/// Client application to load dicitonaries and display lookup results.
+/// Chrome extension content script to display dictionary lookup results.
 
 import 'dart:html';
 import 'dart:js';
@@ -7,83 +7,51 @@ import 'package:chinesenotes/chinesenotes.dart';
 
 const maxSenses = 10;
 
+App? app;
+
 DictionarySources getSources() {
-  const sourceNums = [1, 2, 3, 4, 5, 6];
   Map<int, DictionarySource> sources = {};
-  for (var sourceNum in sourceNums) {
-    var nameID = '#sourceName${sourceNum}';
-    var sourceCB = querySelector(nameID);
-    if (sourceCB == null) {
-      continue;
-    }
-    var cb = sourceCB as CheckboxInputElement;
-    if ((cb.checked == null) || !cb.checked!) {
-      continue;
-    }
-    var tokens = cb.value;
-    if (tokens == null) {
-      continue;
-    }
-    var sourceTokens = tokens.split(',');
-    if (sourceTokens.length < 7) {
-      throw Exception('Not enough information to identify source: $tokens');
-    }
-    var urlID = '#sourceURL${sourceNum}';
-    var sourceTF = querySelector(urlID) as InputElement;
-    var sourceURL = sourceTF.value!;
-    sources[sourceNum] = DictionarySource(
-        sourceNum,
-        sourceURL,
-        sourceTokens[1],
-        sourceTokens[2],
-        sourceTokens[3],
-        sourceTokens[4],
-        sourceTokens[5],
-        int.parse(sourceTokens[6]));
-  }
-  if (sources.isEmpty) {
-    sources[1] = DictionarySource(
-        1,
-        'https://raw.githubusercontent.com/alexamies/chinesenotes.com/master/downloads/chinesenotes_words.json',
-        'Chinese Notes',
-        'Chinese Notes Chinese-English Dictionary',
-        'https://github.com/alexamies/chinesenotes.com',
-        'Alex Amies',
-        'Creative Commons Attribution-Share Alike 3.0',
-        2);
-    sources[2] = DictionarySource(
-        2,
-        'https://raw.githubusercontent.com/alexamies/chinesenotes.com/master/downloads/modern_named_entities.json',
-        'Modern Entities',
-        'Chinese Notes modern named entities',
-        'https://github.com/alexamies/chinesenotes.com',
-        'Alex Amies',
-        'Creative Commons Attribution-Share Alike 3.0',
-        6000002);
-  }
+  sources[1] = DictionarySource(
+      1,
+      'chinesenotes_words.json',
+      'Chinese Notes',
+      'Chinese Notes Chinese-English Dictionary',
+      'https://github.com/alexamies/chinesenotes.com',
+      'Alex Amies',
+      'Creative Commons Attribution-Share Alike 3.0',
+      2);
+  sources[2] = DictionarySource(
+      2,
+      'modern_named_entities.json',
+      'Modern Entities',
+      'Chinese Notes modern named entities',
+      'https://github.com/alexamies/chinesenotes.com',
+      'Alex Amies',
+      'Creative Commons Attribution-Share Alike 3.0',
+      6000002);
   return DictionarySources(sources);
 }
 
-Future<App?> initApp(DictionarySources sources, Element statusDiv,
-    Element errorDiv, Element? submitButton) async {
+Future<App?> initApp(DictionarySources sources) async {
   var sw = Stopwatch();
   sw.start();
-  print('Starting client app');
-  statusDiv.text = 'Loading dictionary';
-
+  print('CNotes, initApp enter');
   try {
     List<DictionaryCollectionIndex> forwardIndexes = [];
     List<HeadwordIDIndex> hwIDIndexes = [];
     for (var source in sources.sources.values) {
       try {
-        final jsonString = await HttpRequest.getString(source.url);
+        final sourceURL =
+            context['chrome']['runtime'].callMethod('getURL', [source.url]);
+        print('CNotes, loading from $sourceURL');
+        final jsonString = await HttpRequest.getString(sourceURL);
+        print('CNotes, jsonString is a ${jsonString.runtimeType}');
         var forwardIndex = dictFromJson(jsonString, source);
         forwardIndexes.add(forwardIndex);
         var hwIDIndex = headwordsFromJson(jsonString, source);
         hwIDIndexes.add(hwIDIndex);
       } catch (ex) {
         print('Could not load dicitonary ${source.abbreviation}: $ex');
-        errorDiv.text = 'Could not load dicitonary ${source.abbreviation}';
       }
     }
 
@@ -91,20 +59,14 @@ Future<App?> initApp(DictionarySources sources, Element statusDiv,
     var mergedHwIdIndex = mergeHWIDIndexes(hwIDIndexes);
     var reverseIndex = buildReverseIndex(mergedFwdIndex);
     var app = App(mergedFwdIndex, sources, reverseIndex, mergedHwIdIndex);
-    if (submitButton != null) {
-      var multiLookupSubmit = submitButton as ButtonElement;
-      multiLookupSubmit.disabled = false;
-    }
     sw.stop();
     print('Dictionary loaded in ${sw.elapsedMilliseconds} ms with '
         '${mergedFwdIndex.entries.length} entries');
-    statusDiv.text = 'Dictionary loaded';
     return app;
   } catch (e) {
-    errorDiv.text = 'Unable to load dictionary';
-    statusDiv.text = 'Try a hard refresh of the page and search again';
     print('Unable to load dictionary, error: $e');
   }
+  print('CNotes, initApp exit');
 }
 
 DivElement makeDialog() {
@@ -193,7 +155,9 @@ void openDialog(Element? cnOutput, Element? textfield, String query) {
 
 void main() async {
   print('cnotes main enter');
-  var sources = getSources();
+
+  app = await initApp(getSources());
+
   var body = querySelector('body')!;
   var cnOutput = querySelector('#cnOutput');
   if (cnOutput == null) {
@@ -202,20 +166,17 @@ void main() async {
   }
   var statusDiv = querySelector('#status')!;
   var errorDiv = querySelector('#lookupError')!;
-  var submitButton = querySelector('#multiLookupSubmit');
-  var app = await initApp(sources, statusDiv, errorDiv, submitButton);
-  if (app == null) {
-    print('Could not init the app, giving up');
-    return;
-  }
   var textField = querySelector('#multiLookupInput');
   var div = querySelector('#lookupResults');
 
-  void displayLookup(String query) {
-    print('displayLookup, $query');
+  void displayLookup(var results) {
+    print('displayLookup, ${results.query}');
     div?.children = [];
     try {
-      var results = app.lookup(query);
+      if (results.terms == null) {
+        print('results.terms == null');
+        return;
+      }
       print('displayLookup, got ${results.terms.length} terms');
       for (var term in results.terms) {
         var dictEntries = term.entries;
@@ -264,10 +225,11 @@ void main() async {
             }
             li.children.add(senseOL);
             ul.children.add(li);
-            var source = sources.lookup(ent.sourceId);
+            //var source = sources.lookup(ent.sourceId);
             var sourceDiv = DivElement();
             sourceDiv.className = 'dict-entry-source';
-            sourceDiv.text = 'Source: ${source.abbreviation}';
+            //sourceDiv.text = 'Source: ${source.abbreviation}';
+            sourceDiv.text = 'Source: ${ent.sourceId}';
             entryDiv.children.add(sourceDiv);
           }
         } else if (term.senses.senses.length > 0) {
@@ -319,10 +281,10 @@ void main() async {
             notesDiv.children.add(notesSpan);
             var sourceSpan = SpanElement();
             sourceSpan.className = 'dict-sense-source';
-            var source = app.getSource(sense.hwid);
-            if (source != null) {
-              sourceSpan.text = 'Source: ${source.abbreviation}';
-            }
+            //var source = app.getSource(sense.hwid);
+            //if (source != null) {
+            //  sourceSpan.text = 'Source: ${source.abbreviation}';
+            //}
             notesDiv.children.add(sourceSpan);
             li.children.add(notesDiv);
             ul.children.add(li);
@@ -341,7 +303,7 @@ void main() async {
       statusDiv.text = 'Try a hard refresh of the page and search again';
       print('Unable to load dictionary, error: $e');
     }
-    openDialog(cnOutput, textField, query);
+    openDialog(cnOutput, textField, results.query);
   }
 
   void onMessageListener(msg, sender, sendResponse) {

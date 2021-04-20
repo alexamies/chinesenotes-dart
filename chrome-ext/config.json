@@ -1,0 +1,20 @@
+{
+  "sources": [{
+    "sourceId": 1,
+    "url": "chinesenotes_words.json",
+    "abbreviation": "Chinese Notes",
+    "title": "Chinese Notes Chinese-English Dictionary",
+    "citation": "https://github.com/alexamies/chinesenotes.com",
+    "author": "Alex Amies",
+    "license": "Creative Commons Attribution-Share Alike 3.0",
+    "startHeadwords": 2},
+  {
+    "sourceId": 2,
+    "url": "modern_named_entities.json",
+    "abbreviation": "Modern Entities",
+    "title": "Chinese Notes modern named entities",
+    "citation": "https://github.com/alexamies/chinesenotes.com",
+    "author": "Alex Amies",
+    "license": "Creative Commons Attribution-Share Alike 3.0",
+    "startHeadwords": 6000002}]
+}
