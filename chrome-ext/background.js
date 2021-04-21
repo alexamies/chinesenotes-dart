@@ -10,6 +10,8 @@ chrome.runtime.onInstalled.addListener(() => {
 chrome.contextMenus.onClicked.addListener((info) => {
   console.log(`CNotes context menu clicked ${info.selectionText}`);
   chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
-    chrome.tabs.sendMessage(tabs[0].id, {term: info.selectionText});
+    const tabId = tabs[0].id;
+    console.log(`sendMessage to tab ${tabId}`)
+    chrome.tabs.sendMessage(tabId, {term: info.selectionText});
   });
 });

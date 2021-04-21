@@ -3,75 +3,11 @@
 import 'dart:html';
 import 'dart:js';
 
-import 'package:chinesenotes/chinesenotes.dart';
-
 const maxSenses = 10;
-
-App? app;
-
-DictionarySources getSources() {
-  Map<int, DictionarySource> sources = {};
-  sources[1] = DictionarySource(
-      1,
-      'chinesenotes_words.json',
-      'Chinese Notes',
-      'Chinese Notes Chinese-English Dictionary',
-      'https://github.com/alexamies/chinesenotes.com',
-      'Alex Amies',
-      'Creative Commons Attribution-Share Alike 3.0',
-      2);
-  sources[2] = DictionarySource(
-      2,
-      'modern_named_entities.json',
-      'Modern Entities',
-      'Chinese Notes modern named entities',
-      'https://github.com/alexamies/chinesenotes.com',
-      'Alex Amies',
-      'Creative Commons Attribution-Share Alike 3.0',
-      6000002);
-  return DictionarySources(sources);
-}
-
-Future<App?> initApp(DictionarySources sources) async {
-  var sw = Stopwatch();
-  sw.start();
-  print('CNotes, initApp enter');
-  try {
-    List<DictionaryCollectionIndex> forwardIndexes = [];
-    List<HeadwordIDIndex> hwIDIndexes = [];
-    for (var source in sources.sources.values) {
-      try {
-        final sourceURL =
-            context['chrome']['runtime'].callMethod('getURL', [source.url]);
-        print('CNotes, loading from $sourceURL');
-        final jsonString = await HttpRequest.getString(sourceURL);
-        print('CNotes, jsonString is a ${jsonString.runtimeType}');
-        var forwardIndex = dictFromJson(jsonString, source);
-        forwardIndexes.add(forwardIndex);
-        var hwIDIndex = headwordsFromJson(jsonString, source);
-        hwIDIndexes.add(hwIDIndex);
-      } catch (ex) {
-        print('Could not load dicitonary ${source.abbreviation}: $ex');
-      }
-    }
-
-    var mergedFwdIndex = mergeDictionaries(forwardIndexes);
-    var mergedHwIdIndex = mergeHWIDIndexes(hwIDIndexes);
-    var reverseIndex = buildReverseIndex(mergedFwdIndex);
-    var app = App(mergedFwdIndex, sources, reverseIndex, mergedHwIdIndex);
-    sw.stop();
-    print('Dictionary loaded in ${sw.elapsedMilliseconds} ms with '
-        '${mergedFwdIndex.entries.length} entries');
-    return app;
-  } catch (e) {
-    print('Unable to load dictionary, error: $e');
-  }
-  print('CNotes, initApp exit');
-}
 
 DivElement makeDialog() {
   // In a Chrome extension content script, create a DOM container for output
-  print('In a Chrome extension content script');
+  print('makeDialog enter');
   var cnOutput = DivElement();
   cnOutput.id = 'cnOutput';
   cnOutput.style.position = 'fixed';
@@ -156,8 +92,6 @@ void openDialog(Element? cnOutput, Element? textfield, String query) {
 void main() async {
   print('cnotes main enter');
 
-  app = await initApp(getSources());
-
   var body = querySelector('body')!;
   var cnOutput = querySelector('#cnOutput');
   if (cnOutput == null) {
@@ -170,16 +104,18 @@ void main() async {
   var div = querySelector('#lookupResults');
 
   void displayLookup(var results) {
-    print('displayLookup, ${results.query}');
+    var query = results['query'] != null ? results['query'] : '';
+    if (query == '') {
+      print('displayLookup, query empty');
+      return;
+    }
+    print('displayLookup, $query');
     div?.children = [];
     try {
-      if (results.terms == null) {
-        print('results.terms == null');
-        return;
-      }
-      print('displayLookup, got ${results.terms.length} terms');
-      for (var term in results.terms) {
-        var dictEntries = term.entries;
+      var terms = results['terms'] != null ? results['terms'] : [];
+      print('displayLookup, got ${terms.length} term(s)');
+      for (var term in terms) {
+        var dictEntries = term['entries'] != null ? term['entries'] : [];
         print('displayLookup, got ${dictEntries.length} entries');
         if (dictEntries.length > 0) {
           var counttDiv = DivElement();
@@ -313,9 +249,9 @@ void main() async {
     if (!msg.hasProperty('term')) {
       print('onMessageListener msg does not have term');
     }
-    var query = msg['term'];
+    var query = msg['query'];
     print('onMessageListener, term: ${query} from $sender');
-    displayLookup(query);
+    displayLookup(msg);
   }
 
   void lookup(Event evt) {
@@ -333,6 +269,7 @@ void main() async {
 
   // If we are a Chrome extension, then listen for messages
   try {
+    print('Adding listener for Chrome context menu events');
     var jsOnMessageEvent = context['chrome']['runtime']['onMessage'];
     JsObject dartOnMessageEvent = (jsOnMessageEvent is JsObject
         ? jsOnMessageEvent
