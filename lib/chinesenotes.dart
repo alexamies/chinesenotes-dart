@@ -186,15 +186,11 @@ class DictionaryEntry {
   }
 
   Map toJson() {
-    var sensesObj = [];
-    for (var sense in senses.senses) {
-      sensesObj.add(sense.toJson());
-    }
     return {
       'headword': headword,
       'headwordId': headwordId,
       'sourceId': sourceId,
-      'senses': sensesObj
+      'senses': senses.toJson()
     };
   }
 }
