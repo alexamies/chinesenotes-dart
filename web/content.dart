@@ -5,6 +5,7 @@ import 'dart:js';
 
 import 'package:chinesenotes/chinesenotes.dart';
 import 'package:chinesenotes/chinesenotes_html.dart';
+import 'package:chinesenotes/chinesenotes_js.dart';
 
 const maxSenses = 10;
 
