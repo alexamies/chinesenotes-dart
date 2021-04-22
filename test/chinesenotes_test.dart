@@ -30,7 +30,8 @@ class TestDictionaryLoader {
     var chinese = '你好';
     var sense =
         Sense(-1, 42, chinese, '', 'níhǎo', 'hello', 'interjection', 'p. 655');
-    var entry = DictionaryEntry(chinese, 42, 1, [sense]);
+    var senses = Senses([sense]);
+    var entry = DictionaryEntry(chinese, 42, 1, senses);
     var entryList = DictionaryEntries(chinese, [entry]);
     var entries = <String, DictionaryEntries>{chinese: entryList};
     return DictionaryCollectionIndex(entries);
@@ -59,7 +60,7 @@ void main() {
       var source = sources.lookup(ent.sourceId);
       expect(source.abbreviation, cnSource.abbreviation);
       expect(ent.senses.length, equals(1));
-      for (var sense in ent.senses) {
+      for (var sense in ent.senses.senses) {
         expect(sense.pinyin, 'suìgǔ');
         expect(sense.english, 'remote antiquity');
       }
@@ -78,7 +79,7 @@ void main() {
       var source = sources.lookup(ent.sourceId);
       expect(source.abbreviation, cnSource.abbreviation);
       expect(ent.senses.length, equals(1));
-      for (var sense in ent.senses) {
+      for (var sense in ent.senses.senses) {
         expect(sense.pinyin, 'wéi');
       }
     }
@@ -130,7 +131,7 @@ void main() {
     var result = app.lookup(query);
     expect(result.terms.length, equals(1));
     for (var term in result.terms) {
-      expect(term.queryText, equals(query));
+      expect(term.query, equals(query));
       expect(term.entries.entries.length, equals(1));
       for (var entry in term.entries.entries) {
         expect(entry.headword, equals(query));
@@ -152,7 +153,7 @@ void main() {
     var result = app.lookup(query);
     //expect(result.terms.length, equals(1));
     for (var term in result.terms) {
-      expect(term.queryText, equals(query));
+      expect(term.query, equals(query));
       expect(term.senses.senses.length, equals(1));
       for (var sense in term.senses.senses) {
         expect(sense.simplified, equals(chinese));
@@ -173,7 +174,7 @@ void main() {
     var result = app.lookup(query);
     expect(result.terms.length, equals(1));
     for (var term in result.terms) {
-      expect(term.queryText, equals(query));
+      expect(term.query, equals(query));
       expect(term.senses.senses.length, equals(1));
       for (var sense in term.senses.senses) {
         expect(sense.simplified, equals(chinese));
@@ -193,7 +194,7 @@ void main() {
     var result = app.lookup(query);
     expect(result.terms.length, equals(1));
     for (var term in result.terms) {
-      expect(term.queryText, equals(query));
+      expect(term.query, equals(query));
       expect(term.senses.senses.length, equals(1));
       for (var sense in term.senses.senses) {
         expect(sense.simplified, equals(simplified));
@@ -206,7 +207,8 @@ void main() {
     var simplified = '再见';
     var sense = Sense(
         -2, 43, simplified, '再見', 'zàijiàn', 'goodbye', 'interjection', '');
-    var entry = DictionaryEntry(simplified, 43, 2, [sense]);
+    var senses = Senses([sense]);
+    var entry = DictionaryEntry(simplified, 43, 2, senses);
     var entryList = DictionaryEntries(simplified, [entry]);
     var entries = <String, DictionaryEntries>{simplified: entryList};
     var index2 = DictionaryCollectionIndex(entries);
@@ -257,5 +259,61 @@ void main() {
     var hello2 =
         Sense(1, 43, chinese, '', 'níhǎo', 'hello', 'interjection', 'p. 655');
     expect(hello1, isNot(hello2));
+  });
+  test('Sense.fromJson constructs a Sense object correctly.', () {
+    var luid = 1;
+    var hwid = 42;
+    var simplified = '你好';
+    var traditional = '';
+    var pinyin = 'níhǎo';
+    var english = 'hello';
+    var grammar = 'interjection';
+    var notes = 'p. 655';
+    var obj = {
+      'luid': luid,
+      'hwid': hwid,
+      'simplified': simplified,
+      'traditional': traditional,
+      'pinyin': pinyin,
+      'english': english,
+      'grammar': grammar,
+      'notes': notes
+    };
+    var sense = Sense.fromJson(obj);
+    var retObj = sense.toJSON();
+    expect(luid, retObj['luid']);
+    expect(hwid, retObj['hwid']);
+    expect(simplified, retObj['simplified']);
+    expect(traditional, retObj['traditional']);
+    expect(pinyin, retObj['pinyin']);
+    expect(english, retObj['english']);
+    expect(grammar, retObj['grammar']);
+    expect(notes, retObj['notes']);
+  });
+  test('Senses.fromJson constructs a Senses object correctly.', () {
+    var obj1 = {
+      'luid': 1,
+      'hwid': 42,
+      'simplified': '你好',
+      'traditional': '',
+      'pinyin': 'níhǎo',
+      'english': 'hello',
+      'grammar': 'interjection',
+      'notes': 'p. 655'
+    };
+    var obj2 = {
+      'luid': 2,
+      'hwid': 43,
+      'simplified': '再见',
+      'traditional': '再見',
+      'pinyin': 'zàijiàn',
+      'english': 'good bye',
+      'grammar': 'interjection',
+      'notes': 'p. 655'
+    };
+    var senseList = [obj1, obj2];
+    var sensesObj = Senses.fromJson(senseList);
+    var retObj = sensesObj.toJSON();
+    expect(retObj.length, senseList.length);
   });
 }

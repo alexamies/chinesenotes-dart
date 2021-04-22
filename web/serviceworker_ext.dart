@@ -9,29 +9,6 @@ import 'package:chinesenotes/chinesenotes.dart';
 
 App? app;
 
-DictionarySources getSources() {
-  Map<int, DictionarySource> sources = {};
-  sources[1] = DictionarySource(
-      1,
-      'chinesenotes_words.json',
-      'Chinese Notes',
-      'Chinese Notes Chinese-English Dictionary',
-      'https://github.com/alexamies/chinesenotes.com',
-      'Alex Amies',
-      'Creative Commons Attribution-Share Alike 3.0',
-      2);
-  sources[2] = DictionarySource(
-      2,
-      'modern_named_entities.json',
-      'Modern Entities',
-      'Chinese Notes modern named entities',
-      'https://github.com/alexamies/chinesenotes.com',
-      'Alex Amies',
-      'Creative Commons Attribution-Share Alike 3.0',
-      6000002);
-  return DictionarySources(sources);
-}
-
 Future<String> loadFromExt(String filename) async {
   final response = await ServiceWorkerGlobalScope.instance.fetch(filename);
   print('response is a ${response.runtimeType}');
@@ -80,21 +57,13 @@ void onMenuEvent(JsObject info, var tabsNotUsed) {
   var query = info['selectionText'];
   QueryResults results =
       (app != null) ? app!.lookup(query) : QueryResults(query, []);
-  var terms = results.terms;
-  print('onMenuEvent got ${terms.length} terms');
-  var termsObj = [];
-  for (var term in terms) {
-    var entryObj = {'s': term.entries.headword};
-    var entriesObj = [entryObj];
-    var termObj = {'entries': entriesObj};
-    termsObj.add(termObj);
-  }
-  var msg = {'query': query, 'terms': termsObj};
-  var msgObj = JsObject.jsify(msg);
+  var res = results.toJson();
+  print('onMenuEvent got ${results.terms.length} terms');
+  var msg = JsObject.jsify(res);
   void sendMessage(var tabs) {
     var tabId = tabs[0]['id'];
     print('sendMessage sending selectionText: ${query} to tab $tabId');
-    context['chrome']['tabs'].callMethod('sendMessage', [tabId, msgObj]);
+    context['chrome']['tabs'].callMethod('sendMessage', [tabId, msg]);
   }
 
   context['chrome']['tabs'].callMethod('query', [activeObj, sendMessage]);
@@ -131,7 +100,7 @@ void onInstalled() async {
         : new JsObject.fromBrowserObject(jsOnInstalled));
     dartOnInstalled.callMethod('addListener', [setUpApp]);
 
-    app = await initApp(getSources());
+    app = await initApp(getDefaultSources());
   } catch (e) {
     print('Unable to listen for Chrome service worker install events: $e');
   }

@@ -79,7 +79,7 @@ DictionaryReverseIndex buildReverseIndex(
   for (var hw in keys) {
     var e = forrwardIndex.lookup(hw);
     for (var entry in e.entries) {
-      for (var sense in entry.senses) {
+      for (var sense in entry.senses.senses) {
         var equivalents = sense.english.split(separator);
         var cleaned = removeStopWords(equivalents);
         addSenses(cleaned, sense);
@@ -131,6 +131,14 @@ class DictionaryEntries {
   int get length {
     return entries.length;
   }
+
+  Map toJson() {
+    var entriesObj = [];
+    for (var entry in entries) {
+      entriesObj.add(entry.toJson());
+    }
+    return {'headword': headword, 'entries': entriesObj};
+  }
 }
 
 /// DictionaryEntry is an entry for a term in a Chinese-English dictionary.
@@ -148,7 +156,7 @@ class DictionaryEntry {
   /// The sourceId identifies the origin of the entry.
   final int sourceId;
 
-  final List<Sense> senses;
+  final Senses senses;
 
   DictionaryEntry(this.headword, this.headwordId, this.sourceId, this.senses);
 
@@ -158,7 +166,7 @@ class DictionaryEntry {
   /// example, 围 (圍).
   String get hwRollup {
     var variants = <String, bool>{};
-    for (var sense in senses) {
+    for (var sense in senses.senses) {
       if (sense.traditional != '') {
         variants[sense.traditional] = true;
       }
@@ -171,10 +179,23 @@ class DictionaryEntry {
   /// Rolls up different writings of Hanyun pinyin from all senses
   String get pinyin {
     var values = <String, bool>{};
-    for (var s in senses) {
+    for (var s in senses.senses) {
       values[s.pinyin] = true;
     }
     return values.keys.join(' ').trim();
+  }
+
+  Map toJson() {
+    var sensesObj = [];
+    for (var sense in senses.senses) {
+      sensesObj.add(sense.toJson());
+    }
+    return {
+      'headword': headword,
+      'headwordId': headwordId,
+      'sourceId': sourceId,
+      'senses': sensesObj
+    };
   }
 }
 
@@ -267,7 +288,8 @@ DictionaryCollectionIndex dictFromJson(
       var sense = Sense(luid, hwid, s, t, p, e, g, n);
       var entries = entryMap[s];
       if (entries == null || entries.length == 0) {
-        var entry = DictionaryEntry(s, hwid, source.sourceId, [sense]);
+        var senses = Senses([sense]);
+        var entry = DictionaryEntry(s, hwid, source.sourceId, senses);
         entryMap[s] = DictionaryEntries(s, [entry]);
       } else {
         entries.entries[0].senses.add(sense);
@@ -275,7 +297,8 @@ DictionaryCollectionIndex dictFromJson(
       if (t != '') {
         var entries = entryMap[t];
         if (entries == null) {
-          var entry = DictionaryEntry(s, hwid, source.sourceId, [sense]);
+          var senses = Senses([sense]);
+          var entry = DictionaryEntry(s, hwid, source.sourceId, senses);
           entryMap[t] = DictionaryEntries(t, [entry]);
         } else {
           entries.entries[0].senses.add(sense);
@@ -316,6 +339,30 @@ DictionarySources getConfig(String jsonString) {
   return DictionarySources(dSources);
 }
 
+/// A default set of sources
+DictionarySources getDefaultSources() {
+  Map<int, DictionarySource> sources = {};
+  sources[1] = DictionarySource(
+      1,
+      'chinesenotes_words.json',
+      'Chinese Notes',
+      'Chinese Notes Chinese-English Dictionary',
+      'https://github.com/alexamies/chinesenotes.com',
+      'Alex Amies',
+      'Creative Commons Attribution-Share Alike 3.0',
+      2);
+  sources[2] = DictionarySource(
+      2,
+      'modern_named_entities.json',
+      'Modern Entities',
+      'Chinese Notes modern named entities',
+      'https://github.com/alexamies/chinesenotes.com',
+      'Alex Amies',
+      'Creative Commons Attribution-Share Alike 3.0',
+      6000002);
+  return DictionarySources(sources);
+}
+
 /// Build a forward index by parsing a dictionary from a JSON string.
 ///
 /// Indended for the Chinese Notes and NTI Reader native dictionary structure
@@ -336,14 +383,16 @@ HeadwordIDIndex headwordsFromJson(String jsonString, DictionarySource source) {
       var sense = Sense(luid, hwid, s, t, p, e, g, n);
       var entry = entryMap[s];
       if (entry == null) {
-        entryMap[hwid] = DictionaryEntry(s, hwid, source.sourceId, [sense]);
+        var senses = Senses([sense]);
+        entryMap[hwid] = DictionaryEntry(s, hwid, source.sourceId, senses);
       } else {
         entry.senses.add(sense);
       }
       if (t != '') {
         var entry = entryMap[t];
         if (entry == null) {
-          entryMap[hwid] = DictionaryEntry(s, hwid, source.sourceId, [sense]);
+          var senses = Senses([sense]);
+          entryMap[hwid] = DictionaryEntry(s, hwid, source.sourceId, senses);
         } else {
           entry.senses.add(sense);
         }
@@ -444,6 +493,15 @@ class QueryResults {
   List<Term> terms;
 
   QueryResults(this.query, this.terms);
+
+  /// For JavaScript interoperability
+  Map toJson() {
+    var termsObj = [];
+    for (var term in terms) {
+      termsObj.add(term.toJson());
+    }
+    return {'query': query, 'terms': termsObj};
+  }
 }
 
 /// Sense is the meaning of a dictionary entry.
@@ -489,6 +547,20 @@ class Sense {
     }
     return '$simplified （$traditional）';
   }
+
+  /// For JavaScript interoperability
+  Map toJson() {
+    return {
+      'luid': luid,
+      'hwid': hwid,
+      'simplified': simplified,
+      'traditional': traditional,
+      'pinyin': pinyin,
+      'english': english,
+      'grammar': grammar,
+      'notes': notes
+    };
+  }
 }
 
 /// Senses is a list of word senses.
@@ -496,6 +568,23 @@ class Senses {
   final List<Sense> senses;
 
   Senses(this.senses);
+
+  void add(Sense sense) {
+    senses.add(sense);
+  }
+
+  int get length {
+    return senses.length;
+  }
+
+  /// For JavaScript interoperability
+  Map toJson() {
+    var sensesArray = [];
+    for (var sense in senses) {
+      sensesArray.add(sense.toJson());
+    }
+    return {'senses': sensesArray};
+  }
 }
 
 /// A Term contains the QueryText searched for and possibly a matching
@@ -504,9 +593,18 @@ class Senses {
 /// Chinese words will have nil DictEntry values and matching values will be
 /// included in the Senses field.
 class Term {
-  String queryText;
+  String query;
   DictionaryEntries entries;
   Senses senses;
 
-  Term(this.queryText, this.entries, this.senses);
+  Term(this.query, this.entries, this.senses);
+
+  /// For JavaScript interoperability
+  Map toJson() {
+    return {
+      'query': query,
+      'entries': entries.toJson(),
+      'senses': senses.toJson()
+    };
+  }
 }
