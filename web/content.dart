@@ -43,20 +43,6 @@ DivElement makeDialog() {
   header.style.fontSize = 'medium;';
   cnOutput.children.add(header);
 
-  var findForm = FormElement();
-  findForm.style.padding = '20px';
-  findForm.id = 'multiLookupForm';
-
-  var textField = TextInputElement();
-  textField.id = 'multiLookupInput';
-  findForm.children.add(textField);
-
-  var submitButton = ButtonElement();
-  submitButton.text = 'Find';
-  submitButton.id = 'multiLookupSubmit';
-  findForm.children.add(submitButton);
-  cnOutput.children.add(findForm);
-
   var statusDiv = DivElement();
   statusDiv.id = 'status';
   cnOutput.children.add(statusDiv);
@@ -103,10 +89,9 @@ void main() async {
   }
   var statusDiv = querySelector('#status')!;
   var errorDiv = querySelector('#lookupError')!;
-  var textField = querySelector('#multiLookupInput');
   var div = querySelector('#lookupResults');
 
-  void onMessageListener(msg, sender, sendResponse) {
+  bool onMessageListener(msg, sender, sendResponse) {
     if (msg == null) {
       print('onMessageListener msg is null');
     }
@@ -115,27 +100,13 @@ void main() async {
     var results = QueryResults.fromJson(msg);
     print('onMessageListener, got ${results.terms.length} terms');
     print('Added ${results.sourceAbbrev.length} source abreviations');
-    displayLookup(results, cnOutput, div, statusDiv, errorDiv, textField);
 
-    void lookup(Event evt) {
-      var query = '';
-      if (textField != null) {
-        var tf = textField as TextInputElement;
-        query = tf.value!.trim();
-        var msg = sendResponse(query);
-        var results = QueryResults.fromJson(msg);
-        displayLookup(results, cnOutput, div, statusDiv, errorDiv, textField);
-      }
-      evt.preventDefault();
-    }
-
-    var findForm = querySelector('#multiLookupForm');
-    findForm?.onSubmit.listen(lookup);
+    displayLookup(results, cnOutput, div, statusDiv, errorDiv, null);
+    return true;
   }
 
   // If we are a Chrome extension, then listen for messages
   try {
-    print('Adding listener for Chrome context menu events');
     var jsOnMessageEvent = context['chrome']['runtime']['onMessage'];
     JsObject dartOnMessageEvent = (jsOnMessageEvent is JsObject
         ? jsOnMessageEvent

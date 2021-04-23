@@ -14,6 +14,11 @@ void displayLookup(QueryResults results, Element? cnOutput, Element? div,
     Element? statusDiv, Element? errorDiv, Element? textField) {
   print('displayLookup, ${results.query}');
   div?.children = [];
+  if (textField == null) {
+    var queryDiv = DivElement();
+    queryDiv.text = 'Showing results for ${results.query}';
+    div?.children.add(queryDiv);
+  }
   try {
     print('displayLookup, got ${results.terms.length} terms');
     for (var term in results.terms) {
@@ -138,14 +143,12 @@ void displayLookup(QueryResults results, Element? cnOutput, Element? div,
     statusDiv?.text = 'Try a hard refresh of the page and search again';
     print('Unable to load dictionary, error: $e');
   }
-  openDialog(cnOutput, textField, results.query);
+  openDialog(cnOutput);
 }
 
-void openDialog(Element? cnOutput, Element? textfield, String query) {
-  if (textfield != null) {
-    var tf = textfield as TextInputElement;
-    tf.value = query;
-  }
+void openDialog(
+  Element? cnOutput,
+) {
   cnOutput?.style.top = '200px';
   cnOutput?.style.left = '300px';
   cnOutput?.style.display = 'block';
