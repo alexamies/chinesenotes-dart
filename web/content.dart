@@ -5,7 +5,6 @@ import 'dart:js';
 
 import 'package:chinesenotes/chinesenotes.dart';
 import 'package:chinesenotes/chinesenotes_html.dart';
-import 'package:chinesenotes/chinesenotes_js.dart';
 
 const maxSenses = 10;
 
@@ -113,26 +112,26 @@ void main() async {
     }
     var query = msg['query'];
     print('onMessageListener, query: ${query}');
-    var results = queryResultsFromJson(msg);
+    var results = QueryResults.fromJson(msg);
     print('onMessageListener, got ${results.terms.length} terms');
-    var sources = getDefaultSources();
-    displayLookup(
-        results, cnOutput, div, statusDiv, errorDiv, textField, sources);
-  }
+    print('Added ${results.sourceAbbrev.length} source abreviations');
+    displayLookup(results, cnOutput, div, statusDiv, errorDiv, textField);
 
-/*
-  void lookup(Event evt) {
-    var query = '';
-    if (textField != null) {
-      var tf = textField as TextInputElement;
-      query = tf.value!.trim();
-      displayLookup(query);
+    void lookup(Event evt) {
+      var query = '';
+      if (textField != null) {
+        var tf = textField as TextInputElement;
+        query = tf.value!.trim();
+        var msg = sendResponse(query);
+        var results = QueryResults.fromJson(msg);
+        displayLookup(results, cnOutput, div, statusDiv, errorDiv, textField);
+      }
+      evt.preventDefault();
     }
-    evt.preventDefault();
+
+    var findForm = querySelector('#multiLookupForm');
+    findForm?.onSubmit.listen(lookup);
   }
-  var findForm = querySelector('#multiLookupForm');
-  findForm?.onSubmit.listen(lookup);
-*/
 
   // If we are a Chrome extension, then listen for messages
   try {

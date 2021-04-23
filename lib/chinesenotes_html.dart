@@ -5,20 +5,13 @@
 library chinesenotes_html;
 
 import 'dart:html';
-import 'dart:js';
 
 import 'package:chinesenotes/chinesenotes.dart';
 
 const maxSenses = 10;
 
-void displayLookup(
-    QueryResults results,
-    Element? cnOutput,
-    Element? div,
-    Element? statusDiv,
-    Element? errorDiv,
-    Element? textField,
-    DictionarySources sources) {
+void displayLookup(QueryResults results, Element? cnOutput, Element? div,
+    Element? statusDiv, Element? errorDiv, Element? textField) {
   print('displayLookup, ${results.query}');
   div?.children = [];
   try {
@@ -70,10 +63,11 @@ void displayLookup(
           }
           li.children.add(senseOL);
           ul.children.add(li);
-          var source = sources.lookup(ent.sourceId);
+          var sourceAbbrev = results.sourceAbbrev[ent.headwordId];
+          print('Source abbrev for headword ${ent.headwordId}: $sourceAbbrev');
           var sourceDiv = DivElement();
           sourceDiv.className = 'dict-entry-source';
-          sourceDiv.text = 'Source: ${source.abbreviation}';
+          sourceDiv.text = 'Source: ${sourceAbbrev}';
           entryDiv.children.add(sourceDiv);
         }
       } else if (term.senses.senses.length > 0) {
@@ -124,8 +118,8 @@ void displayLookup(
           notesDiv.children.add(notesSpan);
           var sourceSpan = SpanElement();
           sourceSpan.className = 'dict-sense-source';
-          var source = sources.lookup(sense.hwid);
-          sourceSpan.text = 'Source: ${source.abbreviation}';
+          var sourceAbbrev = results.sourceAbbrev[sense.hwid];
+          sourceSpan.text = 'Source: ${sourceAbbrev}';
           notesDiv.children.add(sourceSpan);
           li.children.add(notesDiv);
           ul.children.add(li);

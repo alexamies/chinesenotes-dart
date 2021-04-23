@@ -31,7 +31,19 @@ class App {
     var entries = forrwardIndex.lookup(query);
     var senses = reverseIndex.lookup(query);
     var term = Term(query, entries, senses);
-    return QueryResults(query, [term]);
+    Map<int, String> sourceAbbrev = {};
+    for (var sense in senses.senses) {
+      var entry = hwIDIndex.entries[sense.hwid];
+      if (entry != null) {
+        var source = sources.lookup(entry.sourceId);
+        sourceAbbrev[sense.hwid] = source.abbreviation;
+      }
+    }
+    for (var entry in entries.entries) {
+      var source = sources.lookup(entry.sourceId);
+      sourceAbbrev[entry.headwordId] = source.abbreviation;
+    }
+    return QueryResults(query, [term], sourceAbbrev);
   }
 
   DictionarySource? getSource(int hwID) {
@@ -128,6 +140,20 @@ class DictionaryEntries {
 
   DictionaryEntries(this.headword, this.entries);
 
+  DictionaryEntries.fromJson(var obj)
+      : headword = obj['headword'],
+        entries = [] {
+    var entriesObj = obj['entries'];
+    if (!(entriesObj is List)) {
+      return;
+    }
+    List entriesArray = entriesObj;
+    for (var entryObj in entriesArray) {
+      var entry = DictionaryEntry.fromJson(entryObj);
+      entries.add(entry);
+    }
+  }
+
   int get length {
     return entries.length;
   }
@@ -159,6 +185,12 @@ class DictionaryEntry {
   final Senses senses;
 
   DictionaryEntry(this.headword, this.headwordId, this.sourceId, this.senses);
+
+  DictionaryEntry.fromJson(var obj)
+      : headword = obj['headword'],
+        headwordId = obj['headwordId'],
+        sourceId = obj['sourceId'],
+        senses = Senses.fromJson(obj['senses']);
 
   /// A rollup of simplified, traditional, and variant forms of the headword
   ///
@@ -257,7 +289,7 @@ class DictionarySources {
   DictionarySource lookup(int key) {
     var source = sources[key];
     if (source == null) {
-      throw Exception('dictionary source not found');
+      throw Exception('dictionary source $key not found');
     }
     return source;
   }
@@ -306,7 +338,6 @@ DictionaryCollectionIndex dictFromJson(
       rethrow;
     }
   }
-  print('Loaded ${entryMap.length} entries');
   return DictionaryCollectionIndex(entryMap);
 }
 
@@ -485,10 +516,44 @@ class NotesProcessor {
 
 /// Contains the result of a lookup checking both forward and reverse indexes.
 class QueryResults {
+  /// The query that lead to these results
   String query;
+
+  /// The lookup results
   List<Term> terms;
 
-  QueryResults(this.query, this.terms);
+  /// A map from headword id to source abbreviation, for reverse lookup
+  Map<int, String> sourceAbbrev;
+
+  QueryResults(this.query, this.terms, this.sourceAbbrev);
+
+  QueryResults.fromJson(var obj)
+      : query = obj['query'],
+        terms = [],
+        sourceAbbrev = {} {
+    var termsObj = obj['terms'];
+    if (!(termsObj is List)) {
+      return;
+    }
+    List termsArray = termsObj;
+    for (var tObj in termsArray) {
+      var term = Term.fromJson(tObj);
+      terms.add(term);
+    }
+    var abbrevObj = obj['sourceAbbrev'];
+    if (!(abbrevObj is String)) {
+      return;
+    }
+    var tokens = abbrevObj.split(',');
+    for (var token in tokens) {
+      var pair = token.split(':');
+      if (pair.length == 2) {
+        var sourceId = int.parse(pair[0]);
+        var abbreviation = pair[1];
+        sourceAbbrev[sourceId] = abbreviation;
+      }
+    }
+  }
 
   /// For JavaScript interoperability
   Map toJson() {
@@ -496,7 +561,17 @@ class QueryResults {
     for (var term in terms) {
       termsObj.add(term.toJson());
     }
-    return {'query': query, 'terms': termsObj};
+    List<String> abbrevList = [];
+    for (var key in sourceAbbrev.keys) {
+      abbrevList.add('${key}:${sourceAbbrev[key]}');
+    }
+    var abbrevObj = StringBuffer();
+    abbrevObj.writeAll(abbrevList, ',');
+    return {
+      'query': query,
+      'terms': termsObj,
+      'sourceAbbrev': abbrevObj.toString()
+    };
   }
 }
 
@@ -528,6 +603,16 @@ class Sense {
 
   Sense(this.luid, this.hwid, this.simplified, this.traditional, this.pinyin,
       this.english, this.grammar, this.notes);
+
+  Sense.fromJson(var obj)
+      : luid = obj['luid'],
+        hwid = obj['hwid'],
+        simplified = obj['simplified'],
+        traditional = obj['traditional'],
+        pinyin = obj['pinyin'],
+        english = obj['english'],
+        grammar = obj['grammar'],
+        notes = obj['notes'] {}
 
   @override
   bool operator ==(dynamic other) {
@@ -565,6 +650,18 @@ class Senses {
 
   Senses(this.senses);
 
+  Senses.fromJson(var obj) : senses = [] {
+    var sensesObj = obj['senses'];
+    if (!(obj['senses'] is List)) {
+      return;
+    }
+    List sensesArray = sensesObj;
+    for (var senseObj in sensesArray) {
+      var sense = Sense.fromJson(senseObj);
+      senses.add(sense);
+    }
+  }
+
   void add(Sense sense) {
     senses.add(sense);
   }
@@ -594,6 +691,11 @@ class Term {
   Senses senses;
 
   Term(this.query, this.entries, this.senses);
+
+  Term.fromJson(var obj)
+      : query = obj['query'],
+        entries = DictionaryEntries.fromJson(obj['entries']),
+        senses = Senses.fromJson(obj['senses']) {}
 
   /// For JavaScript interoperability
   Map toJson() {

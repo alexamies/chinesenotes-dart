@@ -210,8 +210,7 @@ void main() async {
     var query = msg['term'];
     print('onMessageListener, term: ${query} from $sender');
     var results = app.lookup(query);
-    displayLookup(
-        results, cnOutput, div, statusDiv, errorDiv, textField, sources);
+    displayLookup(results, cnOutput, div, statusDiv, errorDiv, textField);
   }
 
   void lookup(Event evt) {
@@ -220,8 +219,7 @@ void main() async {
       var tf = textField as TextInputElement;
       query = tf.value!.trim();
       var results = app.lookup(query);
-      displayLookup(
-          results, cnOutput, div, statusDiv, errorDiv, textField, sources);
+      displayLookup(results, cnOutput, div, statusDiv, errorDiv, textField);
     }
     evt.preventDefault();
   }

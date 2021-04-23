@@ -4,8 +4,6 @@ targets:
       build_web_compilers:entrypoint:
         generate_for:
         - lib/**html.dart
-        - lib/**js.dart
-        - test/**test_js.dart
         - web/**.dart
         options:
           compiler: dart2js

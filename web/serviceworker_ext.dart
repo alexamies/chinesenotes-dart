@@ -56,14 +56,19 @@ void onMenuEvent(JsObject info, var tabsNotUsed) {
   var activeObj = JsObject.jsify({'active': true, 'currentWindow': true});
   var query = info['selectionText'];
   QueryResults results =
-      (app != null) ? app!.lookup(query) : QueryResults(query, []);
+      (app != null) ? app!.lookup(query) : QueryResults(query, [], {});
   var res = results.toJson();
   print('onMenuEvent got ${results.terms.length} terms');
   var msg = JsObject.jsify(res);
+  void responseCallback() {
+    print('onMenuEvent responseCallback for query $query');
+  }
+
   void sendMessage(var tabs) {
     var tabId = tabs[0]['id'];
     print('sendMessage sending selectionText: ${query} to tab $tabId');
-    context['chrome']['tabs'].callMethod('sendMessage', [tabId, msg]);
+    context['chrome']['tabs']
+        .callMethod('sendMessage', [tabId, msg, null, responseCallback]);
   }
 
   context['chrome']['tabs'].callMethod('query', [activeObj, sendMessage]);
