@@ -31,7 +31,7 @@ class TestDictionaryLoader {
     var sense =
         Sense(-1, 42, chinese, '', 'níhǎo', 'hello', 'interjection', 'p. 655');
     var senses = Senses([sense]);
-    var entry = DictionaryEntry(chinese, 42, 1, senses);
+    var entry = DictionaryEntry(chinese, 42, 1, {'níhǎo'}, senses);
     var entryList = DictionaryEntries(chinese, [entry]);
     var entries = <String, DictionaryEntries>{chinese: entryList};
     return DictionaryCollectionIndex(entries);
@@ -59,8 +59,8 @@ void main() {
     for (var ent in dictEntries.entries) {
       var source = sources.lookup(ent.sourceId);
       expect(source.abbreviation, cnSource.abbreviation);
-      expect(ent.senses.length, equals(1));
-      for (var sense in ent.senses.senses) {
+      expect(ent.getSenses().length, equals(1));
+      for (var sense in ent.getSenses().senses) {
         expect(sense.pinyin, 'suìgǔ');
         expect(sense.english, 'remote antiquity');
       }
@@ -78,8 +78,8 @@ void main() {
     for (var ent in dictEntries.entries) {
       var source = sources.lookup(ent.sourceId);
       expect(source.abbreviation, cnSource.abbreviation);
-      expect(ent.senses.length, equals(1));
-      for (var sense in ent.senses.senses) {
+      expect(ent.getSenses().length, equals(1));
+      for (var sense in ent.getSenses().senses) {
         expect(sense.pinyin, 'wéi');
       }
     }
@@ -136,7 +136,7 @@ void main() {
       for (var entry in term.entries.entries) {
         expect(entry.headword, equals(query));
         expect(entry.hwRollup, equals(query));
-        expect(entry.pinyin, equals(pinyin));
+        expect(entry.pinyinRollup, equals(pinyin));
       }
     }
   });
@@ -208,7 +208,7 @@ void main() {
     var sense = Sense(
         -2, 43, simplified, '再見', 'zàijiàn', 'goodbye', 'interjection', '');
     var senses = Senses([sense]);
-    var entry = DictionaryEntry(simplified, 43, 2, senses);
+    var entry = DictionaryEntry(simplified, 43, 2, {'zàijiàn'}, senses);
     var entryList = DictionaryEntries(simplified, [entry]);
     var entries = <String, DictionaryEntries>{simplified: entryList};
     var index2 = DictionaryCollectionIndex(entries);

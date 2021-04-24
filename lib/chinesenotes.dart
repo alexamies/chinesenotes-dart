@@ -7,7 +7,7 @@ library chinesenotes;
 import 'dart:convert';
 
 const separator = '; ';
-const stopWords = ['a ', 'an ', 'to '];
+const stopWords = ['a ', 'an ', 'to ', 'the '];
 const notesPatterns = [
   r'Scientific name: (.+?)(\(|,|;)',
   r'Sanskrit equivalent: (.+?)(\(|,|;)',
@@ -29,7 +29,8 @@ class App {
 
   QueryResults lookup(String query) {
     var entries = forrwardIndex.lookup(query);
-    var senses = reverseIndex.lookup(query);
+    var queryLower = query.toLowerCase();
+    var senses = reverseIndex.lookup(queryLower);
     var term = Term(query, entries, senses);
     Map<int, String> sourceAbbrev = {};
     for (var sense in senses.senses) {
@@ -68,7 +69,8 @@ DictionaryReverseIndex buildReverseIndex(
     for (var equiv in equivalents) {
       var ent = revIndex[equiv];
       if (ent == null) {
-        revIndex[equiv] = Senses([sense]);
+        var equivLower = equiv.toLowerCase();
+        revIndex[equivLower] = Senses([sense]);
       } else if (!ent.senses.contains(sense)) {
         ent.senses.add(sense);
       }
@@ -91,7 +93,7 @@ DictionaryReverseIndex buildReverseIndex(
   for (var hw in keys) {
     var e = forrwardIndex.lookup(hw);
     for (var entry in e.entries) {
-      for (var sense in entry.senses.senses) {
+      for (var sense in entry.getSenses().senses) {
         var equivalents = sense.english.split(separator);
         var cleaned = removeStopWords(equivalents);
         addSenses(cleaned, sense);
@@ -144,7 +146,7 @@ class DictionaryEntries {
       : headword = obj['headword'],
         entries = [] {
     var entriesObj = obj['entries'];
-    if (!(entriesObj is List)) {
+    if (entriesObj is! List) {
       return;
     }
     List entriesArray = entriesObj;
@@ -182,15 +184,36 @@ class DictionaryEntry {
   /// The sourceId identifies the origin of the entry.
   final int sourceId;
 
-  final Senses senses;
+  /// Rolls up different writings of Hanyun pinyin from all senses
+  final Set<String> pinyin;
 
-  DictionaryEntry(this.headword, this.headwordId, this.sourceId, this.senses);
+  final Senses _senses;
+
+  DictionaryEntry(
+      this.headword, this.headwordId, this.sourceId, this.pinyin, this._senses);
 
   DictionaryEntry.fromJson(var obj)
       : headword = obj['headword'],
         headwordId = obj['headwordId'],
         sourceId = obj['sourceId'],
-        senses = Senses.fromJson(obj['senses']);
+        pinyin = {},
+        _senses = Senses.fromJson(obj['senses']) {
+    var pinyinObj = obj['sourceId'];
+    if (pinyinObj is! String) {
+      return;
+    }
+    var tokens = pinyinObj.split(',');
+    pinyin.addAll(tokens);
+  }
+
+  void addSense(Sense sense) {
+    pinyin.add(sense.pinyin);
+    _senses.add(sense);
+  }
+
+  Senses getSenses() {
+    return _senses;
+  }
 
   /// A rollup of simplified, traditional, and variant forms of the headword
   ///
@@ -198,7 +221,7 @@ class DictionaryEntry {
   /// example, 围 (圍).
   String get hwRollup {
     var variants = <String, bool>{};
-    for (var sense in senses.senses) {
+    for (var sense in _senses.senses) {
       if (sense.traditional != '') {
         variants[sense.traditional] = true;
       }
@@ -208,21 +231,22 @@ class DictionaryEntry {
     return rollup == '' ? headword : '$headword （$rollup）';
   }
 
-  /// Rolls up different writings of Hanyun pinyin from all senses
-  String get pinyin {
-    var values = <String, bool>{};
-    for (var s in senses.senses) {
-      values[s.pinyin] = true;
-    }
-    return values.keys.join(' ').trim();
+  /// A rollup of pinyin pronunciations of the headword
+  String get pinyinRollup {
+    var sb = StringBuffer();
+    sb.writeAll(pinyin, ',');
+    return sb.toString();
   }
 
   Map toJson() {
+    var sb = StringBuffer();
+    sb.writeAll(pinyin, ',');
     return {
       'headword': headword,
       'headwordId': headwordId,
       'sourceId': sourceId,
-      'senses': senses.toJson()
+      'pinyin': sb.toString(),
+      'senses': _senses.toJson()
     };
   }
 }
@@ -278,6 +302,16 @@ class DictionarySource {
 
   DictionarySource(this.sourceId, this.url, this.abbreviation, this.title,
       this.citation, this.author, this.license, this.startHeadwords);
+
+  DictionarySource.fromJson(var obj)
+      : sourceId = obj['sourceId'],
+        url = obj['url'],
+        abbreviation = obj['abbreviation'],
+        title = obj['title'],
+        citation = obj['citation'],
+        author = obj['author'],
+        license = obj['license'],
+        startHeadwords = obj['startHeadwords'];
 }
 
 /// The identity of a dictionary source, how to download it, and a citation.
@@ -285,6 +319,16 @@ class DictionarySources {
   final Map<int, DictionarySource> sources;
 
   DictionarySources(this.sources);
+
+  DictionarySources.fromJson(var obj) : sources = {} {
+    if (obj is! List) {
+      return;
+    }
+    for (var sourceObj in obj) {
+      var source = DictionarySource.fromJson(sourceObj);
+      sources[source.sourceId] = source;
+    }
+  }
 
   DictionarySource lookup(int key) {
     var source = sources[key];
@@ -317,19 +361,19 @@ DictionaryCollectionIndex dictFromJson(
       var entries = entryMap[s];
       if (entries == null || entries.length == 0) {
         var senses = Senses([sense]);
-        var entry = DictionaryEntry(s, hwid, source.sourceId, senses);
+        var entry = DictionaryEntry(s, hwid, source.sourceId, {p}, senses);
         entryMap[s] = DictionaryEntries(s, [entry]);
       } else {
-        entries.entries[0].senses.add(sense);
+        entries.entries[0].addSense(sense);
       }
       if (t != '') {
         var entries = entryMap[t];
         if (entries == null) {
-          var senses = Senses([sense]);
-          var entry = DictionaryEntry(s, hwid, source.sourceId, senses);
+          var entry =
+              DictionaryEntry(s, hwid, source.sourceId, {p}, Senses([sense]));
           entryMap[t] = DictionaryEntries(t, [entry]);
         } else {
-          entries.entries[0].senses.add(sense);
+          entries.entries[0].addSense(sense);
         }
       }
       i++;
@@ -410,18 +454,18 @@ HeadwordIDIndex headwordsFromJson(String jsonString, DictionarySource source) {
       var sense = Sense(luid, hwid, s, t, p, e, g, n);
       var entry = entryMap[s];
       if (entry == null) {
-        var senses = Senses([sense]);
-        entryMap[hwid] = DictionaryEntry(s, hwid, source.sourceId, senses);
+        entryMap[hwid] =
+            DictionaryEntry(s, hwid, source.sourceId, {p}, Senses([sense]));
       } else {
-        entry.senses.add(sense);
+        entry.addSense(sense);
       }
       if (t != '') {
         var entry = entryMap[t];
         if (entry == null) {
-          var senses = Senses([sense]);
-          entryMap[hwid] = DictionaryEntry(s, hwid, source.sourceId, senses);
+          entryMap[hwid] =
+              DictionaryEntry(s, hwid, source.sourceId, {p}, Senses([sense]));
         } else {
-          entry.senses.add(sense);
+          entry.addSense(sense);
         }
       }
       i++;
@@ -652,7 +696,7 @@ class Senses {
 
   Senses.fromJson(var obj) : senses = [] {
     var sensesObj = obj['senses'];
-    if (!(obj['senses'] is List)) {
+    if (obj['senses'] is! List) {
       return;
     }
     List sensesArray = sensesObj;

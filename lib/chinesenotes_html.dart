@@ -10,6 +10,17 @@ import 'package:chinesenotes/chinesenotes.dart';
 
 const maxSenses = 10;
 
+class AppConfig {
+  final String contextMenuText;
+  final DictionarySources sources;
+
+  AppConfig(this.contextMenuText, this.sources);
+
+  AppConfig.fromJson(var obj)
+      : contextMenuText = obj['contextMenuText'],
+        sources = DictionarySources.fromJson(obj['sources']);
+}
+
 void displayLookup(QueryResults results, Element? cnOutput, Element? div,
     Element? statusDiv, Element? errorDiv, Element? textField) {
   print('displayLookup, ${results.query}');
@@ -44,7 +55,7 @@ void displayLookup(QueryResults results, Element? cnOutput, Element? div,
           entryDiv.children.add(ul);
           var li = LIElement();
           var senseOL = OListElement();
-          for (var sense in ent.senses.senses) {
+          for (var sense in ent.getSenses().senses) {
             var senseLi = LIElement();
             var sensePrimary = DivElement();
             var pinyinSpan = SpanElement();

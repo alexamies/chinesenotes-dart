@@ -1,4 +1,5 @@
 {
+  "contextMenuText": "Lookup with Chinese Notes ...",
   "sources": [{
     "sourceId": 1,
     "url": "chinesenotes_words.json",

@@ -62,7 +62,7 @@ void main() async {
     for (var ent in entries) {
       var source = sources.lookup(ent.sourceId);
       print('Source: ${source.abbreviation}');
-      for (var sense in ent.senses.senses) {
+      for (var sense in ent.getSenses().senses) {
         print('Pinyin: ${sense.pinyin}');
         print('English: ${sense.english}');
       }
