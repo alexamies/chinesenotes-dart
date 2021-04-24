@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+    <title>NTI Reader Chinese-English Buddhist Dictionary</title>
+    <link rel='stylesheet' href='styles.css'>
+  </head>
+  <body>
+    <h1>NTI Reader Chinese-English Buddhist Dictionary</h1>
+    <div id='cnOutput'>
+      <p>
+        Search for a term. Examples: 佛, 如來, 不動, 鐘頭, 一切智, 定, 和, 布施, or
+        五蘊. Also try reverse lookup with an English, Sanskrit (pañcaskandha),
+        Pali (pañcakhandhā), Japanese (goun), or Tibetan equivalent.
+      </p>
+      <div id='formDiv'>
+        <form name='multiLookupForm' id='multiLookupForm' action='#'>
+          <div>
+            <label for='multiLookupInput'>Search for</label>
+            <input type='text' name='multiLookupInput'
+                   id='multiLookupInput' size='40' required/>
+            <button type='submit' id='multiLookupSubmit' disabled>
+              <span>Find</span>
+            </button>
+          </div>
+        </form>
+      </div>
+      <div id='lookupResults'></div>
+      <div id='lookupError'></div>
+      <div class='status' id='status'></div>
+      <details>
+        <summary>Settings</summary>
+        <h2>Configuration Settings</h2>
+        <h3>Dictionary Sources</h3>
+        <div id='sourcesDiv'>
+          <form name='sourcesForm' id='sourcesForm' action='#'>
+            <fieldset class='source-form-element'>
+              <input type='checkbox' name='sourceName1'
+                     id='sourceName1' size='40'
+                     value='1,NTI Reader,NTI Reader Chinese-English Dictionary,https://github.com/alexamies/buddhist-dictionary,Alex Amies,Creative Commons  Attribution-Share Alike 3.0,2'
+                     checked='true'
+                     disabled='true'/>
+              <label for='sourceName1'
+                     >NTI Reader Chinese-English Dictionary</label>
+            </fieldset>
+            <fieldset class='source-form-element'>
+              <input type='hidden' name='sourceURL1'
+                     id='sourceURL1' size='40'
+                     value='ntireader_words.json'
+                     readonly='true'/>
+            </fieldset>
+             <fieldset class='source-form-element'>
+              <input type='checkbox' name='sourceName2'
+                     id='sourceName2' size='40'
+                     value='2,Buddhist named entities,NTI Reader Buddhist named entities,https://github.com/alexamies/buddhist-dictionary,Alex Amies,Creative Commons Attribution-Share Alike 3.0,7000002'
+                     checked='true'
+                     disabled='true'/>
+              <label for='sourceName2'
+                      >NTI Reader Buddhist named entities (people, places, text titles, etc)</label>
+            </fieldset>
+            <fieldset class='source-form-element'>
+              <input type='hidden' name='sourceURL2'
+                     id='sourceURL2' size='40'
+                     value='buddhist_named_entities.json'
+                     readonly='true'/>
+            </fieldset>
+            <fieldset class='source-form-element'>
+              <input type='checkbox' name='sourceName4'
+                     id='sourceName4' size='40'
+                     value='4,HB Glossary,Fo Guang Shan Glossary of Humnastic Buddhism,https://foguangpedia.org/the-glossary-of-humanistic-buddhism/,Fo Guang Shan,Copyright Fo Guang Shan,1000001'
+                     checked='true'
+                     disabled='true'/>
+              <label for='sourceName4'
+                     >Fo Guang Shan Glossary of Humnastic Buddhism</label>
+            </fieldset>
+            <fieldset class='source-form-element'>
+              <input type='hidden' name='sourceURL4'
+                     id='sourceURL4' size='40'
+                     value='fgs_mwe.json'
+                     readonly='true'/>
+            </fieldset>
+          </form>
+        </div>
+      </details>
+    </div>
+    <script defer src='main.dart.js'></script>
+  </body>
+</html>

@@ -31,6 +31,7 @@ Future<App?> initApp() async {
     if (jsonConfigString.isNotEmpty) {
       Map configData = json.decode(jsonConfigString) as Map;
       appConfig = AppConfig.fromJson(configData);
+      print('initApp, contextMenuText: ${appConfig?.contextMenuText}');
     }
 
     var sources = appConfig != null ? appConfig!.sources : getDefaultSources();
@@ -97,8 +98,18 @@ void contextMenuSetup() {
   print('contextMenuSetup: exit');
 }
 
-void setUpApp(var details) {
+void setUpApp(var details) async {
   print('CNotes: setUpApp enter');
+  try {
+    String jsonConfigString = await loadFromExt('config.json');
+    if (jsonConfigString.isNotEmpty) {
+      Map configData = json.decode(jsonConfigString) as Map;
+      appConfig = AppConfig.fromJson(configData);
+      print('setUpApp, contextMenuText: ${appConfig?.contextMenuText}');
+    }
+  } catch (e) {
+    print('Unable to listen for Chrome service worker install events: $e');
+  }
   var contextMenuText = appConfig != null
       ? appConfig!.contextMenuText
       : 'Lookup with Chinese Notes ...';

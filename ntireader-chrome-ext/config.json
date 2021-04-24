@@ -1,0 +1,34 @@
+{
+  "contextMenuText": "Lookup with NTI Reader ...",
+  "sources": [{
+    "sourceId": 1,
+    "url": "ntireader_words.json",
+    "abbreviation": "NTI Reader",
+    "title": "NTI Reader Chinese-English Buddhist Dictionary",
+    "citation": "https://github.com/alexamies/chinesenotes.com",
+    "author": "Alex Amies",
+    "license": "Creative Commons Attribution-Share Alike 3.0",
+    "startHeadwords": 2
+  },
+  {
+    "sourceId": 2,
+    "url": "buddhist_named_entities.json",
+    "abbreviation": "Buddhist named entities",
+    "title": "NTI Reader Buddhist named entities",
+    "citation": "https://github.com/alexamies/chinesenotes.com",
+    "author": "Alex Amies",
+    "license": "Creative Commons Attribution-Share Alike 3.0",
+    "startHeadwords": 7000002
+  },
+  {
+    "sourceId": 3,
+    "url": "fgs_mwe.json",
+    "abbreviation": "HB Glossary",
+    "title": "Fo Guang Shan Glossary of Humnastic Buddhism",
+    "citation": "https://github.com/alexamies/chinesenotes.com",
+    "author": "Fo Guang Shan",
+    "license": "Creative Commons Attribution-Share Alike 3.0",
+    "startHeadwords": 1000001
+  }
+  ]
+}
