@@ -26,3 +26,7 @@ $DART_HOME/bin/dart2js --csp -o chrome-ext/main.dart.js web/main.dart
 
 In developmenet deploy to the browser by loading this directory as a Chrome
 extension in development mode.
+
+# Build the Chrome Extensions
+
+Use the scripts in the `bin` directory to build the Chrome extensions.

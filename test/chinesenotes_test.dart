@@ -5,6 +5,8 @@ import 'package:chinesenotes/chinesenotes.dart';
 const jsonString = """
 [{"s":"邃古","t":"","p":"suìgǔ","e": "remote antiquity","g":"noun","n":"(CC-CEDICT '邃古'; Guoyu '邃古')","h":"2"},
 {"s":"围","t":"圍","p":"wéi","e": "to surround; to encircle; to corral","g":"verb","n":"(Unihan '圍')","h":"3"},
+{"s":"欧洲","t":"歐洲","p":"Ōuzhōu","e": "Europe","g":"proper noun","n":"Short form is 欧 (SDC 58; XHZD, p. 700)","h":"261"},
+{"s":"欧","t":"歐","p":"ōu","e": "Europe","g":"proper noun","n":"Abbreviation for 欧洲 (Guoyu '歐' n 1)","h":"3681"},
 {"s":"玫瑰","t":"","p":"méiguī","e":"rose","g":"noun", "n":"Scientific name: Rosa rugosa (CC-CEDICT '玫瑰'; Guoyu '玫瑰' 1; Wikipedia '玫瑰')","h":"3492"},
 {"s":"五蕴","t":"五蘊","p":"wǔ yùn","e":"five aggregates","g":"phrase", "n":"Sanskrit equivalent: pañcaskandha, Pāli: pañcakhandhā, Japanese: goun; the five skandhas are form 色, sensation 受, perception 想, volition 行, and consciousness 识 (FGDB '五蘊'; DJBT 'goun'; Tzu Chuang 2012; Nyanatiloka Thera 1980, 'khandha')","h":"5049"}]
 """;
@@ -123,9 +125,8 @@ void main() {
     var sources = DictionarySources(<int, DictionarySource>{1: cnSource});
     var loader = TestDictionaryLoader();
     var forwardIndex = await loader.load();
-    var reverseIndex = buildReverseIndex(forwardIndex);
     var hwIDIndex = headwordsFromJson(jsonString, cnSource);
-    var app = App(forwardIndex, sources, reverseIndex, hwIDIndex);
+    var app = buildApp([forwardIndex], [hwIDIndex], sources);
     const query = '你好';
     const pinyin = 'níhǎo';
     var result = app.lookup(query);
@@ -144,20 +145,35 @@ void main() {
     var sources = DictionarySources(<int, DictionarySource>{1: cnSource});
     var loader = TestDictionaryLoader();
     var forwardIndex = loader.load();
-    var reverseIndex = buildReverseIndex(forwardIndex);
     var hwIDIndex = headwordsFromJson('[]', cnSource);
-    var app = App(forwardIndex, sources, reverseIndex, hwIDIndex);
+    var app = buildApp([forwardIndex], [hwIDIndex], sources);
     const query = 'hello';
     const chinese = '你好';
     const pinyin = 'níhǎo';
     var result = app.lookup(query);
+    expect(result.terms.length, equals(1));
+    var term = result.terms.first;
+    expect(term.query, equals(query));
+    expect(term.senses.senses.length, equals(1));
+    for (var sense in term.senses.senses) {
+      expect(sense.simplified, equals(chinese));
+      expect(sense.pinyin, equals(pinyin));
+    }
+  });
+  test('App.lookup works with mixed case', () async {
+    var sources = DictionarySources(<int, DictionarySource>{1: cnSource});
+    var forwardIndex = dictFromJson(jsonString, cnSource);
+    var hwIDIndex = headwordsFromJson(jsonString, cnSource);
+    var app = buildApp([forwardIndex], [hwIDIndex], sources);
+    const query = 'Europe';
+    var result = app.lookup(query);
     //expect(result.terms.length, equals(1));
     for (var term in result.terms) {
       expect(term.query, equals(query));
-      expect(term.senses.senses.length, equals(1));
+      expect(term.senses.length, equals(2));
       for (var sense in term.senses.senses) {
-        expect(sense.simplified, equals(chinese));
-        expect(sense.pinyin, equals(pinyin));
+        var gotOne = sense.simplified == '欧洲' || sense.simplified == '欧';
+        expect(gotOne, equals(true));
       }
     }
   });
@@ -166,9 +182,8 @@ void main() {
     var sources =
         DictionarySources(<int, DictionarySource>{sourceId: cnSource});
     var forwardIndex = dictFromJson(jsonString, cnSource);
-    var reverseIndex = buildReverseIndex(forwardIndex);
     var hwIDIndex = headwordsFromJson(jsonString, cnSource);
-    var app = App(forwardIndex, sources, reverseIndex, hwIDIndex);
+    var app = buildApp([forwardIndex], [hwIDIndex], sources);
     const query = 'encircle';
     const chinese = '围';
     var result = app.lookup(query);
@@ -186,9 +201,8 @@ void main() {
   test('App.lookup can find a word from an equivalent in the notes', () {
     var sources = DictionarySources(<int, DictionarySource>{1: cnSource});
     var forwardIndex = dictFromJson(jsonString, cnSource);
-    var reverseIndex = buildReverseIndex(forwardIndex);
     var hwIDIndex = headwordsFromJson(jsonString, cnSource);
-    var app = App(forwardIndex, sources, reverseIndex, hwIDIndex);
+    var app = buildApp([forwardIndex], [hwIDIndex], sources);
     const query = 'Rosa rugosa';
     const simplified = '玫瑰';
     var result = app.lookup(query);
@@ -318,5 +332,15 @@ void main() {
       senseList.length,
       senses.length,
     );
+  });
+  test('flattenPinyin with a string with no accents', () {
+    const String nihao = 'nihao';
+    var flat = flattenPinyin(nihao);
+    expect(flat, equals(nihao));
+  });
+  test('flattenPinyin with an accents', () {
+    const String ouzhou = 'Ōuzhōu';
+    var flat = flattenPinyin(ouzhou);
+    expect(flat, equals('ouzhou'));
   });
 }

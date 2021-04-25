@@ -31,7 +31,6 @@ Future<App?> initApp() async {
     if (jsonConfigString.isNotEmpty) {
       Map configData = json.decode(jsonConfigString) as Map;
       appConfig = AppConfig.fromJson(configData);
-      print('initApp, contextMenuText: ${appConfig?.contextMenuText}');
     }
 
     var sources = appConfig != null ? appConfig!.sources : getDefaultSources();
@@ -49,13 +48,10 @@ Future<App?> initApp() async {
       }
     }
 
-    var mergedFwdIndex = mergeDictionaries(forwardIndexes);
-    var mergedHwIdIndex = mergeHWIDIndexes(hwIDIndexes);
-    var reverseIndex = buildReverseIndex(mergedFwdIndex);
-    var app = App(mergedFwdIndex, sources, reverseIndex, mergedHwIdIndex);
+    var app = buildApp(forwardIndexes, hwIDIndexes, sources);
     sw.stop();
     print('Dictionary loaded in ${sw.elapsedMilliseconds} ms with '
-        '${mergedFwdIndex.entries.length} entries');
+        '${app.hwIDIndex.entries.length} entries');
     return app;
   } catch (e) {
     print('Unable to load dictionary, error: $e');
@@ -105,10 +101,9 @@ void setUpApp(var details) async {
     if (jsonConfigString.isNotEmpty) {
       Map configData = json.decode(jsonConfigString) as Map;
       appConfig = AppConfig.fromJson(configData);
-      print('setUpApp, contextMenuText: ${appConfig?.contextMenuText}');
     }
   } catch (e) {
-    print('Unable to listen for Chrome service worker install events: $e');
+    print('setUpApp: Unable to load config: $e');
   }
   var contextMenuText = appConfig != null
       ? appConfig!.contextMenuText
@@ -137,7 +132,7 @@ void onInstalled() async {
   print('CNotes, onInstalled exit');
 }
 
-void main() async {
+void main() {
   print('CNotes: running service worker');
   onInstalled();
   contextMenuSetup();

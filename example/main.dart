@@ -41,10 +41,9 @@ void main() async {
       1);
   var sources = DictionarySources(<int, DictionarySource>{1: cnSource});
   var jsonString = await download(cnSource.url);
-  var forrwardIndex = dictFromJson(jsonString, cnSource);
-  var reverseIndex = buildReverseIndex(forrwardIndex);
+  var forwardIndex = dictFromJson(jsonString, cnSource);
   var hwIDIndex = headwordsFromJson(jsonString, cnSource);
-  var app = App(forrwardIndex, sources, reverseIndex, hwIDIndex);
+  var app = buildApp([forwardIndex], [hwIDIndex], sources);
   const hw = '你好';
   print('Looking up $hw');
   var results = app.lookup(hw);

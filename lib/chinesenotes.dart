@@ -17,6 +17,48 @@ const notesPatterns = [
   r'Tibetan: (.+?)(\(|,|;)',
   r'or: (.+?)(\(|,|;)'
 ];
+const pinyin2Ascii = {
+  'ā': 'a',
+  'á': 'a',
+  'ǎ': 'a',
+  'à': 'a',
+  'Ā': 'a',
+  'Á': 'a',
+  'Ǎ': 'a',
+  'À': 'a',
+  'ē': 'e',
+  'é': 'e',
+  'ě': 'e',
+  'è': 'e',
+  'Ē': 'e',
+  'É': 'e',
+  'Ě': 'e',
+  'È': 'e',
+  'ī': 'i',
+  'í': 'i',
+  'ǐ': 'i',
+  'ì': 'i',
+  'Ī': 'i',
+  'Í': 'i',
+  'Ǐ': 'i',
+  'Ì': 'i',
+  'ō': 'o',
+  'ó': 'o',
+  'ǒ': 'o',
+  'ò': 'o',
+  'Ō': 'o',
+  'Ó': 'o',
+  'Ǒ': 'o',
+  'Ò': 'o',
+  'ū': 'u',
+  'ú': 'u',
+  'ǔ': 'u',
+  'ù': 'u',
+  'Ū': 'u',
+  'Ú': 'u',
+  'Ǔ': 'u',
+  'Ù': 'u'
+};
 
 /// App is a top level class that holds state of resources.
 class App {
@@ -24,14 +66,43 @@ class App {
   final DictionarySources sources;
   final DictionaryReverseIndex reverseIndex;
   final HeadwordIDIndex hwIDIndex;
+  final PinyinIndex pinyinIndex;
 
-  App(this.forrwardIndex, this.sources, this.reverseIndex, this.hwIDIndex);
+  App(this.forrwardIndex, this.sources, this.reverseIndex, this.hwIDIndex,
+      this.pinyinIndex);
 
   QueryResults lookup(String query) {
     var entries = forrwardIndex.lookup(query);
-    var queryLower = query.toLowerCase();
-    var senses = reverseIndex.lookup(queryLower);
-    var term = Term(query, entries, senses);
+    List<DictionaryEntries> entryList = [];
+    if (!entries.entries.isEmpty) {
+      entryList.add(entries);
+    } else {
+      // did not find anything for Chinese lookup, try pinyin
+      var flat = flattenPinyin(query);
+      var pEntries = pinyinIndex.lookup(flat);
+      print('pinyin lookup found ${pEntries.entries.length} entries');
+      for (var pEntry in pEntries.entries) {
+        var e = DictionaryEntries(pEntry.headword, [pEntry]);
+        entryList.add(e);
+      }
+    }
+    Senses senses = Senses([]);
+    List<Term> terms = [];
+    print(
+        'entries.entries.isEmpty ${entries.entries.isEmpty}, entryList.isEmpty ${entryList.isEmpty}');
+    if (entries.entries.isEmpty && entryList.isEmpty) {
+      // did not find anything for forward lookup, try reverse lookup
+      print('did not find anything for forward lookup, try reverse lookup');
+      var queryLower = query.toLowerCase();
+      senses = reverseIndex.lookup(queryLower);
+      var term = Term(query, entries, senses);
+      terms.add(term);
+    } else {
+      for (var e in entryList) {
+        print('add terms from forward and pinyin lookup');
+        terms.add(Term(query, e, Senses([])));
+      }
+    }
     Map<int, String> sourceAbbrev = {};
     for (var sense in senses.senses) {
       var entry = hwIDIndex.entries[sense.hwid];
@@ -44,13 +115,23 @@ class App {
       var source = sources.lookup(entry.sourceId);
       sourceAbbrev[entry.headwordId] = source.abbreviation;
     }
-    return QueryResults(query, [term], sourceAbbrev);
+    return QueryResults(query, terms, sourceAbbrev);
   }
 
   DictionarySource? getSource(int hwID) {
     var sourceId = hwIDIndex.entries[hwID]?.sourceId;
     return sources.lookup(sourceId!);
   }
+}
+
+App buildApp(List<DictionaryCollectionIndex> forwardIndexes,
+    List<HeadwordIDIndex> hwIDIndexes, DictionarySources sources) {
+  var mergedFwdIndex = mergeDictionaries(forwardIndexes);
+  var mergedHwIdIndex = mergeHWIDIndexes(hwIDIndexes);
+  var reverseIndex = buildReverseIndex(mergedFwdIndex);
+  var pinyinIndex = buildPinyinIndex(mergedHwIdIndex);
+  return App(
+      mergedFwdIndex, sources, reverseIndex, mergedHwIdIndex, pinyinIndex);
 }
 
 /// Builds a reverse index from the given forward index.
@@ -67,12 +148,13 @@ DictionaryReverseIndex buildReverseIndex(
   Map<String, Senses> revIndex = {};
   void addSenses(List<String> equivalents, Sense sense) {
     for (var equiv in equivalents) {
-      var ent = revIndex[equiv];
-      if (ent == null) {
-        var equivLower = equiv.toLowerCase();
+      var equivLower = equiv.toLowerCase();
+      var s = revIndex[equivLower];
+      if (s == null) {
         revIndex[equivLower] = Senses([sense]);
-      } else if (!ent.senses.contains(sense)) {
-        ent.senses.add(sense);
+      } else if (!s.senses.contains(sense)) {
+        s.senses.add(sense);
+        revIndex[equivLower] = s;
       }
     }
   }
@@ -215,6 +297,11 @@ class DictionaryEntry {
     return _senses;
   }
 
+  @override
+  bool operator ==(dynamic other) {
+    return other is DictionaryEntry && (other.headwordId == headwordId);
+  }
+
   /// A rollup of simplified, traditional, and variant forms of the headword
   ///
   /// The headword may have simplified, traditional, and variant forms. For
@@ -251,7 +338,7 @@ class DictionaryEntry {
   }
 }
 
-/// DictionaryReverseIndex indexes the dictionary by equivalent.
+/// DictionaryReverseIndex indexes the dictionary by English equivalent.
 ///
 /// The entries are indexed by Senses, which is part of a Chinese headword.
 class DictionaryReverseIndex {
@@ -558,6 +645,64 @@ class NotesProcessor {
   }
 }
 
+String flattenPinyin(String pinyin) {
+  var flattened = pinyin;
+  for (var e in pinyin2Ascii.entries) {
+    flattened = flattened.replaceAll(e.key, e.value);
+  }
+  return flattened;
+}
+
+PinyinIndex buildPinyinIndex(HeadwordIDIndex hwIDIndex) {
+  Map<String, PinyinIndexEntry> entries = {};
+  for (var hw in hwIDIndex.entries.values) {
+    if (hw.pinyin.isEmpty) {
+      continue;
+    }
+    for (var pinyin in hw.pinyin) {
+      var pinyinFlat = flattenPinyin(pinyin);
+      var entry = entries[pinyinFlat];
+      if (entry == null) {
+        var newEntry = PinyinIndexEntry(pinyinFlat, {hw});
+        entries[pinyinFlat] = newEntry;
+        continue;
+      }
+      entry.entries.add(hw);
+    }
+  }
+  return PinyinIndex(entries);
+}
+
+/// PinyinIndex indexes the dictionary by equivalent.
+///
+/// The entries are indexed by Senses, which is part of a Chinese headword.
+class PinyinIndex {
+  final Map<String, PinyinIndexEntry> entries;
+
+  PinyinIndex(this.entries);
+
+  /// Null safe lookup
+  ///
+  /// Return: the senses or an empty list if there is no match found
+  PinyinIndexEntry lookup(String pinyin) {
+    var result = entries[pinyin];
+    if (result == null) {
+      return PinyinIndexEntry(pinyin, {});
+    }
+    return result;
+  }
+}
+
+/// PinyinIndex indexes the dictionary by flattened pinyin.
+///
+/// The diacritics are removed and capitals and lower cased.
+class PinyinIndexEntry {
+  final String pinyin;
+  final Set<DictionaryEntry> entries;
+
+  PinyinIndexEntry(this.pinyin, this.entries);
+}
+
 /// Contains the result of a lookup checking both forward and reverse indexes.
 class QueryResults {
   /// The query that lead to these results
@@ -662,7 +807,9 @@ class Sense {
   bool operator ==(dynamic other) {
     return other is Sense &&
         (((luid > 0) && (other.luid == luid) && (other.hwid == hwid)) ||
-            (((luid <= 0) && (other.english == english))));
+            (((luid <= 0) &&
+                (other.simplified == simplified) &&
+                (other.english == english))));
   }
 
   // Combines simplified and traditional if they differe, eg 围 (圍)

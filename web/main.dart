@@ -85,18 +85,14 @@ Future<App?> initApp(DictionarySources sources, Element statusDiv,
         errorDiv.text = 'Could not load dicitonary ${source.abbreviation}';
       }
     }
-
-    var mergedFwdIndex = mergeDictionaries(forwardIndexes);
-    var mergedHwIdIndex = mergeHWIDIndexes(hwIDIndexes);
-    var reverseIndex = buildReverseIndex(mergedFwdIndex);
-    var app = App(mergedFwdIndex, sources, reverseIndex, mergedHwIdIndex);
+    var app = buildApp(forwardIndexes, hwIDIndexes, sources);
     if (submitButton != null) {
       var multiLookupSubmit = submitButton as ButtonElement;
       multiLookupSubmit.disabled = false;
     }
     sw.stop();
     print('Dictionary loaded in ${sw.elapsedMilliseconds} ms with '
-        '${mergedFwdIndex.entries.length} entries');
+        '${app.hwIDIndex.entries.length} entries');
     statusDiv.text = 'Dictionary loaded';
     return app;
   } catch (e) {
