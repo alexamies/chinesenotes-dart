@@ -11,3 +11,4 @@ main.dart.js*
 doc/
 ntireader.json
 pubspec.lock
+tmp/

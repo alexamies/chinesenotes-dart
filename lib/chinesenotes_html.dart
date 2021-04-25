@@ -81,10 +81,12 @@ void displayLookup(QueryResults results, Element? cnOutput, Element? div,
           ul.children.add(li);
           var sourceAbbrev = results.sourceAbbrev[ent.headwordId];
           print('Source abbrev for headword ${ent.headwordId}: $sourceAbbrev');
-          var sourceDiv = DivElement();
-          sourceDiv.className = 'dict-entry-source';
-          sourceDiv.text = 'Source: ${sourceAbbrev}';
-          entryDiv.children.add(sourceDiv);
+          if (sourceAbbrev != null && sourceAbbrev.isNotEmpty) {
+            var sourceDiv = DivElement();
+            sourceDiv.className = 'dict-entry-source';
+            sourceDiv.text = 'Source: ${sourceAbbrev}';
+            entryDiv.children.add(sourceDiv);
+          }
         }
       } else if (term.senses.senses.length > 0) {
         var counttDiv = DivElement();

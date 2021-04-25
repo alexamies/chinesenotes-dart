@@ -1,5 +1,6 @@
 #! /usr/bin/bash
 echo 'Making the NTI Reader Chrome Plugin'
+VERSION=0.0.1
 DART_HOME=$HOME/development/flutter/bin/cache/dart-sdk
 NTI_READER_HOME=../buddhist-dictionary
 CNOTES_DART_HOME=$PWD
@@ -16,6 +17,6 @@ cp $NTI_READER_HOME/downloads/buddhist_named_entities.json ntireader-chrome-ext/
 cp $NTI_READER_HOME/downloads/translation_memory_buddhist.json ntireader-chrome-ext/.
 mv $NTI_READER_HOME/fgs_mwe.json ntireader-chrome-ext/.
 cd ntireader-chrome-ext
-zip ntireader-chrome-ext.zip *.js* *.json *.html *.css images/*
+zip ntireader-chrome-ext${VERSION}.zip *.js* *.json *.html *.css images/*
 cd ..
-mv ntireader-chrome-ext/ntireader-chrome-ext.zip archive/
+mv ntireader-chrome-ext/ntireader-chrome-ext${VERSION}.zip downloads/

@@ -13,3 +13,5 @@ transformers:
 - chrome
 - $dart2js:
     csp: true  
+dependencies: 
+  characters: ^1.1.0

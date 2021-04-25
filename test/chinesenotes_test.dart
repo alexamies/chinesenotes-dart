@@ -5,10 +5,13 @@ import 'package:chinesenotes/chinesenotes.dart';
 const jsonString = """
 [{"s":"邃古","t":"","p":"suìgǔ","e": "remote antiquity","g":"noun","n":"(CC-CEDICT '邃古'; Guoyu '邃古')","h":"2"},
 {"s":"围","t":"圍","p":"wéi","e": "to surround; to encircle; to corral","g":"verb","n":"(Unihan '圍')","h":"3"},
-{"s":"欧洲","t":"歐洲","p":"Ōuzhōu","e": "Europe","g":"proper noun","n":"Short form is 欧 (SDC 58; XHZD, p. 700)","h":"261"},
+{"s":"欧洲","t":"歐洲","p":"ōuzhōu","e": "Europe","g":"proper noun","n":"Short form is 欧 (SDC 58; XHZD, p. 700)","h":"261"},
 {"s":"欧","t":"歐","p":"ōu","e": "Europe","g":"proper noun","n":"Abbreviation for 欧洲 (Guoyu '歐' n 1)","h":"3681"},
 {"s":"玫瑰","t":"","p":"méiguī","e":"rose","g":"noun", "n":"Scientific name: Rosa rugosa (CC-CEDICT '玫瑰'; Guoyu '玫瑰' 1; Wikipedia '玫瑰')","h":"3492"},
-{"s":"五蕴","t":"五蘊","p":"wǔ yùn","e":"five aggregates","g":"phrase", "n":"Sanskrit equivalent: pañcaskandha, Pāli: pañcakhandhā, Japanese: goun; the five skandhas are form 色, sensation 受, perception 想, volition 行, and consciousness 识 (FGDB '五蘊'; DJBT 'goun'; Tzu Chuang 2012; Nyanatiloka Thera 1980, 'khandha')","h":"5049"}]
+{"s":"五蕴","t":"五蘊","p":"wǔ yùn","e":"five aggregates","g":"phrase", "n":"Sanskrit equivalent: pañcaskandha, Pāli: pañcakhandhā; the five ...","h":"5049"},
+{"s":"恐龙","t":"恐龍","p":"kǒnglóng","e":"dinosaur","g":"noun", "n":"Measure word: 头 (CC-CEDICT '恐龍')","h":"75439"},
+{"s":"恐","t":"","p":"kǒng","e":"fear","g":"verb", "n":"In the sense of 害怕","h":"5084"}
+]
 """;
 
 const jsonString2 = """
@@ -342,5 +345,57 @@ void main() {
     const String ouzhou = 'Ōuzhōu';
     var flat = flattenPinyin(ouzhou);
     expect(flat, equals('ouzhou'));
+  });
+  test('tokenize with no dictionary entries', () {
+    var loader = TestDictionaryLoader();
+    var forwardIndex = loader.load();
+    var tokenizer = DictTokenizer(forwardIndex);
+    const String text = 'hello';
+    var tokens = tokenizer.tokenize(text);
+    expect(tokens.length, equals(text.length));
+    expect(tokens.first.token, equals('h'));
+  });
+  test('tokenize a single Chinese character', () {
+    var forwardIndex = dictFromJson(jsonString, cnSource);
+    var tokenizer = DictTokenizer(forwardIndex);
+    const String text = '围';
+    var tokens = tokenizer.tokenize(text);
+    expect(tokens.length, equals(text.length));
+    expect(tokens.first.token, equals('围'));
+    expect(tokens.first.entries.length, equals(1));
+    expect(tokens.first.entries.first.pinyinRollup, equals('wéi'));
+  });
+  test('tokenize a zero-length string', () {
+    var forwardIndex = dictFromJson(jsonString, cnSource);
+    var tokenizer = DictTokenizer(forwardIndex);
+    const String text = '';
+    var tokens = tokenizer.tokenize(text);
+    expect(tokens.length, equals(text.length));
+  });
+  test('tokenize a two-character Chinese word', () {
+    var forwardIndex = dictFromJson(jsonString, cnSource);
+    var tokenizer = DictTokenizer(forwardIndex);
+    const String text = '歐洲';
+    var tokens = tokenizer.tokenize(text);
+    expect(tokens.length, equals(1));
+    expect(tokens.first.token, equals('歐洲'));
+    expect(tokens.first.entries.length, equals(1));
+    expect(tokens.first.entries.first.pinyinRollup, equals('ōuzhōu'));
+  });
+  test('tokenize method picks the longest terms', () {
+    var forwardIndex = dictFromJson(jsonString, cnSource);
+    var tokenizer = DictTokenizer(forwardIndex);
+    const String text = '恐龍';
+    var tokens = tokenizer.tokenize(text);
+    expect(tokens.length, equals(1));
+    expect(tokens.first.token, equals('恐龍'));
+    expect(tokens.first.entries.length, equals(1));
+    expect(tokens.first.entries.first.pinyinRollup, equals('kǒnglóng'));
+  });
+  test('isCJKChar correctly identifies a non-Chinese character', () {
+    expect(isCJKChar('ō'), equals(false));
+  });
+  test('isCJKChar correctly identifies a Chinese character', () {
+    expect(isCJKChar('歐'), equals(true));
   });
 }

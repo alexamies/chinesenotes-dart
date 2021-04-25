@@ -1,7 +1,7 @@
 
 *.dart.js*
 *.zip
-chinesenotes_words.json
-modern_named_entities.json
-translation_memory_literary.json
-translation_memory_modern.json
+buddhist_named_entities.json
+fgs_mwe.json
+ntireader_words.json
+translation_memory_buddhist.json
