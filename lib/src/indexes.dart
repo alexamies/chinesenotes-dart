@@ -74,6 +74,8 @@ class DictionaryCollectionIndex {
 /// Indended for the Chinese Notes and NTI Reader native dictionary structure
 DictionaryCollectionIndex dictFromJson(
     String jsonString, DictionarySource source) {
+  var sw = Stopwatch();
+  sw.start();
   var i = source.startHeadwords;
   List data = json.decode(jsonString) as List;
   Map<String, DictionaryEntries> entryMap = {};
@@ -112,6 +114,9 @@ DictionaryCollectionIndex dictFromJson(
       rethrow;
     }
   }
+  sw.stop();
+  print('dictFromJson completed in ${sw.elapsedMilliseconds} ms with '
+      '${entryMap.length} entries for ${source.abbreviation}');
   return DictionaryCollectionIndex(entryMap);
 }
 
@@ -204,6 +209,8 @@ String flattenPinyin(String pinyin) {
 }
 
 PinyinIndex buildPinyinIndex(HeadwordIDIndex hwIDIndex) {
+  var sw = Stopwatch();
+  sw.start();
   Map<String, PinyinIndexEntry> entries = {};
   for (var hw in hwIDIndex.entries.values) {
     if (hw.pinyin.isEmpty) {
@@ -220,6 +227,8 @@ PinyinIndex buildPinyinIndex(HeadwordIDIndex hwIDIndex) {
       entry.entries.add(hw);
     }
   }
+  print('buildPinyinIndex completed in ${sw.elapsedMilliseconds} ms with '
+      '${entries.length} entries');
   return PinyinIndex(entries);
 }
 

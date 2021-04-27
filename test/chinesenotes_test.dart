@@ -129,7 +129,8 @@ void main() {
     var loader = TestDictionaryLoader();
     var forwardIndex = await loader.load();
     var hwIDIndex = headwordsFromJson(jsonString, cnSource);
-    var app = buildApp([forwardIndex], [hwIDIndex], sources);
+    var app = App();
+    app.buildApp([forwardIndex], [hwIDIndex], sources);
     const query = '你好';
     const pinyin = 'níhǎo';
     var result = app.lookup(query);
@@ -149,7 +150,8 @@ void main() {
     var loader = TestDictionaryLoader();
     var forwardIndex = loader.load();
     var hwIDIndex = headwordsFromJson('[]', cnSource);
-    var app = buildApp([forwardIndex], [hwIDIndex], sources);
+    var app = App();
+    app.buildApp([forwardIndex], [hwIDIndex], sources);
     const query = 'hello';
     const chinese = '你好';
     const pinyin = 'níhǎo';
@@ -167,7 +169,8 @@ void main() {
     var sources = DictionarySources(<int, DictionarySource>{1: cnSource});
     var forwardIndex = dictFromJson(jsonString, cnSource);
     var hwIDIndex = headwordsFromJson(jsonString, cnSource);
-    var app = buildApp([forwardIndex], [hwIDIndex], sources);
+    var app = App();
+    app.buildApp([forwardIndex], [hwIDIndex], sources);
     const query = 'Europe';
     var result = app.lookup(query);
     //expect(result.terms.length, equals(1));
@@ -186,7 +189,8 @@ void main() {
         DictionarySources(<int, DictionarySource>{sourceId: cnSource});
     var forwardIndex = dictFromJson(jsonString, cnSource);
     var hwIDIndex = headwordsFromJson(jsonString, cnSource);
-    var app = buildApp([forwardIndex], [hwIDIndex], sources);
+    var app = App();
+    app.buildApp([forwardIndex], [hwIDIndex], sources);
     const query = 'encircle';
     const chinese = '围';
     var result = app.lookup(query);
@@ -205,7 +209,8 @@ void main() {
     var sources = DictionarySources(<int, DictionarySource>{1: cnSource});
     var forwardIndex = dictFromJson(jsonString, cnSource);
     var hwIDIndex = headwordsFromJson(jsonString, cnSource);
-    var app = buildApp([forwardIndex], [hwIDIndex], sources);
+    var app = App();
+    app.buildApp([forwardIndex], [hwIDIndex], sources);
     const query = 'Rosa rugosa';
     const simplified = '玫瑰';
     var result = app.lookup(query);

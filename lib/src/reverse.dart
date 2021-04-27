@@ -22,6 +22,8 @@ const stopWords = ['a ', 'an ', 'to ', 'the '];
 ///   np - to extract secondary equivalents contained in notes
 DictionaryReverseIndex buildReverseIndex(
     DictionaryCollectionIndex forrwardIndex) {
+  var sw = Stopwatch();
+  sw.start();
   var np = NotesProcessor(notesPatterns);
   Map<String, Senses> revIndex = {};
   void addSenses(List<String> equivalents, Sense sense) {
@@ -62,6 +64,8 @@ DictionaryReverseIndex buildReverseIndex(
       }
     }
   }
+  print('buildReverseIndex completed in ${sw.elapsedMilliseconds} ms with '
+      '${revIndex.length} entries');
 
   return DictionaryReverseIndex(revIndex);
 }

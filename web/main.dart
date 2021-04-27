@@ -85,15 +85,17 @@ Future<App?> initApp(DictionarySources sources, Element statusDiv,
         errorDiv.text = 'Could not load dicitonary ${source.abbreviation}';
       }
     }
-    var app = buildApp(forwardIndexes, hwIDIndexes, sources);
+    statusDiv.text = 'Dictionary headwords loaded';
+    var app = App();
+    app.buildApp(forwardIndexes, hwIDIndexes, sources);
     if (submitButton != null) {
       var multiLookupSubmit = submitButton as ButtonElement;
       multiLookupSubmit.disabled = false;
     }
     sw.stop();
     print('Dictionary loaded in ${sw.elapsedMilliseconds} ms with '
-        '${app.hwIDIndex.entries.length} entries');
-    statusDiv.text = 'Dictionary loaded';
+        '${app.hwIDIndex?.entries.length} entries');
+    statusDiv.text = 'Dictionary indexing complete';
     return app;
   } catch (e) {
     errorDiv.text = 'Unable to load dictionary';

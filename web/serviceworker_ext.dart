@@ -8,7 +8,7 @@ import 'dart:js';
 import 'package:chinesenotes/chinesenotes.dart';
 import 'package:chinesenotes/chinesenotes_html.dart';
 
-App? app;
+var app = App();
 AppConfig? appConfig;
 
 Future<String> loadFromExt(String filename) async {
@@ -22,7 +22,7 @@ Future<String> loadFromExt(String filename) async {
   }
 }
 
-Future<App?> initApp() async {
+void initApp() async {
   var sw = Stopwatch();
   sw.start();
   print('CNotes, initApp enter');
@@ -48,11 +48,10 @@ Future<App?> initApp() async {
       }
     }
 
-    var app = buildApp(forwardIndexes, hwIDIndexes, sources);
+    app.buildApp(forwardIndexes, hwIDIndexes, sources);
     sw.stop();
     print('Dictionary loaded in ${sw.elapsedMilliseconds} ms with '
-        '${app.hwIDIndex.entries.length} entries');
-    return app;
+        '${app.hwIDIndex?.entries.length} entries');
   } catch (e) {
     print('Unable to load dictionary, error: $e');
   }
@@ -63,8 +62,9 @@ void onMenuEvent(JsObject info, var tabsNotUsed) {
   print('onMenuEvent enter');
   var activeObj = JsObject.jsify({'active': true, 'currentWindow': true});
   var query = info['selectionText'];
-  QueryResults results =
-      (app != null) ? app!.lookup(query) : QueryResults(query, [], {});
+  QueryResults results = (app != null)
+      ? app.lookup(query)
+      : QueryResults(query, [], {}, 'Dictionary is not loaded');
   var res = results.toJson();
   print('onMenuEvent got ${results.terms.length} terms');
   var msg = JsObject.jsify(res);
@@ -83,19 +83,14 @@ void onMenuEvent(JsObject info, var tabsNotUsed) {
 }
 
 void contextMenuSetup() {
-  print('contextMenuSetup: enter');
   var jsOnClicked = context['chrome']['contextMenus']['onClicked'];
   JsObject onClicked = (jsOnClicked is JsObject
       ? jsOnClicked
       : new JsObject.fromBrowserObject(jsOnClicked));
-  print('contextMenuSetup: onClicked ${onClicked.runtimeType}'
-      ', hasProperty ${onClicked.hasProperty('addListener')}');
   onClicked.callMethod('addListener', [onMenuEvent]);
-  print('contextMenuSetup: exit');
 }
 
 void setUpApp(var details) async {
-  print('CNotes: setUpApp enter');
   try {
     String jsonConfigString = await loadFromExt('config.json');
     if (jsonConfigString.isNotEmpty) {
@@ -117,7 +112,6 @@ void setUpApp(var details) async {
 }
 
 void onInstalled() async {
-  print('CNotes, onInstalled enter');
   try {
     var jsOnInstalled = context['chrome']['runtime']['onInstalled'];
     JsObject dartOnInstalled = (jsOnInstalled is JsObject
@@ -125,11 +119,10 @@ void onInstalled() async {
         : new JsObject.fromBrowserObject(jsOnInstalled));
     dartOnInstalled.callMethod('addListener', [setUpApp]);
 
-    app = await initApp();
+    initApp();
   } catch (e) {
     print('Unable to listen for Chrome service worker install events: $e');
   }
-  print('CNotes, onInstalled exit');
 }
 
 void main() {

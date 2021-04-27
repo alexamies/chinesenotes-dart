@@ -1,7 +1,7 @@
 {
-  "name": "NTI Reader Chinese-English Buddhist Dictionary",
+  "name": "NTI Reader Buddhist Dictionary",
   "short_name": "NTI Reader",
-  "description": "The dictionary can be used to lookup Chinese words by simplified or traditional Chinese or reverse lookup from multi-lingual equivalent.",
+  "description": "The Chinese-English Buddhist dictionary can be used to find terms with forward and multi-language lookup.",
   "author": "Alex Amies",
   "version": "0.0.1",
   "manifest_version": 3,

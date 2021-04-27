@@ -4,91 +4,113 @@ import 'package:chinesenotes/chinesenotes.dart';
 
 /// App is a top level class that holds state of resources.
 class App {
-  final DictionaryCollectionIndex forrwardIndex;
-  final DictionarySources sources;
-  final DictionaryReverseIndex reverseIndex;
-  final HeadwordIDIndex hwIDIndex;
-  final PinyinIndex pinyinIndex;
+  DictionaryCollectionIndex? forwardIndex;
+  DictionarySources? sources;
+  DictionaryReverseIndex? reverseIndex;
+  HeadwordIDIndex? hwIDIndex;
+  PinyinIndex? pinyinIndex;
 
-  App(this.forrwardIndex, this.sources, this.reverseIndex, this.hwIDIndex,
-      this.pinyinIndex);
+  App();
+
+  buildApp(List<DictionaryCollectionIndex> forwardIndexes,
+      List<HeadwordIDIndex> hwIDIndexes, DictionarySources sources) async {
+    forwardIndex = mergeDictionaries(forwardIndexes);
+    this.sources = sources;
+    hwIDIndex = mergeHWIDIndexes(hwIDIndexes);
+    reverseIndex = buildReverseIndex(forwardIndex!);
+    pinyinIndex = buildPinyinIndex(hwIDIndex!);
+  }
 
   QueryResults lookup(String query) {
+    var msg = '';
     List<Term> terms = [];
     if (isCJKChar(query)) {
-      var tokenizer = DictTokenizer(forrwardIndex);
-      var tokens = tokenizer.tokenize(query);
-      for (var token in tokens) {
-        terms.add(Term(token.token,
-            DictionaryEntries(token.token, token.entries), Senses([])));
+      if (forwardIndex == null) {
+        msg = '- Headword index not loaded';
+      } else {
+        var tokenizer = DictTokenizer(forwardIndex!);
+        var tokens = tokenizer.tokenize(query);
+        for (var token in tokens) {
+          terms.add(Term(token.token,
+              DictionaryEntries(token.token, token.entries), Senses([])));
+        }
       }
     } else {
       // did not find anything for Chinese lookup, try pinyin
-      var flat = flattenPinyin(query);
-      var pEntries = pinyinIndex.lookup(flat);
-      for (var pEntry in pEntries.entries) {
-        var e = DictionaryEntries(pEntry.headword, [pEntry]);
-        terms.add(Term(query, e, Senses([])));
+      if (pinyinIndex == null) {
+        msg = '- Pinyin index not loaded';
+      } else {
+        var flat = flattenPinyin(query);
+        var pEntries = pinyinIndex!.lookup(flat);
+        for (var pEntry in pEntries.entries) {
+          var e = DictionaryEntries(pEntry.headword, [pEntry]);
+          terms.add(Term(query, e, Senses([])));
+        }
       }
     }
     Senses senses = Senses([]);
     if (terms.isEmpty) {
       // did not find anything for forward lookup, try reverse lookup
-      var queryLower = query.toLowerCase();
-      senses = reverseIndex.lookup(queryLower);
-      var term = Term(query, DictionaryEntries('', []), senses);
-      terms.add(term);
+      if (reverseIndex == null) {
+        msg = '- Reverse index is not loaded';
+      } else {
+        var queryLower = query.toLowerCase();
+        senses = reverseIndex!.lookup(queryLower);
+        var term = Term(query, DictionaryEntries('', []), senses);
+        terms.add(term);
+      }
     }
     Map<int, String> sourceAbbrev = {};
+    if (hwIDIndex == null) {
+      msg = '- Headword id\'s are not loaded';
+      return QueryResults(query, terms, sourceAbbrev, msg);
+    }
+    if (sources == null) {
+      msg = '- Source list is not loaded';
+      return QueryResults(query, terms, sourceAbbrev, msg);
+    }
     for (var sense in senses.senses) {
-      var entry = hwIDIndex.entries[sense.hwid];
+      var entry = hwIDIndex!.entries[sense.hwid];
       if (entry != null) {
-        var source = sources.lookup(entry.sourceId);
+        var source = sources!.lookup(entry.sourceId);
         sourceAbbrev[sense.hwid] = source.abbreviation;
       }
     }
     for (var t in terms) {
       for (var entry in t.entries.entries) {
-        var source = sources.lookup(entry.sourceId);
+        var source = sources!.lookup(entry.sourceId);
         sourceAbbrev[entry.headwordId] = source.abbreviation;
       }
     }
-    return QueryResults(query, terms, sourceAbbrev);
+    return QueryResults(query, terms, sourceAbbrev, msg);
   }
 
   DictionarySource? getSource(int hwID) {
-    var sourceId = hwIDIndex.entries[hwID]?.sourceId;
-    return sources.lookup(sourceId!);
+    var sourceId = hwIDIndex?.entries[hwID]?.sourceId;
+    return sources?.lookup(sourceId!);
   }
-}
-
-App buildApp(List<DictionaryCollectionIndex> forwardIndexes,
-    List<HeadwordIDIndex> hwIDIndexes, DictionarySources sources) {
-  var mergedFwdIndex = mergeDictionaries(forwardIndexes);
-  var mergedHwIdIndex = mergeHWIDIndexes(hwIDIndexes);
-  var reverseIndex = buildReverseIndex(mergedFwdIndex);
-  var pinyinIndex = buildPinyinIndex(mergedHwIdIndex);
-  return App(
-      mergedFwdIndex, sources, reverseIndex, mergedHwIdIndex, pinyinIndex);
 }
 
 /// Contains the result of a lookup checking both forward and reverse indexes.
 class QueryResults {
   /// The query that lead to these results
-  String query;
+  final String query;
 
   /// The lookup results
-  List<Term> terms;
+  final List<Term> terms;
 
   /// A map from headword id to source abbreviation, for reverse lookup
-  Map<int, String> sourceAbbrev;
+  final Map<int, String> sourceAbbrev;
 
-  QueryResults(this.query, this.terms, this.sourceAbbrev);
+  final String msg;
+
+  QueryResults(this.query, this.terms, this.sourceAbbrev, this.msg);
 
   QueryResults.fromJson(var obj)
       : query = obj['query'],
         terms = [],
-        sourceAbbrev = {} {
+        sourceAbbrev = {},
+        msg = obj['msg'] {
     var termsObj = obj['terms'];
     if (!(termsObj is List)) {
       return;
@@ -128,7 +150,8 @@ class QueryResults {
     return {
       'query': query,
       'terms': termsObj,
-      'sourceAbbrev': abbrevObj.toString()
+      'sourceAbbrev': abbrevObj.toString(),
+      'msg': msg
     };
   }
 }
