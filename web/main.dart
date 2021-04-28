@@ -198,7 +198,7 @@ void main() async {
   var textField = querySelector('#multiLookupInput');
   var div = querySelector('#lookupResults');
 
-  void onMessageListener(msg, sender, sendResponse) {
+  void onMessageListener(msg, sender, sendResponse) async {
     if (msg == null) {
       print('onMessageListener msg is null');
     }
@@ -207,16 +207,16 @@ void main() async {
     }
     var query = msg['term'];
     print('onMessageListener, term: ${query} from $sender');
-    var results = app.lookup(query);
+    var results = await app.lookup(query);
     displayLookup(results, cnOutput, div, statusDiv, errorDiv, textField);
   }
 
-  void lookup(Event evt) {
+  void lookup(Event evt) async {
     var query = '';
     if (textField != null) {
       var tf = textField as TextInputElement;
       query = tf.value!.trim();
-      var results = app.lookup(query);
+      var results = await app.lookup(query);
       displayLookup(results, cnOutput, div, statusDiv, errorDiv, textField);
     }
     evt.preventDefault();

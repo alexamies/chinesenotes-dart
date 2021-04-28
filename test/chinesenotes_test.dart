@@ -133,7 +133,7 @@ void main() {
     app.buildApp([forwardIndex], [hwIDIndex], sources);
     const query = '你好';
     const pinyin = 'níhǎo';
-    var result = app.lookup(query);
+    var result = await app.lookup(query);
     expect(result.terms.length, equals(1));
     for (var term in result.terms) {
       expect(term.query, equals(query));
@@ -155,7 +155,7 @@ void main() {
     const query = 'hello';
     const chinese = '你好';
     const pinyin = 'níhǎo';
-    var result = app.lookup(query);
+    var result = await app.lookup(query);
     expect(result.terms.length, equals(1));
     var term = result.terms.first;
     expect(term.query, equals(query));
@@ -172,7 +172,7 @@ void main() {
     var app = App();
     app.buildApp([forwardIndex], [hwIDIndex], sources);
     const query = 'Europe';
-    var result = app.lookup(query);
+    var result = await app.lookup(query);
     //expect(result.terms.length, equals(1));
     for (var term in result.terms) {
       expect(term.query, equals(query));
@@ -193,7 +193,7 @@ void main() {
     app.buildApp([forwardIndex], [hwIDIndex], sources);
     const query = 'encircle';
     const chinese = '围';
-    var result = app.lookup(query);
+    var result = await app.lookup(query);
     expect(result.terms.length, equals(1));
     for (var term in result.terms) {
       expect(term.query, equals(query));
@@ -205,15 +205,15 @@ void main() {
       }
     }
   });
-  test('App.lookup can find a word from an equivalent in the notes', () {
+  test('App.lookup can find a word from an equivalent in the notes', () async {
     var sources = DictionarySources(<int, DictionarySource>{1: cnSource});
     var forwardIndex = dictFromJson(jsonString, cnSource);
     var hwIDIndex = headwordsFromJson(jsonString, cnSource);
     var app = App();
-    app.buildApp([forwardIndex], [hwIDIndex], sources);
     const query = 'Rosa rugosa';
     const simplified = '玫瑰';
-    var result = app.lookup(query);
+    app.buildApp([forwardIndex], [hwIDIndex], sources);
+    var result = await app.lookup(query);
     expect(result.terms.length, equals(1));
     for (var term in result.terms) {
       expect(term.query, equals(query));
@@ -222,6 +222,29 @@ void main() {
         expect(sense.simplified, equals(simplified));
       }
     }
+  });
+  test('App.lookup waits for the index to build', () async {
+    var sources = DictionarySources(<int, DictionarySource>{1: cnSource});
+    var loader = TestDictionaryLoader();
+    var forwardIndex = await loader.load();
+    var hwIDIndex = headwordsFromJson(jsonString, cnSource);
+    var app = App();
+    const query = '你好';
+    const pinyin = 'níhǎo';
+    var rFuture = app.lookup(query);
+    app.buildApp([forwardIndex], [hwIDIndex], sources);
+    rFuture.then((QueryResults result) {
+      expect(result.terms.length, equals(1));
+      for (var term in result.terms) {
+        expect(term.query, equals(query));
+        expect(term.entries.entries.length, equals(1));
+        for (var entry in term.entries.entries) {
+          expect(entry.headword, equals(query));
+          expect(entry.hwRollup, equals(query));
+          expect(entry.pinyinRollup, equals(pinyin));
+        }
+      }
+    });
   });
   test('mergeDictionaries works as expected.', () {
     var loader = TestDictionaryLoader();

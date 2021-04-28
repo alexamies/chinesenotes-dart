@@ -21,11 +21,18 @@ class App {
     pinyinIndex = buildPinyinIndex(hwIDIndex!);
   }
 
-  QueryResults lookup(String query) {
+  Future<QueryResults> lookup(String query) async {
     var msg = '';
     List<Term> terms = [];
     if (isCJKChar(query)) {
+      var retries = 1;
+      while (forwardIndex == null && retries <= 3) {
+        print('lookup: Index is not loaded, wait and try again - $retries');
+        await Future.delayed(Duration(milliseconds: retries * 500));
+        retries++;
+      }
       if (forwardIndex == null) {
+        //  Index is still not loaded, give up
         msg = '- Headword index not loaded';
       } else {
         var tokenizer = DictTokenizer(forwardIndex!);

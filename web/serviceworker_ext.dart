@@ -58,13 +58,11 @@ void initApp() async {
   print('CNotes, initApp exit');
 }
 
-void onMenuEvent(JsObject info, var tabsNotUsed) {
+void onMenuEvent(JsObject info, var tabsNotUsed) async {
   print('onMenuEvent enter');
   var activeObj = JsObject.jsify({'active': true, 'currentWindow': true});
   var query = info['selectionText'];
-  QueryResults results = (app != null)
-      ? app.lookup(query)
-      : QueryResults(query, [], {}, 'Dictionary is not loaded');
+  QueryResults results = await app.lookup(query);
   var res = results.toJson();
   print('onMenuEvent got ${results.terms.length} terms');
   var msg = JsObject.jsify(res);
