@@ -41,12 +41,12 @@ void main() async {
       1);
   var sources = DictionarySources(<int, DictionarySource>{1: cnSource});
   var jsonString = await download(cnSource.url);
-  var forwardIndex = dictFromJson(jsonString, cnSource);
   var hwIDIndex = headwordsFromJson(jsonString, cnSource);
-  var app = buildApp([forwardIndex], [hwIDIndex], sources);
+  var app = App();
+  app.buildApp([hwIDIndex], sources);
   const hw = '你好';
   print('Looking up $hw');
-  var results = app.lookup(hw);
+  var results = await app.lookup(hw);
   if (results.terms.length == 0) {
     print('No results found.');
     return;

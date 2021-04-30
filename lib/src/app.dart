@@ -4,7 +4,7 @@ import 'package:chinesenotes/chinesenotes.dart';
 
 /// App is a top level class that holds state of resources.
 class App {
-  DictionaryCollectionIndex? forwardIndex;
+  ForwardIndex? forwardIndex;
   DictionarySources? sources;
   DictionaryReverseIndex? reverseIndex;
   HeadwordIDIndex? hwIDIndex;
@@ -12,12 +12,11 @@ class App {
 
   App();
 
-  buildApp(List<DictionaryCollectionIndex> forwardIndexes,
-      List<HeadwordIDIndex> hwIDIndexes, DictionarySources sources) async {
-    forwardIndex = mergeDictionaries(forwardIndexes);
+  buildApp(List<HeadwordIDIndex> hwIDIndexes, DictionarySources sources) async {
     this.sources = sources;
     hwIDIndex = mergeHWIDIndexes(hwIDIndexes);
-    reverseIndex = buildReverseIndex(forwardIndex!);
+    forwardIndex = ForwardIndex.fromHWIndex(hwIDIndex!);
+    reverseIndex = buildReverseIndex(hwIDIndex!);
     pinyinIndex = buildPinyinIndex(hwIDIndex!);
   }
 

@@ -20,8 +20,7 @@ const stopWords = ['a ', 'an ', 'to ', 'the '];
 /// Params:
 ///   forrwardIndex - containing the dictionary entries
 ///   np - to extract secondary equivalents contained in notes
-DictionaryReverseIndex buildReverseIndex(
-    DictionaryCollectionIndex forrwardIndex) {
+DictionaryReverseIndex buildReverseIndex(HeadwordIDIndex hwIdIndex) {
   var sw = Stopwatch();
   sw.start();
   var np = NotesProcessor(notesPatterns);
@@ -51,17 +50,14 @@ DictionaryReverseIndex buildReverseIndex(
     return cleaned;
   }
 
-  var keys = forrwardIndex.keys();
-  for (var hw in keys) {
-    var e = forrwardIndex.lookup(hw);
-    for (var entry in e.entries) {
-      for (var sense in entry.getSenses().senses) {
-        var equivalents = sense.english.split(separator);
-        var cleaned = removeStopWords(equivalents);
-        addSenses(cleaned, sense);
-        var notesEquiv = np.parseNotes(sense.notes);
-        addSenses(notesEquiv, sense);
-      }
+  var keys = hwIdIndex.entries.keys;
+  for (var entry in hwIdIndex.entries.values) {
+    for (var sense in entry.getSenses().senses) {
+      var equivalents = sense.english.split(separator);
+      var cleaned = removeStopWords(equivalents);
+      addSenses(cleaned, sense);
+      var notesEquiv = np.parseNotes(sense.notes);
+      addSenses(notesEquiv, sense);
     }
   }
   print('buildReverseIndex completed in ${sw.elapsedMilliseconds} ms with '

@@ -7,7 +7,7 @@ import 'package:chinesenotes/chinesenotes.dart';
 /// If the terms are not found in the dictionary then individual characters will
 /// be returned.
 class DictTokenizer {
-  final DictionaryCollectionIndex index;
+  final ForwardIndex index;
 
   DictTokenizer(this.index);
 

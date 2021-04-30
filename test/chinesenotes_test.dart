@@ -31,20 +31,23 @@ var cnSource = DictionarySource(
 // DictionaryLoader load a dictionary from some source.
 class TestDictionaryLoader {
   /// fill in real implementation
-  DictionaryCollectionIndex load() {
+  ForwardIndex load() {
     var chinese = '你好';
     var sense =
         Sense(-1, 42, chinese, '', 'níhǎo', 'hello', 'interjection', 'p. 655');
     var senses = Senses([sense]);
     var entry = DictionaryEntry(chinese, 42, 1, {'níhǎo'}, senses);
-    var entryList = DictionaryEntries(chinese, [entry]);
-    var entries = <String, DictionaryEntries>{chinese: entryList};
-    return DictionaryCollectionIndex(entries);
+    Map<String, Set<int>> entries = {
+      chinese: {42}
+    };
+    var hIndex = {42: entry};
+    var hwIndex = HeadwordIDIndex(hIndex);
+    return ForwardIndex(entries, hwIndex);
   }
 }
 
 void main() {
-  test('DictionaryCollectionIndex.lookup finds a matching headword.', () {
+  test('Forward.lookup finds a matching headword.', () {
     var loader = TestDictionaryLoader();
     var forwardIndex = loader.load();
     const headword = '你好';
@@ -55,7 +58,8 @@ void main() {
   });
   test('dictFromJson builds the index correctly', () {
     var sources = DictionarySources(<int, DictionarySource>{1: cnSource});
-    var forwardIndex = dictFromJson(jsonString, cnSource);
+    var hwIDIndex = headwordsFromJson(jsonString, cnSource);
+    var forwardIndex = ForwardIndex.fromHWIndex(hwIDIndex);
     const headword = '邃古';
     var dictEntries = forwardIndex.lookup(headword);
     expect(dictEntries.entries.length, equals(1));
@@ -73,7 +77,8 @@ void main() {
   });
   test('dictFromJson builds the index with traditional', () {
     var sources = DictionarySources(<int, DictionarySource>{1: cnSource});
-    var forwardIndex = dictFromJson(jsonString, cnSource);
+    var hwIDIndex = headwordsFromJson(jsonString, cnSource);
+    var forwardIndex = ForwardIndex.fromHWIndex(hwIDIndex);
     const simp = '围';
     const trad = '圍';
     var dictEntries = forwardIndex.lookup(trad);
@@ -92,7 +97,7 @@ void main() {
   test('buildReverseIndex builds the reverse index correctly', () async {
     var loader = TestDictionaryLoader();
     var forwardIndex = await loader.load();
-    var reverseIndex = buildReverseIndex(forwardIndex);
+    var reverseIndex = buildReverseIndex(forwardIndex.hwIndex);
     const headword = '你好';
     const english = 'hello';
     var senses = reverseIndex.lookup(english);
@@ -127,10 +132,10 @@ void main() {
   test('App.lookup can find a word with a Chinese query', () async {
     var sources = DictionarySources(<int, DictionarySource>{1: cnSource});
     var loader = TestDictionaryLoader();
-    var forwardIndex = await loader.load();
-    var hwIDIndex = headwordsFromJson(jsonString, cnSource);
+    var fwdIndex = loader.load();
+    var hwIDIndex = fwdIndex.hwIndex;
     var app = App();
-    app.buildApp([forwardIndex], [hwIDIndex], sources);
+    app.buildApp([hwIDIndex], sources);
     const query = '你好';
     const pinyin = 'níhǎo';
     var result = await app.lookup(query);
@@ -148,10 +153,10 @@ void main() {
   test('App.lookup can find a word with an English query', () async {
     var sources = DictionarySources(<int, DictionarySource>{1: cnSource});
     var loader = TestDictionaryLoader();
-    var forwardIndex = loader.load();
-    var hwIDIndex = headwordsFromJson('[]', cnSource);
+    var fwdIndex = loader.load();
+    var hwIDIndex = fwdIndex.hwIndex;
     var app = App();
-    app.buildApp([forwardIndex], [hwIDIndex], sources);
+    app.buildApp([hwIDIndex], sources);
     const query = 'hello';
     const chinese = '你好';
     const pinyin = 'níhǎo';
@@ -167,10 +172,9 @@ void main() {
   });
   test('App.lookup works with mixed case', () async {
     var sources = DictionarySources(<int, DictionarySource>{1: cnSource});
-    var forwardIndex = dictFromJson(jsonString, cnSource);
     var hwIDIndex = headwordsFromJson(jsonString, cnSource);
     var app = App();
-    app.buildApp([forwardIndex], [hwIDIndex], sources);
+    app.buildApp([hwIDIndex], sources);
     const query = 'Europe';
     var result = await app.lookup(query);
     //expect(result.terms.length, equals(1));
@@ -187,10 +191,9 @@ void main() {
     const sourceId = 1;
     var sources =
         DictionarySources(<int, DictionarySource>{sourceId: cnSource});
-    var forwardIndex = dictFromJson(jsonString, cnSource);
     var hwIDIndex = headwordsFromJson(jsonString, cnSource);
     var app = App();
-    app.buildApp([forwardIndex], [hwIDIndex], sources);
+    app.buildApp([hwIDIndex], sources);
     const query = 'encircle';
     const chinese = '围';
     var result = await app.lookup(query);
@@ -207,12 +210,11 @@ void main() {
   });
   test('App.lookup can find a word from an equivalent in the notes', () async {
     var sources = DictionarySources(<int, DictionarySource>{1: cnSource});
-    var forwardIndex = dictFromJson(jsonString, cnSource);
     var hwIDIndex = headwordsFromJson(jsonString, cnSource);
     var app = App();
     const query = 'Rosa rugosa';
     const simplified = '玫瑰';
-    app.buildApp([forwardIndex], [hwIDIndex], sources);
+    app.buildApp([hwIDIndex], sources);
     var result = await app.lookup(query);
     expect(result.terms.length, equals(1));
     for (var term in result.terms) {
@@ -225,14 +227,12 @@ void main() {
   });
   test('App.lookup waits for the index to build', () async {
     var sources = DictionarySources(<int, DictionarySource>{1: cnSource});
-    var loader = TestDictionaryLoader();
-    var forwardIndex = await loader.load();
     var hwIDIndex = headwordsFromJson(jsonString, cnSource);
     var app = App();
     const query = '你好';
     const pinyin = 'níhǎo';
     var rFuture = app.lookup(query);
-    app.buildApp([forwardIndex], [hwIDIndex], sources);
+    app.buildApp([hwIDIndex], sources);
     rFuture.then((QueryResults result) {
       expect(result.terms.length, equals(1));
       for (var term in result.terms) {
@@ -245,33 +245,6 @@ void main() {
         }
       }
     });
-  });
-  test('mergeDictionaries works as expected.', () {
-    var loader = TestDictionaryLoader();
-    var index1 = loader.load();
-    var simplified = '再见';
-    var sense = Sense(
-        -2, 43, simplified, '再見', 'zàijiàn', 'goodbye', 'interjection', '');
-    var senses = Senses([sense]);
-    var entry = DictionaryEntry(simplified, 43, 2, {'zàijiàn'}, senses);
-    var entryList = DictionaryEntries(simplified, [entry]);
-    var entries = <String, DictionaryEntries>{simplified: entryList};
-    var index2 = DictionaryCollectionIndex(entries);
-    var indexes = [index1, index2];
-    var mergedIndex = mergeDictionaries(indexes);
-    expect(mergedIndex.entries.length, equals(2));
-    var result = mergedIndex.lookup(simplified);
-    expect(result.entries.length, equals(1));
-    var first = result.entries.first;
-    expect(first.headword, equals(simplified));
-  });
-  test('mergeHWIDIndexes works as expected.', () {
-    var hwIDIndex1 = headwordsFromJson(jsonString, cnSource);
-    var hwIDIndex2 = headwordsFromJson(jsonString2, cnSource);
-    var indexes = [hwIDIndex1, hwIDIndex2];
-    var mergedIndex = mergeHWIDIndexes(indexes);
-    var entry = mergedIndex.entries[3001251]!;
-    expect(entry.headword, equals('汲引高风'));
   });
   test('Sense == equals with same LUID and HWID.', () {
     var chinese = '你好';
@@ -384,7 +357,8 @@ void main() {
     expect(tokens.first.token, equals('h'));
   });
   test('tokenize a single Chinese character', () {
-    var forwardIndex = dictFromJson(jsonString, cnSource);
+    var hwIDIndex = headwordsFromJson(jsonString, cnSource);
+    var forwardIndex = ForwardIndex.fromHWIndex(hwIDIndex);
     var tokenizer = DictTokenizer(forwardIndex);
     const String text = '围';
     var tokens = tokenizer.tokenize(text);
@@ -394,14 +368,16 @@ void main() {
     expect(tokens.first.entries.first.pinyinRollup, equals('wéi'));
   });
   test('tokenize a zero-length string', () {
-    var forwardIndex = dictFromJson(jsonString, cnSource);
+    var hwIDIndex = headwordsFromJson(jsonString, cnSource);
+    var forwardIndex = ForwardIndex.fromHWIndex(hwIDIndex);
     var tokenizer = DictTokenizer(forwardIndex);
     const String text = '';
     var tokens = tokenizer.tokenize(text);
     expect(tokens.length, equals(text.length));
   });
   test('tokenize a two-character Chinese word', () {
-    var forwardIndex = dictFromJson(jsonString, cnSource);
+    var hwIDIndex = headwordsFromJson(jsonString, cnSource);
+    var forwardIndex = ForwardIndex.fromHWIndex(hwIDIndex);
     var tokenizer = DictTokenizer(forwardIndex);
     const String text = '歐洲';
     var tokens = tokenizer.tokenize(text);
@@ -411,7 +387,8 @@ void main() {
     expect(tokens.first.entries.first.pinyinRollup, equals('ōuzhōu'));
   });
   test('tokenize method picks the longest terms', () {
-    var forwardIndex = dictFromJson(jsonString, cnSource);
+    var hwIDIndex = headwordsFromJson(jsonString, cnSource);
+    var forwardIndex = ForwardIndex.fromHWIndex(hwIDIndex);
     var tokenizer = DictTokenizer(forwardIndex);
     const String text = '恐龍';
     var tokens = tokenizer.tokenize(text);

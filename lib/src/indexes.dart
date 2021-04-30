@@ -45,97 +45,72 @@ const pinyin2Ascii = {
   'Ù': 'u'
 };
 
-/// DictionaryCollection is a collection of dictionaries for lookup of terms.
+/// ForwardIndex is an index for a collection of dictionaries.
 ///
-/// The entries are indexed by Chinese headword.
-class DictionaryCollectionIndex {
-  final Map<String, DictionaryEntries> entries;
+/// The entries are indexed by Chinese headword, either or both of simplified
+/// and traditional Chinese.
+class ForwardIndex {
+  final Map<String, Set<int>> headwordIds;
+  final HeadwordIDIndex hwIndex;
 
-  DictionaryCollectionIndex(this.entries);
+  ForwardIndex(this.headwordIds, this.hwIndex);
+
+  ForwardIndex.fromHWIndex(HeadwordIDIndex index)
+      : headwordIds = {},
+        hwIndex = index {
+    for (var e in index.entries.entries) {
+      var hwId = e.key;
+      var dictEntry = e.value;
+
+      // Index by simplified
+      var hwIdsSimp = headwordIds[dictEntry.simplified];
+      if (hwIdsSimp == null) {
+        hwIdsSimp = {};
+      }
+      hwIdsSimp.add(hwId);
+      headwordIds[dictEntry.simplified] = hwIdsSimp;
+
+      // Index by traditional
+      var trad = dictEntry.traditional;
+      for (var t in trad) {
+        var hwIdsTrad = headwordIds[t];
+        if (hwIdsTrad == null) {
+          hwIdsTrad = {};
+        }
+        hwIdsTrad.add(hwId);
+        headwordIds[t] = hwIdsTrad;
+      }
+    }
+    print('ForwardIndex.fromHWIndex loaded ${headwordIds.length} keys');
+  }
 
   Iterable<String> keys() {
-    return entries.keys;
+    return headwordIds.keys;
   }
 
   /// Null safe lookup
   ///
   /// Return: the value or an empty list if there is no match found
+  /// Params:
+  ///   key - a Chinese term, simplified or traditional
+  /// Returns:
+  ///   A list of matching entries
   DictionaryEntries lookup(String key) {
-    var dictEntries = entries[key];
-    if (dictEntries == null) {
+    var hwIDs = headwordIds[key];
+    if (hwIDs == null) {
       return DictionaryEntries(key, []);
     }
-    return dictEntries;
-  }
-}
-
-/// Build a forward index by parsing a dictionary from a JSON string.
-///
-/// Indended for the Chinese Notes and NTI Reader native dictionary structure
-DictionaryCollectionIndex dictFromJson(
-    String jsonString, DictionarySource source) {
-  var sw = Stopwatch();
-  sw.start();
-  var i = source.startHeadwords;
-  List data = json.decode(jsonString) as List;
-  Map<String, DictionaryEntries> entryMap = {};
-  for (var lu in data) {
-    try {
-      var luid = (lu['luid'] != null) ? int.parse(lu['luid']) : i;
-      var hwid = (lu['h'] != null) ? int.parse(lu['h']) : i;
-      var s = lu['s'] ?? '';
-      var t = lu['t'] ?? '';
-      var p = lu['p'] ?? '';
-      var e = lu['e'] ?? '';
-      var g = lu['g'] ?? '';
-      var n = lu['n'] ?? '';
-      var sense = Sense(luid, hwid, s, t, p, e, g, n);
-      var entries = entryMap[s];
-      if (entries == null || entries.length == 0) {
-        var senses = Senses([sense]);
-        var entry = DictionaryEntry(s, hwid, source.sourceId, {p}, senses);
-        entryMap[s] = DictionaryEntries(s, [entry]);
+    List<DictionaryEntry> entries = [];
+    for (var hwid in hwIDs) {
+      var entry = hwIndex.entries[hwid];
+      if (entry != null) {
+        entries.add(entry);
       } else {
-        entries.entries[0].addSense(sense);
-      }
-      if (t != '') {
-        var entries = entryMap[t];
-        if (entries == null) {
-          var entry =
-              DictionaryEntry(s, hwid, source.sourceId, {p}, Senses([sense]));
-          entryMap[t] = DictionaryEntries(t, [entry]);
-        } else {
-          entries.entries[0].addSense(sense);
-        }
-      }
-      i++;
-    } on Exception catch (ex) {
-      print('Could not load parse entry ${lu['h']}, ${lu['s']}: $ex');
-      rethrow;
-    }
-  }
-  sw.stop();
-  print('dictFromJson completed in ${sw.elapsedMilliseconds} ms with '
-      '${entryMap.length} entries for ${source.abbreviation}');
-  return DictionaryCollectionIndex(entryMap);
-}
-
-/// Build a combined index by combining multiple dictionaries
-DictionaryCollectionIndex mergeDictionaries(
-    List<DictionaryCollectionIndex> dictionaries) {
-  Map<String, DictionaryEntries> index = {};
-  for (var dictionary in dictionaries) {
-    for (var headword in dictionary.keys()) {
-      var entriesToAdd = dictionary.lookup(headword);
-      var e = index[headword];
-      if (e == null) {
-        index[headword] = entriesToAdd;
-      } else {
-        e.entries.addAll(entriesToAdd.entries);
+        print('No matching entry for term $key, $hwid');
       }
     }
+    return DictionaryEntries(key, entries);
   }
-  return DictionaryCollectionIndex(index);
 }
 
 /// HeadwordIDIndex indexes the dictionary by headword ID.

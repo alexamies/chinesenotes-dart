@@ -34,13 +34,10 @@ void initApp() async {
     }
 
     var sources = appConfig != null ? appConfig!.sources : getDefaultSources();
-    List<DictionaryCollectionIndex> forwardIndexes = [];
     List<HeadwordIDIndex> hwIDIndexes = [];
     for (var source in sources.sources.values) {
       try {
         String jsonString = await loadFromExt(source.url);
-        var forwardIndex = dictFromJson(jsonString, source);
-        forwardIndexes.add(forwardIndex);
         var hwIDIndex = headwordsFromJson(jsonString, source);
         hwIDIndexes.add(hwIDIndex);
       } catch (ex) {
@@ -48,7 +45,7 @@ void initApp() async {
       }
     }
 
-    app.buildApp(forwardIndexes, hwIDIndexes, sources);
+    app.buildApp(hwIDIndexes, sources);
     sw.stop();
     print('Dictionary loaded in ${sw.elapsedMilliseconds} ms with '
         '${app.hwIDIndex?.entries.length} entries');

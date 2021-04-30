@@ -115,6 +115,23 @@ class DictionaryEntry {
     return sb.toString();
   }
 
+  String get simplified {
+    if (_senses.senses.isEmpty) {
+      return "";
+    }
+    return _senses.senses.first.simplified;
+  }
+
+  Set<String> get traditional {
+    Set<String> trad = {};
+    for (var sense in _senses.senses) {
+      if (sense.traditional != '') {
+        trad.add(sense.traditional);
+      }
+    }
+    return trad;
+  }
+
   Map toJson() {
     var sb = StringBuffer();
     sb.writeAll(pinyin, ',');

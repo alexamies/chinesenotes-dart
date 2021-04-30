@@ -71,13 +71,10 @@ Future<App?> initApp(DictionarySources sources, Element statusDiv,
   statusDiv.text = 'Loading dictionary';
 
   try {
-    List<DictionaryCollectionIndex> forwardIndexes = [];
     List<HeadwordIDIndex> hwIDIndexes = [];
     for (var source in sources.sources.values) {
       try {
         final jsonString = await HttpRequest.getString(source.url);
-        var forwardIndex = dictFromJson(jsonString, source);
-        forwardIndexes.add(forwardIndex);
         var hwIDIndex = headwordsFromJson(jsonString, source);
         hwIDIndexes.add(hwIDIndex);
       } catch (ex) {
@@ -87,7 +84,7 @@ Future<App?> initApp(DictionarySources sources, Element statusDiv,
     }
     statusDiv.text = 'Dictionary headwords loaded';
     var app = App();
-    app.buildApp(forwardIndexes, hwIDIndexes, sources);
+    app.buildApp(hwIDIndexes, sources);
     if (submitButton != null) {
       var multiLookupSubmit = submitButton as ButtonElement;
       multiLookupSubmit.disabled = false;
