@@ -156,33 +156,23 @@ HeadwordIDIndex headwordsFromJson(String jsonString, DictionarySource source) {
     try {
       var luid = (lu['luid'] != null) ? int.parse(lu['luid']) : i;
       var hwid = (lu['h'] != null) ? int.parse(lu['h']) : i;
-      var s = lu['s'] ?? '';
-      var t = lu['t'] ?? '';
-      var p = lu['p'] ?? '';
-      var e = lu['e'] ?? '';
-      var g = lu['g'] ?? '';
-      var n = lu['n'] ?? '';
+      String s = lu['s'] ?? '';
+      String t = lu['t'] ?? '';
+      String p = lu['p'] ?? '';
+      String e = lu['e'] ?? '';
+      String g = lu['g'] ?? '';
+      String n = lu['n'] ?? '';
       var sense = Sense(luid, hwid, s, t, p, e, g, n);
-      var entry = entryMap[s];
+      var entry = entryMap[hwid];
       if (entry == null) {
         entryMap[hwid] =
             DictionaryEntry(s, hwid, source.sourceId, {p}, Senses([sense]));
       } else {
         entry.addSense(sense);
       }
-      if (t != '') {
-        var entry = entryMap[t];
-        if (entry == null) {
-          entryMap[hwid] =
-              DictionaryEntry(s, hwid, source.sourceId, {p}, Senses([sense]));
-        } else {
-          entry.addSense(sense);
-        }
-      }
       i++;
     } on Exception catch (ex) {
       print('Could not load parse entry ${lu['h']}, ${lu['s']}: $ex');
-      rethrow;
     }
   }
   print('Loaded ${entryMap.length} headwords');

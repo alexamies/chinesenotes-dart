@@ -91,7 +91,7 @@ void main() async {
   var errorDiv = querySelector('#lookupError')!;
   var div = querySelector('#lookupResults');
 
-  void onMessageListener(msg, sender, sendResponse) {
+  bool onMessageListener(msg, sender, sendResponse) {
     if (msg == null) {
       print('onMessageListener msg is null');
     }
@@ -102,6 +102,8 @@ void main() async {
     print('Added ${results.sourceAbbrev.length} source abreviations');
 
     displayLookup(results, cnOutput, div, statusDiv, errorDiv, null);
+    sendResponse();
+    return true;
   }
 
   // If we are a Chrome extension, then listen for messages

@@ -9,15 +9,20 @@ class App {
   DictionaryReverseIndex? reverseIndex;
   HeadwordIDIndex? hwIDIndex;
   PinyinIndex? pinyinIndex;
+  bool loadReverseIndex = false;
 
   App();
 
-  buildApp(List<HeadwordIDIndex> hwIDIndexes, DictionarySources sources) async {
+  buildApp(List<HeadwordIDIndex> hwIDIndexes, DictionarySources sources,
+      bool loadReverseIndex) async {
     this.sources = sources;
     hwIDIndex = mergeHWIDIndexes(hwIDIndexes);
     forwardIndex = ForwardIndex.fromHWIndex(hwIDIndex!);
-    reverseIndex = buildReverseIndex(hwIDIndex!);
-    pinyinIndex = buildPinyinIndex(hwIDIndex!);
+    this.loadReverseIndex = loadReverseIndex;
+    if (loadReverseIndex) {
+      reverseIndex = buildReverseIndex(hwIDIndex!);
+      pinyinIndex = buildPinyinIndex(hwIDIndex!);
+    }
   }
 
   Future<QueryResults> lookup(String query) async {
@@ -61,22 +66,24 @@ class App {
     if (terms.isEmpty) {
       // did not find anything for forward lookup, try reverse lookup
       if (reverseIndex == null) {
-        msg = '- Reverse index is not loaded';
-      } else {
-        var queryLower = query.toLowerCase();
-        var rEntries = reverseIndex!.lookup(queryLower);
-        List<Sense> sList = [];
-        for (var rEntry in rEntries) {
-          var e = hwIDIndex?.entries[rEntry.hwid];
-          var s = e?.getSenses().lookup(rEntry.luid);
-          if (s != null) {
-            sList.add(s);
-          }
-        }
-        var senses = Senses(sList);
-        var term = Term(query, DictionaryEntries('', []), senses);
-        terms.add(term);
+        msg = '- Reverse index was loaded';
+        loadReverseIndex = true;
+        reverseIndex = buildReverseIndex(hwIDIndex!);
+        pinyinIndex = buildPinyinIndex(hwIDIndex!);
       }
+      var queryLower = query.toLowerCase();
+      var rEntries = reverseIndex!.lookup(queryLower);
+      List<Sense> sList = [];
+      for (var rEntry in rEntries) {
+        var e = hwIDIndex?.entries[rEntry.hwid];
+        var s = e?.getSenses().lookup(rEntry.luid);
+        if (s != null) {
+          sList.add(s);
+        }
+      }
+      var senses = Senses(sList);
+      var term = Term(query, DictionaryEntries('', []), senses);
+      terms.add(term);
     }
     Map<int, String> sourceAbbrev = {};
     if (hwIDIndex == null) {

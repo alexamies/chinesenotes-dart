@@ -5,6 +5,7 @@ import 'package:chinesenotes/chinesenotes.dart';
 const jsonString = """
 [{"s":"邃古","t":"","p":"suìgǔ","e": "remote antiquity","g":"noun","n":"(CC-CEDICT '邃古'; Guoyu '邃古')","h":"2"},
 {"s":"围","t":"圍","p":"wéi","e": "to surround; to encircle; to corral","g":"verb","n":"(Unihan '圍')","h":"3"},
+{"s":"围","t":"圍","p":"wéi","e": "a defensive wall","g":"noun","n":"Guoyu '圍' n 4)","h":"3"},
 {"s":"欧洲","t":"歐洲","p":"ōuzhōu","e": "Europe","g":"proper noun","n":"Short form is 欧 (SDC 58; XHZD, p. 700)","h":"261"},
 {"s":"欧","t":"歐","p":"ōu","e": "Europe","g":"proper noun","n":"Abbreviation for 欧洲 (Guoyu '歐' n 1)","h":"3681"},
 {"s":"玫瑰","t":"","p":"méiguī","e":"rose","g":"noun", "n":"Scientific name: Rosa rugosa (CC-CEDICT '玫瑰'; Guoyu '玫瑰' 1; Wikipedia '玫瑰')","h":"3492"},
@@ -60,7 +61,7 @@ void main() {
     var entry = dictEntries.entries.first;
     expect(entry.headword, equals(headword));
   });
-  test('dictFromJson builds the index correctly', () {
+  test('headwordsFromJson builds the index correctly', () {
     var sources = DictionarySources(<int, DictionarySource>{1: cnSource});
     var hwIDIndex = headwordsFromJson(jsonString, cnSource);
     var forwardIndex = ForwardIndex.fromHWIndex(hwIDIndex);
@@ -79,7 +80,7 @@ void main() {
       }
     }
   });
-  test('dictFromJson builds the index with traditional', () {
+  test('headwordsFromJson builds the index with traditional', () {
     var sources = DictionarySources(<int, DictionarySource>{1: cnSource});
     var hwIDIndex = headwordsFromJson(jsonString, cnSource);
     var forwardIndex = ForwardIndex.fromHWIndex(hwIDIndex);
@@ -92,7 +93,7 @@ void main() {
     for (var ent in dictEntries.entries) {
       var source = sources.lookup(ent.sourceId);
       expect(source.abbreviation, cnSource.abbreviation);
-      expect(ent.getSenses().length, equals(1));
+      expect(ent.getSenses().length, equals(2));
       for (var sense in ent.getSenses().senses) {
         expect(sense.pinyin, 'wéi');
       }
@@ -142,7 +143,7 @@ void main() {
     var loader = TestDictionaryLoader();
     var hwIDIndex = loader.getHeadwordIDIndex();
     var app = App();
-    app.buildApp([hwIDIndex], sources);
+    app.buildApp([hwIDIndex], sources, false);
     const query = '你好';
     const pinyin = 'níhǎo';
     var result = await app.lookup(query);
@@ -162,7 +163,7 @@ void main() {
     var loader = TestDictionaryLoader();
     var hwIDIndex = loader.getHeadwordIDIndex();
     var app = App();
-    app.buildApp([hwIDIndex], sources);
+    app.buildApp([hwIDIndex], sources, true);
     const query = 'hello';
     const chinese = '你好';
     const pinyin = 'níhǎo';
@@ -180,7 +181,7 @@ void main() {
     var sources = DictionarySources(<int, DictionarySource>{1: cnSource});
     var hwIDIndex = headwordsFromJson(jsonString, cnSource);
     var app = App();
-    app.buildApp([hwIDIndex], sources);
+    app.buildApp([hwIDIndex], sources, true);
     const query = 'Europe';
     var result = await app.lookup(query);
     //expect(result.terms.length, equals(1));
@@ -199,7 +200,7 @@ void main() {
         DictionarySources(<int, DictionarySource>{sourceId: cnSource});
     var hwIDIndex = headwordsFromJson(jsonString, cnSource);
     var app = App();
-    app.buildApp([hwIDIndex], sources);
+    app.buildApp([hwIDIndex], sources, true);
     const query = 'encircle';
     const chinese = '围';
     var result = await app.lookup(query);
@@ -220,7 +221,7 @@ void main() {
     var app = App();
     const query = 'Rosa rugosa';
     const simplified = '玫瑰';
-    app.buildApp([hwIDIndex], sources);
+    app.buildApp([hwIDIndex], sources, true);
     var result = await app.lookup(query);
     expect(result.terms.length, equals(1));
     for (var term in result.terms) {
@@ -238,7 +239,7 @@ void main() {
     const query = '你好';
     const pinyin = 'níhǎo';
     var rFuture = app.lookup(query);
-    app.buildApp([hwIDIndex], sources);
+    app.buildApp([hwIDIndex], sources, true);
     rFuture.then((QueryResults result) {
       expect(result.terms.length, equals(1));
       for (var term in result.terms) {

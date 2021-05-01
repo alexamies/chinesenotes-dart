@@ -1,5 +1,6 @@
 {
   "contextMenuText": "Lookup with NTI Reader ...",
+  "reverseIndex": false,
   "sources": [{
     "sourceId": 1,
     "url": "ntireader_words.json",
@@ -19,16 +20,6 @@
     "author": "Alex Amies",
     "license": "Creative Commons Attribution-Share Alike 3.0",
     "startHeadwords": 7000002
-  },
-  {
-    "sourceId": 3,
-    "url": "translation_memory_buddhist.json",
-    "abbreviation": "Buddhist quotations",
-    "title": "NTI Reader Buddhist quotations",
-    "citation": "https://github.com/alexamies/chinesenotes.com",
-    "author": "Alex Amies",
-    "license": "Creative Commons Attribution-Share Alike 3.0",
-    "startHeadwords": 2000002
   },
   {
     "sourceId": 4,

@@ -44,8 +44,8 @@ void initApp() async {
         print('Could not load dicitonary ${source.abbreviation}: $ex');
       }
     }
-
-    app.buildApp(hwIDIndexes, sources);
+    var loadReverseIndex = appConfig != null ? appConfig!.reverseIndex : false;
+    app.buildApp(hwIDIndexes, sources, loadReverseIndex);
     sw.stop();
     print('Dictionary loaded in ${sw.elapsedMilliseconds} ms with '
         '${app.hwIDIndex?.entries.length} entries');
@@ -56,15 +56,13 @@ void initApp() async {
 }
 
 void onMenuEvent(JsObject info, var tabsNotUsed) async {
-  print('onMenuEvent enter');
   var activeObj = JsObject.jsify({'active': true, 'currentWindow': true});
   var query = info['selectionText'];
   QueryResults results = await app.lookup(query);
   var res = results.toJson();
-  print('onMenuEvent got ${results.terms.length} terms');
   var msg = JsObject.jsify(res);
   void responseCallback() {
-    print('onMenuEvent responseCallback for query $query');
+    print('onMenuEvent responseCallback for query ${query}');
   }
 
   void sendMessage(var tabs) {

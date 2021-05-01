@@ -84,7 +84,7 @@ Future<App?> initApp(DictionarySources sources, Element statusDiv,
     }
     statusDiv.text = 'Dictionary headwords loaded';
     var app = App();
-    app.buildApp(hwIDIndexes, sources);
+    app.buildApp(hwIDIndexes, sources, true);
     if (submitButton != null) {
       var multiLookupSubmit = submitButton as ButtonElement;
       multiLookupSubmit.disabled = false;

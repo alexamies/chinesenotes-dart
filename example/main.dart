@@ -43,7 +43,7 @@ void main() async {
   var jsonString = await download(cnSource.url);
   var hwIDIndex = headwordsFromJson(jsonString, cnSource);
   var app = App();
-  app.buildApp([hwIDIndex], sources);
+  app.buildApp([hwIDIndex], sources, true);
   const hw = '你好';
   print('Looking up $hw');
   var results = await app.lookup(hw);

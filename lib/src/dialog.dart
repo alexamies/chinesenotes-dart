@@ -10,12 +10,15 @@ const maxSenses = 10;
 
 class AppConfig {
   final String contextMenuText;
+  final bool reverseIndex;
   final DictionarySources sources;
 
-  AppConfig(this.contextMenuText, this.sources);
+  AppConfig(this.contextMenuText, this.reverseIndex, this.sources);
 
   AppConfig.fromJson(var obj)
       : contextMenuText = obj['contextMenuText'],
+        reverseIndex =
+            obj['reverseIndex'] == null ? obj['reverseIndex'] : false,
         sources = DictionarySources.fromJson(obj['sources']);
 }
 
@@ -34,27 +37,40 @@ void displayLookup(QueryResults results, Element? cnOutput, Element? div,
       var dictEntries = term.entries;
       print('displayLookup, got ${dictEntries.length} entries');
       if (dictEntries.length > 0) {
-        var counttDiv = DivElement();
-        counttDiv.className = 'counttDiv';
-        if (dictEntries.length == 1) {
-          counttDiv.text = 'Found 1 entry.';
-        } else {
-          counttDiv.text = 'Found ${dictEntries.length} entries.';
+        if (results.terms.length == 1) {
+          var counttDiv = DivElement();
+          counttDiv.className = 'counttDiv';
+          if (dictEntries.length == 1) {
+            counttDiv.text = 'Found 1 entry.';
+          } else {
+            counttDiv.text = 'Found ${dictEntries.length} entries.';
+          }
+          div?.children.add(counttDiv);
         }
-        div?.children.add(counttDiv);
-        var entryDiv = DivElement();
+
+        // If more than one term, then use a twistie
+        Element entryDiv = DivElement();
+        if (results.terms.length > 1) {
+          entryDiv = DetailsElement();
+          (entryDiv as DetailsElement).open = true;
+        }
         div?.children.add(entryDiv);
         for (var ent in dictEntries.entries) {
           var hwDiv = DivElement();
           hwDiv.text = ent.hwRollup;
           hwDiv.className = 'dict-entry-headword';
-          entryDiv.children.add(hwDiv);
-          var ul = UListElement();
-          entryDiv.children.add(ul);
-          var li = LIElement();
-          var senseOL = OListElement();
-          for (var sense in ent.getSenses().senses) {
-            var senseLi = LIElement();
+          if (results.terms.length > 1) {
+            var summaryElem = document.createElement("summary");
+            summaryElem.children.add(hwDiv);
+            entryDiv.children.add(summaryElem);
+          } else {
+            entryDiv.children.add(hwDiv);
+          }
+          var senses = ent.getSenses().senses;
+          if (senses.length == 1) {
+            print('senses.length == 1');
+            var sense = senses.first;
+            var senseDiv = DivElement();
             var sensePrimary = DivElement();
             var pinyinSpan = SpanElement();
             pinyinSpan.className = 'cnnotes-pinyin';
@@ -68,15 +84,38 @@ void displayLookup(QueryResults results, Element? cnOutput, Element? div,
             engSpan.className = 'dict-entry-definition';
             engSpan.text = '${sense.english} ';
             sensePrimary.children.add(engSpan);
-            senseLi.children.add(sensePrimary);
+            senseDiv.children.add(sensePrimary);
             var notesDiv = DivElement();
             notesDiv.className = 'dict-entry-notes-content';
             notesDiv.text = sense.notes;
-            senseLi.children.add(notesDiv);
-            senseOL.children.add(senseLi);
+            senseDiv.children.add(notesDiv);
+            entryDiv.children.add(senseDiv);
+          } else {
+            var senseOL = OListElement();
+            for (var sense in ent.getSenses().senses) {
+              var senseLi = LIElement();
+              var sensePrimary = DivElement();
+              var pinyinSpan = SpanElement();
+              pinyinSpan.className = 'cnnotes-pinyin';
+              pinyinSpan.text = '${sense.pinyin} ';
+              sensePrimary.children.add(pinyinSpan);
+              var posSpan = SpanElement();
+              posSpan.className = 'dict-entry-grammar';
+              posSpan.text = '${sense.grammar} ';
+              sensePrimary.children.add(posSpan);
+              var engSpan = SpanElement();
+              engSpan.className = 'dict-entry-definition';
+              engSpan.text = '${sense.english} ';
+              sensePrimary.children.add(engSpan);
+              senseLi.children.add(sensePrimary);
+              var notesDiv = DivElement();
+              notesDiv.className = 'dict-entry-notes-content';
+              notesDiv.text = sense.notes;
+              senseLi.children.add(notesDiv);
+              senseOL.children.add(senseLi);
+            }
+            entryDiv.children.add(senseOL);
           }
-          li.children.add(senseOL);
-          ul.children.add(li);
           var sourceAbbrev = results.sourceAbbrev[ent.headwordId];
           print('Source abbrev for headword ${ent.headwordId}: $sourceAbbrev');
           if (sourceAbbrev != null && sourceAbbrev.isNotEmpty) {
@@ -144,7 +183,7 @@ void displayLookup(QueryResults results, Element? cnOutput, Element? div,
             break;
           }
         }
-      } else {
+      } else if (results.terms.isEmpty) {
         div?.text = 'Did not find any results.';
       }
       statusDiv?.text = '';
