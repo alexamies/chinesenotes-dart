@@ -51,13 +51,10 @@ const pinyin2Ascii = {
 /// and traditional Chinese.
 class ForwardIndex {
   final Map<String, Set<int>> headwordIds;
-  final HeadwordIDIndex hwIndex;
 
-  ForwardIndex(this.headwordIds, this.hwIndex);
+  ForwardIndex(this.headwordIds);
 
-  ForwardIndex.fromHWIndex(HeadwordIDIndex index)
-      : headwordIds = {},
-        hwIndex = index {
+  ForwardIndex.fromHWIndex(HeadwordIDIndex index) : headwordIds = {} {
     for (var e in index.entries.entries) {
       var hwId = e.key;
       var dictEntry = e.value;
@@ -95,7 +92,7 @@ class ForwardIndex {
   ///   key - a Chinese term, simplified or traditional
   /// Returns:
   ///   A list of matching entries
-  DictionaryEntries lookup(String key) {
+  DictionaryEntries lookup(HeadwordIDIndex hwIndex, String key) {
     var hwIDs = headwordIds[key];
     if (hwIDs == null) {
       return DictionaryEntries(key, []);
@@ -186,7 +183,7 @@ String flattenPinyin(String pinyin) {
 PinyinIndex buildPinyinIndex(HeadwordIDIndex hwIDIndex) {
   var sw = Stopwatch();
   sw.start();
-  Map<String, PinyinIndexEntry> entries = {};
+  Map<String, Set<int>> entries = {};
   for (var hw in hwIDIndex.entries.values) {
     if (hw.pinyin.isEmpty) {
       continue;
@@ -195,11 +192,10 @@ PinyinIndex buildPinyinIndex(HeadwordIDIndex hwIDIndex) {
       var pinyinFlat = flattenPinyin(pinyin);
       var entry = entries[pinyinFlat];
       if (entry == null) {
-        var newEntry = PinyinIndexEntry(pinyinFlat, {hw});
-        entries[pinyinFlat] = newEntry;
+        entries[pinyinFlat] = {hw.headwordId};
         continue;
       }
-      entry.entries.add(hw);
+      entry.add(hw.headwordId);
     }
   }
   print('buildPinyinIndex completed in ${sw.elapsedMilliseconds} ms with '
@@ -209,30 +205,20 @@ PinyinIndex buildPinyinIndex(HeadwordIDIndex hwIDIndex) {
 
 /// PinyinIndex indexes the dictionary by equivalent.
 ///
-/// The entries are indexed by Senses, which is part of a Chinese headword.
+/// The entries are indexed by headword IDs.
 class PinyinIndex {
-  final Map<String, PinyinIndexEntry> entries;
+  final Map<String, Set<int>> entries;
 
   PinyinIndex(this.entries);
 
   /// Null safe lookup
   ///
   /// Return: the senses or an empty list if there is no match found
-  PinyinIndexEntry lookup(String pinyin) {
+  Set<int> lookup(String pinyin) {
     var result = entries[pinyin];
     if (result == null) {
-      return PinyinIndexEntry(pinyin, {});
+      return {};
     }
     return result;
   }
-}
-
-/// PinyinIndex indexes the dictionary by flattened pinyin.
-///
-/// The diacritics are removed and capitals and lower cased.
-class PinyinIndexEntry {
-  final String pinyin;
-  final Set<DictionaryEntry> entries;
-
-  PinyinIndexEntry(this.pinyin, this.entries);
 }

@@ -286,6 +286,14 @@ class Senses {
     return senses.length;
   }
 
+  Sense? lookup(int luid) {
+    for (var sense in senses) {
+      if (sense.luid == luid) {
+        return sense;
+      }
+    }
+  }
+
   /// For JavaScript interoperability
   Map toJson() {
     var sensesArray = [];

@@ -34,7 +34,7 @@ class App {
         //  Index is still not loaded, give up
         msg = '- Headword index not loaded';
       } else {
-        var tokenizer = DictTokenizer(forwardIndex!);
+        var tokenizer = DictTokenizer(forwardIndex!, hwIDIndex!);
         var tokens = tokenizer.tokenize(query);
         for (var token in tokens) {
           terms.add(Term(token.token,
@@ -47,10 +47,13 @@ class App {
         msg = '- Pinyin index not loaded';
       } else {
         var flat = flattenPinyin(query);
-        var pEntries = pinyinIndex!.lookup(flat);
-        for (var pEntry in pEntries.entries) {
-          var e = DictionaryEntries(pEntry.headword, [pEntry]);
-          terms.add(Term(query, e, Senses([])));
+        var hwIds = pinyinIndex!.lookup(flat);
+        for (var hwId in hwIds) {
+          var e = hwIDIndex?.entries[hwId];
+          if (e != null) {
+            var dEntry = DictionaryEntries(e.headword, [e]);
+            terms.add(Term(query, dEntry, Senses([])));
+          }
         }
       }
     }
@@ -61,7 +64,16 @@ class App {
         msg = '- Reverse index is not loaded';
       } else {
         var queryLower = query.toLowerCase();
-        senses = reverseIndex!.lookup(queryLower);
+        var rEntries = reverseIndex!.lookup(queryLower);
+        List<Sense> sList = [];
+        for (var rEntry in rEntries) {
+          var e = hwIDIndex?.entries[rEntry.hwid];
+          var s = e?.getSenses().lookup(rEntry.luid);
+          if (s != null) {
+            sList.add(s);
+          }
+        }
+        var senses = Senses(sList);
         var term = Term(query, DictionaryEntries('', []), senses);
         terms.add(term);
       }

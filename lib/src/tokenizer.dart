@@ -8,8 +8,12 @@ import 'package:chinesenotes/chinesenotes.dart';
 /// be returned.
 class DictTokenizer {
   final ForwardIndex index;
+  final HeadwordIDIndex hwIndex;
 
-  DictTokenizer(this.index);
+  DictTokenizer(
+    this.index,
+    this.hwIndex,
+  );
 
   List<TextToken> tokenize(String text) {
     return _greedyLtoR(text);
@@ -25,7 +29,7 @@ class DictTokenizer {
     for (var i = 0; i < fragment.characters.length; i++) {
       for (var j = fragment.characters.length; j > 0; j--) {
         var w = fragment.characters.getRange(i, j);
-        var result = index.lookup(w.string);
+        var result = index.lookup(hwIndex, w.string);
         if (result.entries.isNotEmpty) {
           var token = TextToken(w.string, result.entries);
           tokens.add(token);

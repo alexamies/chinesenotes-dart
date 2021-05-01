@@ -24,15 +24,16 @@ DictionaryReverseIndex buildReverseIndex(HeadwordIDIndex hwIdIndex) {
   var sw = Stopwatch();
   sw.start();
   var np = NotesProcessor(notesPatterns);
-  Map<String, Senses> revIndex = {};
+  Map<String, Set<ReverseindexEntry>> revIndex = {};
   void addSenses(List<String> equivalents, Sense sense) {
     for (var equiv in equivalents) {
       var equivLower = equiv.toLowerCase();
       var s = revIndex[equivLower];
+      var rEntry = ReverseindexEntry(sense.hwid, sense.luid);
       if (s == null) {
-        revIndex[equivLower] = Senses([sense]);
-      } else if (!s.senses.contains(sense)) {
-        s.senses.add(sense);
+        revIndex[equivLower] = {rEntry};
+      } else if (!s.contains(sense)) {
+        s.add(rEntry);
         revIndex[equivLower] = s;
       }
     }
@@ -50,7 +51,6 @@ DictionaryReverseIndex buildReverseIndex(HeadwordIDIndex hwIdIndex) {
     return cleaned;
   }
 
-  var keys = hwIdIndex.entries.keys;
   for (var entry in hwIdIndex.entries.values) {
     for (var sense in entry.getSenses().senses) {
       var equivalents = sense.english.split(separator);
@@ -68,20 +68,27 @@ DictionaryReverseIndex buildReverseIndex(HeadwordIDIndex hwIdIndex) {
 
 /// DictionaryReverseIndex indexes the dictionary by English equivalent.
 ///
-/// The entries are indexed by Senses, which is part of a Chinese headword.
+/// The entries are indexed by lexical unit ID, which map directly to senses.
 class DictionaryReverseIndex {
-  final Map<String, Senses> _senses;
+  final Map<String, Set<ReverseindexEntry>> _senses;
 
   DictionaryReverseIndex(this._senses);
 
   /// Null safe lookup
   ///
   /// Return: the senses or an empty list if there is no match found
-  Senses lookup(String key) {
+  Set<ReverseindexEntry> lookup(String key) {
     var senses = _senses[key];
     if (senses == null) {
-      return Senses([]);
+      return {};
     }
     return senses;
   }
+}
+
+class ReverseindexEntry {
+  final int hwid;
+  final int luid;
+
+  ReverseindexEntry(this.hwid, this.luid);
 }
