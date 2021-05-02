@@ -3,20 +3,20 @@ import 'package:test/test.dart';
 import 'package:chinesenotes/chinesenotes.dart';
 
 const jsonString = """
-[{"s":"邃古","t":"","p":"suìgǔ","e": "remote antiquity","g":"noun","n":"(CC-CEDICT '邃古'; Guoyu '邃古')","h":"2"},
-{"s":"围","t":"圍","p":"wéi","e": "to surround; to encircle; to corral","g":"verb","n":"(Unihan '圍')","h":"3"},
-{"s":"围","t":"圍","p":"wéi","e": "a defensive wall","g":"noun","n":"Guoyu '圍' n 4)","h":"3"},
-{"s":"欧洲","t":"歐洲","p":"ōuzhōu","e": "Europe","g":"proper noun","n":"Short form is 欧 (SDC 58; XHZD, p. 700)","h":"261"},
-{"s":"欧","t":"歐","p":"ōu","e": "Europe","g":"proper noun","n":"Abbreviation for 欧洲 (Guoyu '歐' n 1)","h":"3681"},
-{"s":"玫瑰","t":"","p":"méiguī","e":"rose","g":"noun", "n":"Scientific name: Rosa rugosa (CC-CEDICT '玫瑰'; Guoyu '玫瑰' 1; Wikipedia '玫瑰')","h":"3492"},
-{"s":"五蕴","t":"五蘊","p":"wǔ yùn","e":"five aggregates","g":"phrase", "n":"Sanskrit equivalent: pañcaskandha, Pāli: pañcakhandhā; the five ...","h":"5049"},
-{"s":"恐龙","t":"恐龍","p":"kǒnglóng","e":"dinosaur","g":"noun", "n":"Measure word: 头 (CC-CEDICT '恐龍')","h":"75439"},
-{"s":"恐","t":"","p":"kǒng","e":"fear","g":"verb", "n":"In the sense of 害怕","h":"5084"}
+[{"s":"邃古","t":"","p":"suìgǔ","e": "remote antiquity","g":"noun","n":"(CC-CEDICT '邃古'; Guoyu '邃古')","h":2},
+{"s":"围","t":"圍","p":"wéi","e": "to surround; to encircle; to corral","g":"verb","n":"(Unihan '圍')","h":3},
+{"s":"围","t":"圍","p":"wéi","e": "a defensive wall","g":"noun","n":"Guoyu '圍' n 4)","h":3},
+{"s":"欧洲","t":"歐洲","p":"ōuzhōu","e": "Europe","g":"proper noun","n":"Short form is 欧 (SDC 58; XHZD, p. 700)","h":261},
+{"s":"欧","t":"歐","p":"ōu","e": "Europe","g":"proper noun","n":"Abbreviation for 欧洲 (Guoyu '歐' n 1)","h":3681},
+{"s":"玫瑰","t":"","p":"méiguī","e":"rose","g":"noun", "n":"Scientific name: Rosa rugosa (CC-CEDICT '玫瑰'; Guoyu '玫瑰' 1; Wikipedia '玫瑰')","h":3492},
+{"s":"五蕴","t":"五蘊","p":"wǔ yùn","e":"five aggregates","g":"phrase", "n":"Sanskrit equivalent: pañcaskandha, Pāli: pañcakhandhā; the five ...","h":5049},
+{"s":"恐龙","t":"恐龍","p":"kǒnglóng","e":"dinosaur","g":"noun", "n":"Measure word: 头 (CC-CEDICT '恐龍')","h":75439},
+{"s":"恐","t":"","p":"kǒng","e":"fear","g":"verb", "n":"In the sense of 害怕","h":5084}
 ]
 """;
 
 const jsonString2 = """
-[{"s":"汲引高风","t":"汲引高風","p":"jí yǐn gāo fēng","e": "to imitate a person of lofty character","g":"phrase","n":"Reworded from Mathews 1931 '汲引高風', p. 62)","h":"3001251", "luid": "3001251"}]
+[{"s":"汲引高风","t":"汲引高風","p":"jí yǐn gāo fēng","e": "to imitate a person of lofty character","g":"phrase","n":"Reworded from Mathews 1931 '汲引高風', p. 62)","h":3001251, "luid": 3001251}]
 """;
 
 var cnSource = DictionarySource(

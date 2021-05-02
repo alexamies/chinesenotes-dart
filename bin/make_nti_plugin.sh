@@ -1,6 +1,6 @@
 #! /usr/bin/bash
 echo 'Making the NTI Reader Chrome Plugin'
-VERSION=0.0.1
+VERSION=0.0.2
 DART_HOME=$HOME/development/flutter/bin/cache/dart-sdk
 NTI_READER_HOME=../buddhist-dictionary
 CNOTES_DART_HOME=$PWD

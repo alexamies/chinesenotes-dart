@@ -55,6 +55,8 @@ class ForwardIndex {
   ForwardIndex(this.headwordIds);
 
   ForwardIndex.fromHWIndex(HeadwordIDIndex index) : headwordIds = {} {
+    var sw = Stopwatch();
+    sw.start();
     for (var e in index.entries.entries) {
       var hwId = e.key;
       var dictEntry = e.value;
@@ -78,7 +80,8 @@ class ForwardIndex {
         headwordIds[t] = hwIdsTrad;
       }
     }
-    print('ForwardIndex.fromHWIndex loaded ${headwordIds.length} keys');
+    print('ForwardIndex.fromHWIndex loaded in ${sw.elapsedMilliseconds} ms '
+        'with ${headwordIds.length} keys');
   }
 
   Iterable<String> keys() {

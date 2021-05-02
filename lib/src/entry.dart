@@ -149,13 +149,15 @@ class DictionaryEntry {
 ///
 /// Indended for the Chinese Notes and NTI Reader native dictionary structure
 HeadwordIDIndex headwordsFromJson(String jsonString, DictionarySource source) {
+  var sw = Stopwatch();
+  sw.start();
   var i = source.startHeadwords;
   List data = json.decode(jsonString) as List;
   Map<int, DictionaryEntry> entryMap = {};
   for (var lu in data) {
     try {
-      var luid = (lu['luid'] != null) ? int.parse(lu['luid']) : i;
-      var hwid = (lu['h'] != null) ? int.parse(lu['h']) : i;
+      int luid = (lu['luid'] != null) ? lu['luid'] : i;
+      int hwid = (lu['h'] != null) ? lu['h'] : i;
       String s = lu['s'] ?? '';
       String t = lu['t'] ?? '';
       String p = lu['p'] ?? '';
@@ -175,7 +177,8 @@ HeadwordIDIndex headwordsFromJson(String jsonString, DictionarySource source) {
       print('Could not load parse entry ${lu['h']}, ${lu['s']}: $ex');
     }
   }
-  print('Loaded ${entryMap.length} headwords');
+  print('headwordsFromJson: Loaded in ${sw.elapsedMilliseconds} ms with '
+      '${entryMap.length} headwords');
   return HeadwordIDIndex(entryMap);
 }
 
