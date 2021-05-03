@@ -24,7 +24,6 @@ class AppConfig {
 
 void displayLookup(QueryResults results, Element? cnOutput, Element? div,
     Element? statusDiv, Element? errorDiv, Element? textField) {
-  print('displayLookup, ${results.query}, ${results.msg}');
   div?.children = [];
   if (textField == null) {
     var queryDiv = DivElement();
@@ -32,10 +31,8 @@ void displayLookup(QueryResults results, Element? cnOutput, Element? div,
     div?.children.add(queryDiv);
   }
   try {
-    print('displayLookup, got ${results.terms.length} terms');
     for (var term in results.terms) {
       var dictEntries = term.entries;
-      print('displayLookup, got ${dictEntries.length} entries');
       if (dictEntries.length > 0) {
         if (results.terms.length == 1) {
           var counttDiv = DivElement();
@@ -68,7 +65,6 @@ void displayLookup(QueryResults results, Element? cnOutput, Element? div,
           }
           var senses = ent.getSenses().senses;
           if (senses.length == 1) {
-            print('senses.length == 1');
             var sense = senses.first;
             var senseDiv = DivElement();
             var sensePrimary = DivElement();
@@ -117,7 +113,6 @@ void displayLookup(QueryResults results, Element? cnOutput, Element? div,
             entryDiv.children.add(senseOL);
           }
           var sourceAbbrev = results.sourceAbbrev[ent.headwordId];
-          print('Source abbrev for headword ${ent.headwordId}: $sourceAbbrev');
           if (sourceAbbrev != null && sourceAbbrev.isNotEmpty) {
             var sourceDiv = DivElement();
             sourceDiv.className = 'dict-entry-source';
@@ -174,8 +169,10 @@ void displayLookup(QueryResults results, Element? cnOutput, Element? div,
           var sourceSpan = SpanElement();
           sourceSpan.className = 'dict-sense-source';
           var sourceAbbrev = results.sourceAbbrev[sense.hwid];
-          sourceSpan.text = 'Source: ${sourceAbbrev}';
-          notesDiv.children.add(sourceSpan);
+          if (sourceAbbrev != null && sourceAbbrev != '') {
+            sourceSpan.text = 'Source: ${sourceAbbrev}';
+            notesDiv.children.add(sourceSpan);
+          }
           li.children.add(notesDiv);
           ul.children.add(li);
           numAdded++;

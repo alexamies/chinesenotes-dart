@@ -3,7 +3,7 @@
   "short_name": "NTI Reader",
   "description": "The Chinese-English Buddhist dictionary can be used to find terms with forward and multi-language lookup.",
   "author": "Alex Amies",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "manifest_version": 3,
   "permissions": [
     "activeTab",

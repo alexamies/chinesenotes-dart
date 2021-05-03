@@ -102,7 +102,7 @@ void main() async {
     print('Added ${results.sourceAbbrev.length} source abreviations');
 
     displayLookup(results, cnOutput, div, statusDiv, errorDiv, null);
-    sendResponse();
+    // sendResponse();
     return true;
   }
 
