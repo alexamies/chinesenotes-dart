@@ -59,16 +59,20 @@ class DictionaryEntry {
   /// Rolls up different writings of Hanyun pinyin from all senses
   final Set<String> pinyin;
 
+  /// Rolls up different writings of Hanyun pinyin with diacritics removed
+  final Set<String> flatPinyin;
+
   final Senses _senses;
 
-  DictionaryEntry(
-      this.headword, this.headwordId, this.sourceId, this.pinyin, this._senses);
+  DictionaryEntry(this.headword, this.headwordId, this.sourceId, this.pinyin,
+      this.flatPinyin, this._senses);
 
   DictionaryEntry.fromJson(var obj)
       : headword = obj['headword'],
         headwordId = obj['headwordId'],
         sourceId = obj['sourceId'],
         pinyin = {},
+        flatPinyin = {},
         _senses = Senses.fromJson(obj['senses']) {
     var pinyinObj = obj['sourceId'];
     if (pinyinObj is! String) {
@@ -80,6 +84,7 @@ class DictionaryEntry {
 
   void addSense(Sense sense) {
     pinyin.add(sense.pinyin);
+    flatPinyin.add(sense.flatPinyin);
     _senses.add(sense);
   }
 
@@ -161,14 +166,15 @@ HeadwordIDIndex headwordsFromJson(String jsonString, DictionarySource source) {
       String s = lu['s'] ?? '';
       String t = lu['t'] ?? '';
       String p = lu['p'] ?? '';
+      String fp = lu['fp'] ?? '';
       String e = lu['e'] ?? '';
       String g = lu['g'] ?? '';
       String n = lu['n'] ?? '';
-      var sense = Sense(luid, hwid, s, t, p, e, g, n);
+      var sense = Sense(luid, hwid, s, t, p, fp, e, g, n);
       var entry = entryMap[hwid];
       if (entry == null) {
-        entryMap[hwid] =
-            DictionaryEntry(s, hwid, source.sourceId, {p}, Senses([sense]));
+        entryMap[hwid] = DictionaryEntry(
+            s, hwid, source.sourceId, {p}, {fp}, Senses([sense]));
       } else {
         entry.addSense(sense);
       }
@@ -199,6 +205,9 @@ class Sense {
   /// The Hanyu pinyin pronunciation of the sense
   final String pinyin;
 
+  /// The Hanyu pinyin value with diacritics removed and lower cased
+  final String flatPinyin;
+
   /// A delimited set of English equivalents
   final String english;
 
@@ -209,7 +218,7 @@ class Sense {
   final String notes;
 
   Sense(this.luid, this.hwid, this.simplified, this.traditional, this.pinyin,
-      this.english, this.grammar, this.notes);
+      this.flatPinyin, this.english, this.grammar, this.notes);
 
   Sense.fromJson(var obj)
       : luid = obj['luid'],
@@ -217,6 +226,7 @@ class Sense {
         simplified = obj['simplified'],
         traditional = obj['traditional'],
         pinyin = obj['pinyin'],
+        flatPinyin = "",
         english = obj['english'],
         grammar = obj['grammar'],
         notes = obj['notes'] {}

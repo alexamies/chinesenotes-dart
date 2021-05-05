@@ -41,24 +41,7 @@ DictionarySources getSources() {
         int.parse(sourceTokens[6]));
   }
   if (sources.isEmpty) {
-    sources[1] = DictionarySource(
-        1,
-        'https://raw.githubusercontent.com/alexamies/chinesenotes.com/master/downloads/chinesenotes_words.json',
-        'Chinese Notes',
-        'Chinese Notes Chinese-English Dictionary',
-        'https://github.com/alexamies/chinesenotes.com',
-        'Alex Amies',
-        'Creative Commons Attribution-Share Alike 3.0',
-        2);
-    sources[2] = DictionarySource(
-        2,
-        'https://raw.githubusercontent.com/alexamies/chinesenotes.com/master/downloads/modern_named_entities.json',
-        'Modern Entities',
-        'Chinese Notes modern named entities',
-        'https://github.com/alexamies/chinesenotes.com',
-        'Alex Amies',
-        'Creative Commons Attribution-Share Alike 3.0',
-        6000002);
+    sources = getDefaultSources().sources;
   }
   return DictionarySources(sources);
 }
@@ -209,6 +192,7 @@ void main() async {
   }
 
   void lookup(Event evt) async {
+    print('Got a lookup event');
     var query = '';
     if (textField != null) {
       var tf = textField as TextInputElement;

@@ -9,20 +9,18 @@ class App {
   DictionaryReverseIndex? reverseIndex;
   HeadwordIDIndex? hwIDIndex;
   PinyinIndex? pinyinIndex;
-  bool loadReverseIndex = false;
+  bool multiLingualIndex = false;
 
   App();
 
   buildApp(List<HeadwordIDIndex> hwIDIndexes, DictionarySources sources,
-      bool loadReverseIndex) async {
+      bool multiLingualIndex) async {
     this.sources = sources;
     hwIDIndex = mergeHWIDIndexes(hwIDIndexes);
     forwardIndex = ForwardIndex.fromHWIndex(hwIDIndex!);
-    this.loadReverseIndex = loadReverseIndex;
-    if (loadReverseIndex) {
-      reverseIndex = buildReverseIndex(hwIDIndex!);
-      pinyinIndex = buildPinyinIndex(hwIDIndex!);
-    }
+    this.multiLingualIndex = multiLingualIndex;
+    pinyinIndex = buildPinyinIndex(hwIDIndex!);
+    reverseIndex = buildReverseIndex(hwIDIndex!, multiLingualIndex);
   }
 
   Future<QueryResults> lookup(String query) async {
@@ -49,16 +47,16 @@ class App {
     } else {
       // did not find anything for Chinese lookup, try pinyin
       if (pinyinIndex == null) {
-        msg = '- Pinyin index not loaded';
-      } else {
-        var flat = flattenPinyin(query);
-        var hwIds = pinyinIndex!.lookup(flat);
-        for (var hwId in hwIds) {
-          var e = hwIDIndex?.entries[hwId];
-          if (e != null) {
-            var dEntry = DictionaryEntries(e.headword, [e]);
-            terms.add(Term(query, dEntry, Senses([])));
-          }
+        msg = '- Pinyin index newly loaded';
+        pinyinIndex = buildPinyinIndex(hwIDIndex!);
+      }
+      var flat = flattenPinyin(query);
+      var hwIds = pinyinIndex!.lookup(flat);
+      for (var hwId in hwIds) {
+        var e = hwIDIndex?.entries[hwId];
+        if (e != null) {
+          var dEntry = DictionaryEntries(e.headword, [e]);
+          terms.add(Term(query, dEntry, Senses([])));
         }
       }
     }
@@ -67,9 +65,7 @@ class App {
       // did not find anything for forward lookup, try reverse lookup
       if (reverseIndex == null) {
         msg = '- Reverse index was loaded';
-        loadReverseIndex = true;
-        reverseIndex = buildReverseIndex(hwIDIndex!);
-        pinyinIndex = buildPinyinIndex(hwIDIndex!);
+        reverseIndex = buildReverseIndex(hwIDIndex!, multiLingualIndex);
       }
       var queryLower = query.toLowerCase();
       var rEntries = reverseIndex!.lookup(queryLower);

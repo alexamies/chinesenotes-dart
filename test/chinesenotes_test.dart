@@ -32,8 +32,9 @@ var cnSource = DictionarySource(
 // DictionaryLoader load a dictionary from some source.
 class TestDictionaryLoader {
   var chinese = '你好';
-  var senses = Senses(
-      [Sense(1, 42, '你好', '', 'níhǎo', 'hello', 'interjection', 'p. 655')]);
+  var senses = Senses([
+    Sense(1, 42, '你好', '', 'níhǎo', 'nihao', 'hello', 'interjection', 'p. 655')
+  ]);
 
   /// fill in real implementation
   ForwardIndex load() {
@@ -44,7 +45,7 @@ class TestDictionaryLoader {
   }
 
   HeadwordIDIndex getHeadwordIDIndex() {
-    var entry = DictionaryEntry(chinese, 42, 1, {'níhǎo'}, senses);
+    var entry = DictionaryEntry(chinese, 42, 1, {'níhǎo'}, {'nihao'}, senses);
     var hIndex = {42: entry};
     return HeadwordIDIndex(hIndex);
   }
@@ -103,7 +104,7 @@ void main() {
     var loader = TestDictionaryLoader();
     var forwardIndex = await loader.load();
     var hwIndex = loader.getHeadwordIDIndex();
-    var reverseIndex = buildReverseIndex(hwIndex);
+    var reverseIndex = buildReverseIndex(hwIndex, true);
     const headword = '你好';
     const english = 'hello';
     var senses = reverseIndex.lookup(english);
@@ -255,34 +256,34 @@ void main() {
   });
   test('Sense == equals with same LUID and HWID.', () {
     var chinese = '你好';
-    var hello1 =
-        Sense(42, 42, chinese, '', 'níhǎo', 'hello', 'interjection', 'p. 655');
-    var hello2 =
-        Sense(42, 42, chinese, '', 'níhǎo', 'hello', 'interjection', 'p. 655');
+    var hello1 = Sense(42, 42, chinese, '', 'níhǎo', 'nihao', 'hello',
+        'interjection', 'p. 655');
+    var hello2 = Sense(42, 42, chinese, '', 'níhǎo', 'nihao', 'hello',
+        'interjection', 'p. 655');
     expect(hello1, equals(hello2));
   });
   test('Sense == not equals with different LUID and HWID.', () {
     var chinese = '你好';
-    var hello1 =
-        Sense(42, 42, chinese, '', 'níhǎo', 'hello', 'interjection', 'p. 655');
-    var hello2 =
-        Sense(43, 43, chinese, '', 'níhǎo', 'hello', 'interjection', 'p. 655');
+    var hello1 = Sense(42, 42, chinese, '', 'níhǎo', 'nihao', 'hello',
+        'interjection', 'p. 655');
+    var hello2 = Sense(43, 43, chinese, '', 'níhǎo', 'nihao', 'hello',
+        'interjection', 'p. 655');
     expect(hello1, isNot(hello2));
   });
   test('Sense == equivalent is equals with no LUID.', () {
     var chinese = '你好';
-    var hello1 =
-        Sense(-1, 42, chinese, '', 'níhǎo', 'hello', 'interjection', 'p. 655');
-    var hello2 =
-        Sense(-1, 43, chinese, '', 'níhǎo', 'hello', 'interjection', 'p. 655');
+    var hello1 = Sense(-1, 42, chinese, '', 'níhǎo', 'nihao', 'hello',
+        'interjection', 'p. 655');
+    var hello2 = Sense(-1, 43, chinese, '', 'níhǎo', 'nihao', 'hello',
+        'interjection', 'p. 655');
     expect(hello1, equals(hello2));
   });
   test('Sense == not equals with same LUID, different HWID.', () {
     var chinese = '你好';
-    var hello1 =
-        Sense(1, 42, chinese, '', 'níhǎo', 'hello', 'interjection', 'p. 655');
-    var hello2 =
-        Sense(1, 43, chinese, '', 'níhǎo', 'hello', 'interjection', 'p. 655');
+    var hello1 = Sense(1, 42, chinese, '', 'níhǎo', 'nihao', 'hello',
+        'interjection', 'p. 655');
+    var hello2 = Sense(1, 43, chinese, '', 'níhǎo', 'nihao', 'hello',
+        'interjection', 'p. 655');
     expect(hello1, isNot(hello2));
   });
   test('Sense.fromJson constructs a Sense object correctly.', () {

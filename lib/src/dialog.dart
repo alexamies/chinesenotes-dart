@@ -10,20 +10,22 @@ const maxSenses = 10;
 
 class AppConfig {
   final String contextMenuText;
-  final bool reverseIndex;
+  final bool multiLingualIndex;
   final DictionarySources sources;
 
-  AppConfig(this.contextMenuText, this.reverseIndex, this.sources);
+  AppConfig(this.contextMenuText, this.multiLingualIndex, this.sources);
 
   AppConfig.fromJson(var obj)
       : contextMenuText = obj['contextMenuText'],
-        reverseIndex =
-            obj['reverseIndex'] == null ? obj['reverseIndex'] : false,
+        multiLingualIndex =
+            obj['multiLingualIndex'] == null ? obj['multiLingualIndex'] : false,
         sources = DictionarySources.fromJson(obj['sources']);
 }
 
 void displayLookup(QueryResults results, Element? cnOutput, Element? div,
     Element? statusDiv, Element? errorDiv, Element? textField) {
+  print('Showing results for ${results.query}, found ${results.terms.length} '
+      'term(s) ${results.msg}');
   div?.children = [];
   if (textField == null) {
     var queryDiv = DivElement();
@@ -51,6 +53,7 @@ void displayLookup(QueryResults results, Element? cnOutput, Element? div,
           entryDiv = DetailsElement();
           (entryDiv as DetailsElement).open = true;
         }
+        print('displayLookup: adding results to ${div?.id}');
         div?.children.add(entryDiv);
         for (var ent in dictEntries.entries) {
           var hwDiv = DivElement();

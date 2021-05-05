@@ -19,8 +19,9 @@ const stopWords = ['a ', 'an ', 'to ', 'the '];
 ///
 /// Params:
 ///   forrwardIndex - containing the dictionary entries
-///   np - to extract secondary equivalents contained in notes
-DictionaryReverseIndex buildReverseIndex(HeadwordIDIndex hwIdIndex) {
+///   multiLingualIndex - whether to extract secondary equivalents in notes
+DictionaryReverseIndex buildReverseIndex(
+    HeadwordIDIndex hwIdIndex, bool multiLingualIndex) {
   var sw = Stopwatch();
   sw.start();
   var np = NotesProcessor(notesPatterns);
@@ -56,8 +57,10 @@ DictionaryReverseIndex buildReverseIndex(HeadwordIDIndex hwIdIndex) {
       var equivalents = sense.english.split(separator);
       var cleaned = removeStopWords(equivalents);
       addSenses(cleaned, sense);
-      var notesEquiv = np.parseNotes(sense.notes);
-      addSenses(notesEquiv, sense);
+      if (multiLingualIndex) {
+        var notesEquiv = np.parseNotes(sense.notes);
+        addSenses(notesEquiv, sense);
+      }
     }
   }
   print('buildReverseIndex completed in ${sw.elapsedMilliseconds} ms with '

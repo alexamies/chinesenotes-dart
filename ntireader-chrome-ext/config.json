@@ -1,6 +1,6 @@
 {
   "contextMenuText": "Lookup with NTI Reader ...",
-  "reverseIndex": false,
+  "multiLingualIndex": true,
   "sources": [{
     "sourceId": 1,
     "url": "ntireader_words.json",

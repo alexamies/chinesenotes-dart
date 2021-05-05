@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:chinesenotes/chinesenotes.dart';
 
 const pinyin2Ascii = {
@@ -42,8 +40,18 @@ const pinyin2Ascii = {
   'Ū': 'u',
   'Ú': 'u',
   'Ǔ': 'u',
-  'Ù': 'u'
+  'Ù': 'u',
+  ' ': ''
 };
+
+/// Remove accents from a Hanyu pinyin string
+String flattenPinyin(String pinyin) {
+  var flattened = pinyin;
+  for (var e in pinyin2Ascii.entries) {
+    flattened = flattened.replaceAll(e.key, e.value);
+  }
+  return flattened;
+}
 
 /// ForwardIndex is an index for a collection of dictionaries.
 ///
@@ -175,14 +183,6 @@ class NotesProcessor {
   }
 }
 
-String flattenPinyin(String pinyin) {
-  var flattened = pinyin;
-  for (var e in pinyin2Ascii.entries) {
-    flattened = flattened.replaceAll(e.key, e.value);
-  }
-  return flattened;
-}
-
 PinyinIndex buildPinyinIndex(HeadwordIDIndex hwIDIndex) {
   var sw = Stopwatch();
   sw.start();
@@ -191,8 +191,7 @@ PinyinIndex buildPinyinIndex(HeadwordIDIndex hwIDIndex) {
     if (hw.pinyin.isEmpty) {
       continue;
     }
-    for (var pinyin in hw.pinyin) {
-      var pinyinFlat = flattenPinyin(pinyin);
+    for (var pinyinFlat in hw.flatPinyin) {
       var entry = entries[pinyinFlat];
       if (entry == null) {
         entries[pinyinFlat] = {hw.headwordId};
