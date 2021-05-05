@@ -44,7 +44,8 @@ void initApp() async {
         print('Could not load dicitonary ${source.abbreviation}: $ex');
       }
     }
-    var loadReverseIndex = appConfig != null ? appConfig!.reverseIndex : false;
+    var loadReverseIndex =
+        appConfig != null ? appConfig!.multiLingualIndex : false;
     app.buildApp(hwIDIndexes, sources, loadReverseIndex);
     sw.stop();
     print('Dictionary loaded in ${sw.elapsedMilliseconds} ms with '

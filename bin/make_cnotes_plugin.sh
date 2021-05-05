@@ -1,6 +1,6 @@
 #! /usr/bin/bash
 echo 'Making the Chinese Notes Chrome Plugin'
-VERSION=0.0.3
+VERSION=0.0.5
 DART_HOME=$HOME/development/flutter/bin/cache/dart-sdk
 CNOTES_READER_HOME=../chinesenotes.com
 CNOTES_DART_HOME=$PWD
