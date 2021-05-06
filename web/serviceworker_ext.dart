@@ -87,6 +87,7 @@ void contextMenuSetup() {
 void setUpApp(var details) async {
   try {
     String jsonConfigString = await loadFromExt('config.json');
+    print('setUpApp: jsonConfigString: ${jsonConfigString.length} bytes');
     if (jsonConfigString.isNotEmpty) {
       Map configData = json.decode(jsonConfigString) as Map;
       appConfig = AppConfig.fromJson(configData);

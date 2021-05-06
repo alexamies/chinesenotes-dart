@@ -67,7 +67,7 @@ Future<App?> initApp(DictionarySources sources, Element statusDiv,
     }
     statusDiv.text = 'Dictionary headwords loaded';
     var app = App();
-    app.buildApp(hwIDIndexes, sources, true);
+    app.buildApp(hwIDIndexes, sources, false);
     if (submitButton != null) {
       var multiLookupSubmit = submitButton as ButtonElement;
       multiLookupSubmit.disabled = false;
@@ -178,21 +178,7 @@ void main() async {
   var textField = querySelector('#multiLookupInput');
   var div = querySelector('#lookupResults');
 
-  void onMessageListener(msg, sender, sendResponse) async {
-    if (msg == null) {
-      print('onMessageListener msg is null');
-    }
-    if (!msg.hasProperty('term')) {
-      print('onMessageListener msg does not have term');
-    }
-    var query = msg['term'];
-    print('onMessageListener, term: ${query} from $sender');
-    var results = await app.lookup(query);
-    displayLookup(results, cnOutput, div, statusDiv, errorDiv, textField);
-  }
-
   void lookup(Event evt) async {
-    print('Got a lookup event');
     var query = '';
     if (textField != null) {
       var tf = textField as TextInputElement;
@@ -205,15 +191,4 @@ void main() async {
 
   var findForm = querySelector('#multiLookupForm');
   findForm?.onSubmit.listen(lookup);
-
-  // If we are a Chrome extension, then listen for messages
-  try {
-    var jsOnMessageEvent = context['chrome']['runtime']['onMessage'];
-    JsObject dartOnMessageEvent = (jsOnMessageEvent is JsObject
-        ? jsOnMessageEvent
-        : new JsObject.fromBrowserObject(jsOnMessageEvent));
-    dartOnMessageEvent.callMethod('addListener', [onMessageListener]);
-  } catch (e) {
-    print('Unable to listen for Chrome content events: $e');
-  }
 }

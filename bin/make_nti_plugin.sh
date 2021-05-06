@@ -4,9 +4,9 @@ VERSION=0.0.5
 DART_HOME=$HOME/development/flutter/bin/cache/dart-sdk
 NTI_READER_HOME=../buddhist-dictionary
 CNOTES_DART_HOME=$PWD
-$DART_HOME/bin/dart2js --csp -o ntireader-chrome-ext/main.dart.js web/main.dart
-$DART_HOME/bin/dart2js --csp -o ntireader-chrome-ext/serviceworker_ext.dart.js web/serviceworker_ext.dart
-$DART_HOME/bin/dart2js --csp -o ntireader-chrome-ext/content.dart.js web/content.dart
+$DART_HOME/bin/dart2js --csp -O2 -o ntireader-chrome-ext/main.dart.js web/main.dart
+$DART_HOME/bin/dart2js --csp -O2 -o ntireader-chrome-ext/serviceworker_ext.dart.js web/serviceworker_ext.dart
+$DART_HOME/bin/dart2js --csp -O2  -o ntireader-chrome-ext/content.dart.js web/content.dart
 cd $NTI_READER_HOME
 bin/make_downloads.sh
 python3 bin/tsv2json.py "data/dictionary/fgs_mwe.txt" fgs_mwe.json \

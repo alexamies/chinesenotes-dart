@@ -35,6 +35,7 @@ void displayLookup(QueryResults results, Element? cnOutput, Element? div,
   try {
     for (var term in results.terms) {
       var dictEntries = term.entries;
+      print('Showing term ${term.query}, found ${dictEntries.length} entries');
       if (dictEntries.length > 0) {
         if (results.terms.length == 1) {
           var counttDiv = DivElement();
@@ -183,7 +184,7 @@ void displayLookup(QueryResults results, Element? cnOutput, Element? div,
             break;
           }
         }
-      } else if (results.terms.isEmpty) {
+      } else {
         div?.text = 'Did not find any results.';
       }
       statusDiv?.text = '';
