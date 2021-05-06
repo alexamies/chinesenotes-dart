@@ -26,7 +26,9 @@ The extension package includes the dictionary, which takes about 3 seconds to
 load and initialize indexes. Use it by selecting text on a page, right clicking,
 and selecting Lookup with Chinese Notes ...
 
-See screenshots in the ../drawings directory.
+See screenshots in the ../drawings directory. See a demo at
+
+https://youtu.be/3ExNACiczyw
 
 ## Developers
 
