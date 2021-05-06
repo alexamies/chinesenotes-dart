@@ -3,7 +3,7 @@
   "short_name": "Chinese Notes",
   "description": "The dictionary can be used to lookup Chinese words by simplified or traditional Chinese or reverse lookup from English equivalent.",
   "author": "Alex Amies",
-  "version": "0.0.3",
+  "version": "0.0.5",
   "manifest_version": 3,
   "permissions": [
     "activeTab",

@@ -25,7 +25,6 @@ Future<String> loadFromExt(String filename) async {
 void initApp() async {
   var sw = Stopwatch();
   sw.start();
-  print('CNotes, initApp enter');
   try {
     String jsonConfigString = await loadFromExt('config.json');
     if (jsonConfigString.isNotEmpty) {
@@ -53,7 +52,6 @@ void initApp() async {
   } catch (e) {
     print('Unable to load dictionary, error: $e');
   }
-  print('CNotes, initApp exit');
 }
 
 void onMenuEvent(JsObject info, var tabsNotUsed) async {
@@ -87,7 +85,6 @@ void contextMenuSetup() {
 void setUpApp(var details) async {
   try {
     String jsonConfigString = await loadFromExt('config.json');
-    print('setUpApp: jsonConfigString: ${jsonConfigString.length} bytes');
     if (jsonConfigString.isNotEmpty) {
       Map configData = json.decode(jsonConfigString) as Map;
       appConfig = AppConfig.fromJson(configData);
@@ -121,7 +118,6 @@ void onInstalled() async {
 }
 
 void main() {
-  print('CNotes: running service worker');
   onInstalled();
   contextMenuSetup();
 }
