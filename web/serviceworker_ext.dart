@@ -43,12 +43,13 @@ void initApp() async {
         print('Could not load dicitonary ${source.abbreviation}: $ex');
       }
     }
-    var loadReverseIndex =
+    var multiLingualIndex =
         appConfig != null ? appConfig!.multiLingualIndex : false;
-    app.buildApp(hwIDIndexes, sources, loadReverseIndex);
+    app.buildApp(hwIDIndexes, sources, multiLingualIndex);
     sw.stop();
     print('Dictionary loaded in ${sw.elapsedMilliseconds} ms with '
-        '${app.hwIDIndex?.entries.length} entries');
+        '${app.hwIDIndex?.entries.length} entries, multiLingualIndex: '
+        '$multiLingualIndex');
   } catch (e) {
     print('Unable to load dictionary, error: $e');
   }

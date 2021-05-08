@@ -18,8 +18,8 @@ class AppConfig {
   AppConfig.fromJson(var obj)
       : contextMenuText = obj['contextMenuText'],
         multiLingualIndex =
-            obj['multiLingualIndex'] == null ? obj['multiLingualIndex'] : false,
-        sources = DictionarySources.fromJson(obj['sources']);
+            obj['multiLingualIndex'] != null ? obj['multiLingualIndex'] : false,
+        sources = DictionarySources.fromJson(obj['sources']) {}
 }
 
 void displayLookup(QueryResults results, Element? cnOutput, Element? div,

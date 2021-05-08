@@ -412,4 +412,7 @@ void main() {
   test('isCJKChar correctly identifies a Chinese character', () {
     expect(isCJKChar('歐'), equals(true));
   });
+  test('_normalizeQuery correctly lower cases a query string', () {
+    expect(normalizeQuery('Mary O’Malley'), equals('mary o\'malley'));
+  });
 }

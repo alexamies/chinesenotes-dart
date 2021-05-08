@@ -67,8 +67,8 @@ class App {
         msg = '- Reverse index was loaded';
         reverseIndex = buildReverseIndex(hwIDIndex!, multiLingualIndex);
       }
-      var queryLower = query.toLowerCase();
-      var rEntries = reverseIndex!.lookup(queryLower);
+      var nQuery = normalizeQuery(query);
+      var rEntries = reverseIndex!.lookup(nQuery);
       List<Sense> sList = [];
       for (var rEntry in rEntries) {
         var e = hwIDIndex?.entries[rEntry.hwid];
@@ -110,6 +110,11 @@ class App {
     var sourceId = hwIDIndex?.entries[hwID]?.sourceId;
     return sources?.lookup(sourceId!);
   }
+}
+
+String normalizeQuery(String query) {
+  var clean = query.replaceAll('’', '\'');
+  return clean.toLowerCase();
 }
 
 /// Contains the result of a lookup checking both forward and reverse indexes.

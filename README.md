@@ -1,4 +1,4 @@
-# Chinese Notes Dictionary App
+# Chinese Notes Dictionary Dart App
 
 App for the Chinese Notes Chinese-English dictionary in Dart.
 

@@ -99,7 +99,6 @@ void main() async {
     print('onMessageListener, query: ${query}');
     var results = QueryResults.fromJson(msg);
     print('onMessageListener, got ${results.terms.length} terms');
-    print('Added ${results.sourceAbbrev.length} source abreviations');
 
     displayLookup(results, cnOutput, div, statusDiv, errorDiv, null);
     // sendResponse();
