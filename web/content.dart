@@ -39,7 +39,7 @@ DivElement makeDialog() {
   cnOutput.children.add(closeButton);
 
   var header = HeadingElement.h4();
-  header.text = 'Chinese-English Dictionary';
+  header.text = 'Dictionary lookup';
   header.style.fontSize = 'medium;';
   cnOutput.children.add(header);
 

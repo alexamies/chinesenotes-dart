@@ -6,7 +6,7 @@
     "url": "ntireader_words.json",
     "abbreviation": "NTI Reader",
     "title": "NTI Reader Chinese-English Buddhist Dictionary",
-    "citation": "https://github.com/alexamies/chinesenotes.com",
+    "citation": "https://github.com/alexamies/buddhist-dictionary",
     "author": "Alex Amies",
     "license": "Creative Commons Attribution-Share Alike 3.0",
     "startHeadwords": 2
@@ -16,7 +16,7 @@
     "url": "buddhist_named_entities.json",
     "abbreviation": "Buddhist named entities",
     "title": "NTI Reader Buddhist named entities",
-    "citation": "https://github.com/alexamies/chinesenotes.com",
+    "citation": "https://github.com/alexamies/buddhist-dictionary",
     "author": "Alex Amies",
     "license": "Creative Commons Attribution-Share Alike 3.0",
     "startHeadwords": 7000002
@@ -26,7 +26,7 @@
     "url": "fgs_mwe.json",
     "abbreviation": "HB Glossary",
     "title": "Fo Guang Shan Glossary of Humnastic Buddhism",
-    "citation": "https://github.com/alexamies/chinesenotes.com",
+    "citation": "https://github.com/alexamies/buddhist-dictionary",
     "author": "Fo Guang Shan",
     "license": "Creative Commons Attribution-Share Alike 3.0",
     "startHeadwords": 1000001

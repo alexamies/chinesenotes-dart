@@ -84,6 +84,9 @@ chinesenotes.ntiReaderJson to your web server. Makes the styles in the
 index.html page and styles.css match your web site. Follow instructions at
 [Web deployment](https://dart.dev/web/deployment).
 
+## Browser Extensions
+
+See chrome-ext/README.md and ntireader-chrome-ext/README.md
 
 ## Native App Example
 
@@ -92,4 +95,18 @@ To run it type
 
 ```shell
 dart run example/main.dart
+```
+## Tools for Other Dictionaries
+
+### Mahavyutpatti
+
+Mahavyutpatti dictionary is a historic Chinese-Tibetan-Sanskrit Buddhist 
+dictionary. Download the data file from the DILA site and save it in the 
+`data` directory.
+
+```shell
+mkdir data
+cd data
+curl -k https://glossaries.dila.edu.tw/data/mahavyutpatti.dila.tei.p5.xml.zip
+unzip mahavyutpatti.dila.tei.p5.xml.zip 
 ```

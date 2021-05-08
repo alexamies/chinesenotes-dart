@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+    <title>NTI Reader Chinese-English Buddhist Dictionary</title>
+    <link rel='stylesheet' href='styles.css'>
+  </head>
+  <body>
+    <h1>Mahāvyutpatti Sanskrit-Tibetan-Chinese Budhist Dictionary</h1>
+    <div id='cnOutput'>
+      <p>
+        Use the dicitonary either by selected text on the page and right
+        clicking to use the context menu or from this popup page. 
+        Search for a term. Examples: 佛, 如來, 不動, 鐘頭, 一切智, 定, 和, 布施, or
+        五蘊. Also try reverse lookup with an Sanskrit or
+        Tibetan Wylie equivalent.
+        <a href='popup.html' target='_blank'
+        title='Open this page in a new tab to avoid needing to reload it each time'
+        >Open this page in a new tab</a> to avoid needing to reload it each time.
+      </p>
+      <div id='formDiv'>
+        <form name='multiLookupForm' id='multiLookupForm' action='#'>
+          <div>
+            <label for='multiLookupInput'>Search for</label>
+            <input type='text' name='multiLookupInput'
+                   id='multiLookupInput' size='40' required/>
+            <button type='submit' id='multiLookupSubmit' disabled>
+              <span>Find</span>
+            </button>
+          </div>
+        </form>
+      </div>
+      <div id='lookupResults'></div>
+      <div id='lookupError'></div>
+      <div class='status' id='status'></div>
+      <details>
+        <summary>Settings</summary>
+        <h2>Configuration Settings</h2>
+        <h3>Dictionary Sources</h3>
+        <div id='sourcesDiv'>
+          <form name='sourcesForm' id='sourcesForm' action='#'>
+            <fieldset class='source-form-element'>
+              <input type='checkbox' name='sourceName1'
+                     id='sourceName1' size='40'
+                     value='1,Mahāvyutpatti,Mahāvyutpatti Sanskrit-Tibetan-Chinese Budhist Dictionary,https://glossaries.dila.edu.tw/glossaries/MVP?,,Creative Commons Attribution-Share Alike 3.0,2'
+                     checked='true'
+                     disabled='true'/>
+              <label for='sourceName1'
+                     >Mahāvyutpatti Sanskrit-Tibetan-Chinese Budhist Dictionary</label>
+            </fieldset>
+            <fieldset class='source-form-element'>
+              <input type='hidden' name='sourceURL1'
+                     id='sourceURL1' size='40'
+                     value='mahavyutpatti.json'
+                     readonly='true'/>
+            </fieldset>
+          </form>
+        </div>
+      </details>
+    </div>
+    <script defer src='main.dart.js'></script>
+  </body>
+</html>

@@ -1,0 +1,14 @@
+{
+  "contextMenuText": "Lookup in Mahāvyutpatti ...",
+  "multiLingualIndex": true,
+  "sources": [{
+    "sourceId": 1,
+    "url": "mahavyutpatti.json",
+    "abbreviation": "Mahāvyutpatti",
+    "title": "Mahāvyutpatti Sanskrit-Tibetan-Chinese Budhist Dictionary",
+    "citation": "https://glossaries.dila.edu.tw/glossaries/MVP",
+    "author": "",
+    "license": "Copyright expired",
+    "startHeadwords": 2
+  }]
+}
