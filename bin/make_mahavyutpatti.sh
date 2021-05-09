@@ -12,7 +12,14 @@ if [ ! -f $TARGET_DIR/mahavyutpatti.json ]; then
   curl -k -o mahavyutpatti.dila.tei.p5.xml.zip https://glossaries.dila.edu.tw/data/mahavyutpatti.dila.tei.p5.xml.zip
   unzip mahavyutpatti.dila.tei.p5.xml.zip
   cd ..
-  dart tools/main.dart
+  dart tools/parse_tei.dart \
+    -s 'data/mahavyutpatti.dila.tei.p5.xml' \
+    -t 'mahavyutpatti-chrome-ext/mahavyutpatti.json' \
+    -l "sanskrit" \
+    -n "Mahāvyutpatti Sanskrit-Tibetan-Chinese dictionary" \
+    -x "Mahāvyutpatti" \
+    -a "" \
+    -y "Copyright expired"
 fi
 cd $TARGET_DIR
 zip mahavyutpatti-chrome-ext-${VERSION}.zip *.js* *.json *.html *.css images/*

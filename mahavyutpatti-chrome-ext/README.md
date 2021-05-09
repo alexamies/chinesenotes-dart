@@ -3,7 +3,13 @@
 This page describes how to use the Chrome browser extension.
 
 Mahāvyutpatti is a historic dictionary compiled in the Song dynasty for
-translation of Buddhist texts to Tibetan.
+translation of Buddhist texts to Tibetan. You can find out more about the
+dictionary at
+
+https://glossaries.dila.edu.tw/glossaries/MVP?locale=en
+
+Thank you to the Digital Archive Section at Dharma Drum Institute of Liberal
+Arts (DILA) for making the TEI file available.
 
 Install the extension from the Chrome store
 
@@ -19,6 +25,7 @@ menu that says, "Lookup in Mahāvyutpatti ..." Click it. A dialog should appear
 with the details of the entry. A Youtube video demonstrating it is here
 
 https://youtu.be/_RXTqXetQb8
+
 
 Screenshots
 

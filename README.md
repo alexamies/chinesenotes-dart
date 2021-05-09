@@ -98,15 +98,13 @@ dart run example/main.dart
 ```
 ## Tools for Other Dictionaries
 
-### Mahavyutpatti
-
-Mahavyutpatti dictionary is a historic Chinese-Tibetan-Sanskrit Buddhist 
-dictionary. Download the data file from the DILA site and save it in the 
-`data` directory.
+A tool for parsing dicitonaries in
+[Text Encoding Initiative](https://www.tei-c.org/release/doc/tei-p5-doc/en/html/DI.html)
+or TEI format is provided in the `tools` directory. It can be used like
 
 ```shell
-mkdir data
-cd data
-curl -k https://glossaries.dila.edu.tw/data/mahavyutpatti.dila.tei.p5.xml.zip
-unzip mahavyutpatti.dila.tei.p5.xml.zip 
+dart tools/parse_tei.dart -s source-tei.xml -t target-file.json -l chinese
 ```
+
+to parse the source TEI file and write to the JSON target file that can be
+read natively by the Chinese Notes code.

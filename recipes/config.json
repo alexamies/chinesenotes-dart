@@ -1,0 +1,14 @@
+{
+  "contextMenuText": "Lookup with my extension ...",
+  "multiLingualIndex": true,
+  "sources": [{
+    "sourceId": 1,
+    "url": "source.json",
+    "abbreviation": "My Extension",
+    "title": "The Title of My Extension",
+    "citation": "https://example.com/extension",
+    "author": "A. Author",
+    "license": "Copyright by A. Author",
+    "startHeadwords": 2
+  }]
+}

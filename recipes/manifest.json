@@ -1,8 +1,8 @@
 {
-  "name": "Mahāvyutpatti Buddhist Dictionary",
-  "short_name": "Mahāvyutpatt",
-  "description": "A Sanskrit-Tibetan-Chinese dictionary compiled for translation of Buddhist texts.",
-  "author": "Alex Amies",
+  "name": "Name of extension",
+  "short_name": "Short name",
+  "description": "a longer description",
+  "author": "A. Author",
   "version": "0.0.1",
   "manifest_version": 3,
   "permissions": [
@@ -14,7 +14,7 @@
   },
   "action": {
     "default_popup": "popup.html",
-    "default_title": "Mahāvyutpatti Buddhist Dictionary",
+    "default_title": "Name of extension",
     "default_icon": {
       "16": "/images/icon16.png",
       "32": "/images/icon32.png",
