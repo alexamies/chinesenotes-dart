@@ -16,7 +16,17 @@ https://www2.hf.uio.no/polyglotta/index.php?page=volume&vid=435
 
 Right click on a Chinese, Tibetan, or Sanskrit term. You should see a context
 menu that says, "Lookup in Mahāvyutpatti ..." Click it. A dialog should appear
-with the details of the entry.
+with the details of the entry. A Youtube video demonstrating it is here
+
+https://youtu.be/_RXTqXetQb8
+
+Screenshots
+
+![](../drawings/mahavyutpatti-chrome-ext-menu.png?raw=true)
+
+![](../drawings/mahavyutpatti-chrome-ext-dialog.png?raw=true)
+
+![](../drawings/mahavyutpatti-chrome-ext-tibetan.png?raw=true)
 
 ## Development
 
