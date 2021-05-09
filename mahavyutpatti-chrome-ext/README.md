@@ -24,6 +24,27 @@ This section describes how to build and package the extension.
 
 Prerequisites: Dart, Linux
 
+Get the package dependencies
+
+```shell
+dart pub get
+```
+
+### Dictionary data
+
+Mahavyutpatti dictionary is a historic Chinese-Tibetan-Sanskrit Buddhist 
+dictionary. Download the data file from the DILA site and save it in the 
+`data` directory.
+
+```shell
+mkdir data
+cd data
+curl -k -o mahavyutpatti.dila.tei.p5.xml.zip \
+  https://glossaries.dila.edu.tw/data/mahavyutpatti.dila.tei.p5.xml.zip
+unzip mahavyutpatti.dila.tei.p5.xml.zip
+cd ..
+```
+
 ### Compiling the code
 
 From the top level directory run
