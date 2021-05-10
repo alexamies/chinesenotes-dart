@@ -66,11 +66,13 @@ You are welcome to download and work directly with the code.
 
 ### Compiling the code
 
-Set your Dart SDK home directory in an environment variable
+Set your Dart SDK home directory in the environment variable
 
 ```shell
 DART_HOME=[your dart home]
 ```
+
+in the script `bin/make_nti_plugin.sh`
 
 If you have installed Flutter, it may be somewhere like
 
@@ -78,13 +80,26 @@ If you have installed Flutter, it may be somewhere like
 DART_HOME=$HOME/flutter/bin/cache/dart-sdk
 ```
 
-From the top level directory, compile `main.dart` to JavaScript with the command
+From the top level directory, run the build script with the command
 
 ```shell
-$DART_HOME/bin/dart2js --csp -o chrome-ext/main.dart.js web/main.dart 
+bin/make_nti_plugin.sh
 ```
 
+The zipped exension will be place in the `downloads` directory.
+
 ### Try it out
+
+Make a convenient directory somewhere and copy the zipped extension to it:
+
+```shell
+mkdir tmp
+cp downloads/ntireader-chrome-ext-0.0.5.zip
+cd tmp
+unzip ntireader-chrome-ext-0.0.5.zip
+rm *.zip
+cd ..
+```
 
 In developmenet deploy to the browser by loading this directory as a Chrome
 extension in development mode.
