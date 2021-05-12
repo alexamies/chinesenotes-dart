@@ -27,7 +27,7 @@ these commands from the top level directory of the project:
 mkdir data
 SOURCE=lokaksema
 SOURCE_XML=${SOURCE}.xml
-SOURCE_ZIP=${SOURCE_XML}.dila.tei.p5.xml.zip
+SOURCE_ZIP=${SOURCE}.dila.tei.p5.xml.zip
 curl -k -o data/${SOURCE_ZIP}  https://glossaries.dila.edu.tw/data/${SOURCE_ZIP}
 cd data
 unzip ${SOURCE_ZIP}
@@ -62,7 +62,12 @@ Add a Chrome extension manifest file using the template in this directory
 cp recipes/manifest.json ${TARGET_DIR}/
 ```
 
-Edit the `manifest.json` file, entering the values for your extension.
+Edit the `manifest.json` file, entering the values for your extension or use
+the ready-made one here:
+
+```shell
+cp recipes/lokaksema_manifest.json ${TARGET_DIR}/manifest.json
+```
 
 Compile the Dart code with the JavaScript placed in the extension directory:
 
@@ -82,9 +87,9 @@ cp web/images/icon32.png $TARGET_DIR/images/
 cp web/images/icon48.png $TARGET_DIR/images/
 cp web/images/icon128.png $TARGET_DIR/images/
 ```
-
-There is also a popup file which allows the extension to be used indepdently of
-an external web page. Copy it
+There is also an application configuration file that tells the 
+[service worker](https://developers.google.com/web/fundamentals/primers/service-workers)
+how to load the dictionary file. Copy a template with this command
 
 ```shell
 cp recipes/config.json $TARGET_DIR/
@@ -92,9 +97,8 @@ cp recipes/config.json $TARGET_DIR/
 
 and edit it to be suitable for the particular extension that you are creating.
 
-There is also an application configuration file that tells the 
-[service worker](https://developers.google.com/web/fundamentals/primers/service-workers)
-how to load the dictionary file. Copy a template with this command
+There is also a popup file which allows the extension to be used indepdently of
+an external web page. Copy it
 
 ```shell
 cp recipes/popup.html $TARGET_DIR/
@@ -106,3 +110,72 @@ Then load the unpacked extension. You can now test the extension. A screenshot
 is shown below:
 
 ![](../drawings/lokaksema-chrome-ext-dialog.png?raw=true)
+
+Zip it up for submission to the Chrome Store with the command
+
+```shell
+BUNDLE=${SOURCE}-chrome-ext.zip
+cd $TARGET_DIR
+zip ${BUNDLE} *.js* *.json *.html *.css images/*
+cd ..
+mkdir archive
+mv $TARGET_DIR/${BUNDLE} archive/
+```
+
+### Soothill-Hodous
+
+This section includes the recipe for 
+[Soothill-Hodous: A Dictionary of Chinese Buddhist Terms](https://glossaries.dila.edu.tw/glossaries/SHH?locale=en)
+
+Download the TEI file
+
+```shell
+SOURCE=soothill-hodous
+SOURCE_ZIP=${SOURCE}.ddbc.tei.p5.xml.zip
+curl -k -o data/${SOURCE_ZIP}  https://glossaries.dila.edu.tw/data/${SOURCE_ZIP}
+```
+
+Follow the instructions above. Then create  a JSON bundle
+
+```shell
+SOURCE_XML=ddbc.soothill-hodous.tei.p5.xml
+dart tools/parse_tei.dart \
+  -s data/${SOURCE_XML} \
+  -t ${TARGET_DIR}/${TARGET_JSON} \
+  -l "chinese" \
+  -n "Soothill-Hodous: A Dictionary of Chinese Buddhist Terms" \
+  -x "Soothill-Hodous" \
+  -a "William Edward Soothill and Lewis Hodous, Digitization, editorial changes and preface Charles Muller" \
+  -y "Copyright by authors"
+```
+
+The manifest:
+
+```shell
+cp  recipes/soothill-hodous_manifest.json  soothill-hodous/manifest.json
+```
+
+As above for JavaScript compilation and icons.
+
+Configuration file
+
+```shell
+cp recipes/soothill-hodous_config.json soothill-hodous/config.json
+```
+
+Popup file
+
+```shell
+cp recipes/soothill-hodous_popup.html soothill-hodous/popup.html
+```
+
+Zip it up for archiing with the command
+
+```shell
+BUNDLE=${SOURCE}-chrome-ext.zip
+cd $TARGET_DIR
+zip ${BUNDLE} *.js* *.json *.html *.css images/*
+cd ..
+mkdir archive
+mv $TARGET_DIR/${BUNDLE} archive/
+```

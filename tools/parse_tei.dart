@@ -86,8 +86,9 @@ String formatSanskritEntry(SanskritEntry entry, int headwordId) {
 List<ChineseEntry> parseEntry(XmlElement entry) {
   List<ChineseEntry> pEntries = [];
   final orthElems = entry.findAllElements('orth');
-  final orthElem = orthElems.first;
-  final ch = orthElem.text.trim();
+  final formElems = entry.findAllElements('form');
+  final hwElem = (!orthElems.isEmpty) ? orthElems.first : formElems.first;
+  final ch = hwElem.text.trim();
   if (ch.isEmpty || (ch == '\\') || !isCJKChar(ch)) {
     return pEntries;
   }
@@ -95,15 +96,16 @@ List<ChineseEntry> parseEntry(XmlElement entry) {
   final pinyinElems = entry
       .findAllElements('pron')
       .where((el) => el.getAttribute('notation') == 'pinyin');
-  final pinyinElem = pinyinElems.first;
-  final pinyin = pinyinElem.text.trim();
+  final pinyinElem = (!pinyinElems.isEmpty) ? pinyinElems.first : null;
+  final pinyin = (pinyinElem != null) ? pinyinElem.text.trim() : '';
 
   final defElems = entry.findAllElements('def');
-  if (defElems.isEmpty) {
+  final senseElems = entry.findAllElements('sense');
+  final defElem = (!defElems.isEmpty) ? defElems.first : senseElems.first;
+  final definition = defElem.text.trim();
+  if (definition.isEmpty || (definition == '\\')) {
     return pEntries;
   }
-  final defElem = defElems.first;
-  final definition = defElem.text.trim();
   var pEntry = ChineseEntry(ch, pinyin, definition);
   pEntries.add(pEntry);
   return pEntries;
