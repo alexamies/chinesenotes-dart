@@ -1,4 +1,4 @@
-# Mahāvyutpatti Sanskrit-Tibetan-Chinese Budhist Dictionary Browser Extension
+# Mahāvyutpatti Sanskrit-Tibetan-Chinese Buddhist Dictionary Browser Extension
 
 This page describes how to use the Chrome browser extension.
 
@@ -11,7 +11,9 @@ https://glossaries.dila.edu.tw/glossaries/MVP?locale=en
 Thank you to the Digital Archive Section at Dharma Drum Institute of Liberal
 Arts (DILA) for making the TEI file available.
 
-Install the extension from the Chrome store
+Install the extension from the Chrome store here
+
+https://chrome.google.com/webstore/detail/mah%C4%81vyutpatti-buddhist-di/ejdgjjdkjlkepopaeloagcaeocloiofa?hl=en&authuser=0
 
 Try it out on web site like the University of Oslo's multi-lingual corpus
 [Thesaurus Literaturae Buddhicae](https://www2.hf.uio.no/polyglotta/index.php)
@@ -31,9 +33,15 @@ Screenshots
 
 ![](../drawings/mahavyutpatti-chrome-ext-menu.png?raw=true)
 
+The context menu appears when you select text on a page and right click.
+
 ![](../drawings/mahavyutpatti-chrome-ext-dialog.png?raw=true)
 
+A dialog like this will be shown.
+
 ![](../drawings/mahavyutpatti-chrome-ext-tibetan.png?raw=true)
+
+You can lookup with Tibetan Wylie as well.
 
 ## Development
 
