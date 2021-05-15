@@ -33,9 +33,14 @@ const authorOption = 'author';
 const authorDefault = 'A Author';
 const licenseOption = 'license';
 const licenseDefault = 'Copyright by Author';
+const hwStartOption = 'headword-start';
+const hwStartDefault = "2";
 
 const defReplace = {'\n': ' ', '"': ' ', '<': '&lt;', '>': '&gt;'};
 const pinyinReplace = {';': ''};
+
+const paliPattern = r'(P). (.+?)(\(|,|;|$)';
+const sanskritPattern = r'(S|Skt). (.+?)(\(|,|;|$)';
 
 ArgResults? argResults;
 
@@ -47,6 +52,14 @@ class ChineseEntry {
   ChineseEntry(this.chinese, this.pinyin, this.english);
 }
 
+class PaliSanskritEntry {
+  final String chinese;
+  final String pali;
+  final String sanskrit;
+
+  PaliSanskritEntry(this.chinese, this.pali, this.sanskrit);
+}
+
 class SanskritEntry {
   final String sanskrit;
   final String chinese;
@@ -54,6 +67,42 @@ class SanskritEntry {
   final List<String> tibScript;
 
   SanskritEntry(this.sanskrit, this.chinese, this.tibWylie, this.tibScript);
+}
+
+// PatternProcessor extracts Pali and Sanskrit from abbrevations
+class PatternProcessor {
+  RegExp paliExpr;
+  RegExp sanskritExpr;
+
+  PatternProcessor()
+      : paliExpr = RegExp(paliPattern, unicode: true),
+        sanskritExpr = RegExp(sanskritPattern, unicode: true);
+
+  String _parseNoses(RegExp exp, String notes) {
+    var reMatch = exp.firstMatch(notes);
+    if (reMatch != null) {
+      return reMatch[2]!.trim();
+    }
+    return '';
+  }
+
+  // Process the notes field for Pali pattern.
+  //
+  // Params:
+  //   notes - the notes field to process
+  // Return: pattern match from the first group
+  String parsePali(String notes) {
+    return _parseNoses(paliExpr, notes);
+  }
+
+  // Process the notes field for Sanskrit pattern.
+  //
+  // Params:
+  //   notes - the notes field to process
+  // Return: pattern match from the first group
+  String parseSanskrit(String notes) {
+    return _parseNoses(sanskritExpr, notes);
+  }
 }
 
 String formatEntry(ChineseEntry entry, int headwordId) {
@@ -83,15 +132,38 @@ String formatSanskritEntry(SanskritEntry entry, int headwordId) {
       '}';
 }
 
+String formatPaliSanskrit(PaliSanskritEntry entry, int headwordId) {
+  var eng = [];
+  var notes = [];
+  if (entry.sanskrit != '') {
+    eng.add(entry.sanskrit);
+    notes.add('Sanskrit equivalent: ${entry.sanskrit}');
+  }
+  if (entry.pali != '') {
+    eng.add(entry.pali);
+    notes.add('Pali: ${entry.pali}');
+  }
+  var e = eng.join('; ');
+  var n = notes.join(', ');
+  return '{"luid": $headwordId, '
+      '"h": $headwordId,'
+      '"s": "${entry.chinese}",'
+      '"e": "${e}",'
+      '"n": "${n}"'
+      '}';
+}
+
 List<ChineseEntry> parseEntry(XmlElement entry) {
   List<ChineseEntry> pEntries = [];
   final orthElems = entry.findAllElements('orth');
   final formElems = entry.findAllElements('form');
   final hwElem = (!orthElems.isEmpty) ? orthElems.first : formElems.first;
-  final ch = hwElem.text.trim();
+  var ch = hwElem.text.trim();
   if (ch.isEmpty || (ch == '\\') || !isCJKChar(ch)) {
     return pEntries;
   }
+  ch = ch.replaceAll('\n', ' ');
+  ch = ch.replaceAll('\r', ' ');
 
   final pinyinElems = entry
       .findAllElements('pron')
@@ -101,12 +173,62 @@ List<ChineseEntry> parseEntry(XmlElement entry) {
 
   final defElems = entry.findAllElements('def');
   final senseElems = entry.findAllElements('sense');
+  if (defElems.isEmpty && senseElems.isEmpty) {
+    return pEntries;
+  }
   final defElem = (!defElems.isEmpty) ? defElems.first : senseElems.first;
-  final definition = defElem.text.trim();
+  var definition = defElem.text.trim();
+  definition = definition.replaceAll('\n', ' ');
+  definition = definition.replaceAll('\r', ' ');
   if (definition.isEmpty || (definition == '\\')) {
     return pEntries;
   }
   var pEntry = ChineseEntry(ch, pinyin, definition);
+  pEntries.add(pEntry);
+  return pEntries;
+}
+
+List<PaliSanskritEntry> parsePaliSanskrit(
+    XmlElement entry, PatternProcessor processor) {
+  List<PaliSanskritEntry> pEntries = [];
+  final formElems = entry.findAllElements('form');
+  if (formElems.isEmpty) {
+    return pEntries;
+  }
+  final hwElem = formElems.first;
+  final ch = hwElem.text.trim();
+  if (ch.isEmpty || (ch == '\\') || !isCJKChar(ch)) {
+    return pEntries;
+  }
+
+  var pali = '';
+  var sanskrit = '';
+  final defElems = entry.findAllElements('p');
+  for (var elem in defElems) {
+    final definition = elem.text.trim();
+    pali = processor.parsePali(definition);
+    if (pali.contains('T1') ||
+        pali.contains('T2') ||
+        pali.contains('C1') ||
+        pali.contains('C2')) {
+      pali = '';
+    }
+    sanskrit = processor.parseSanskrit(definition);
+    if (sanskrit.contains('T1') ||
+        sanskrit.contains('T2') ||
+        sanskrit.contains('C1') ||
+        sanskrit.contains('C2')) {
+      sanskrit = '';
+    }
+    if (pali != '' || sanskrit != '') {
+      break;
+    }
+  }
+  if (pali == '' && sanskrit == '') {
+    return pEntries;
+  }
+
+  var pEntry = PaliSanskritEntry(ch, pali, sanskrit);
   pEntries.add(pEntry);
   return pEntries;
 }
@@ -156,7 +278,8 @@ void main(List<String> arguments) {
     ..addOption(titleOption, defaultsTo: titleDefault, abbr: 'n')
     ..addOption(abbrevOption, defaultsTo: abbrevDefault, abbr: 'x')
     ..addOption(authorOption, defaultsTo: authorDefault, abbr: 'a')
-    ..addOption(licenseOption, defaultsTo: licenseDefault, abbr: 'y');
+    ..addOption(licenseOption, defaultsTo: licenseDefault, abbr: 'y')
+    ..addOption(hwStartOption, defaultsTo: hwStartDefault, abbr: 'h');
   argResults = parser.parse(arguments);
   final fName = argResults![sourceFile];
   final outFName = argResults![targetFile];
@@ -165,45 +288,55 @@ void main(List<String> arguments) {
   final abbreviation = argResults![abbrevOption];
   final author = argResults![authorOption];
   final license = argResults![licenseOption];
+  final hwStartStr = argResults![hwStartOption];
+  final hwStart = int.parse(hwStartStr);
   print('Reading $fName in $sLanguage');
   var sb = StringBuffer();
   sb.writeln('['
       '{"source_title":"${title}",'
       '"source_abbreviation":"${abbreviation}",'
       '"source_author":"${author}",'
-      '"source_license":"${license}"},');
+      '"source_license":"${license}"}');
   try {
     final file = new File(fName);
     final document = XmlDocument.parse(file.readAsStringSync());
     final entries = document.findAllElements('entry');
-    var hwid = 0;
+    var hwid = hwStart;
+    final processor = PatternProcessor();
     for (var entry in entries) {
+      // Used for Mahāvyutpatti
       if (sLanguage == 'sanskrit') {
         var pEntries = parseSanskritEntry(entry);
         for (var pEntry in pEntries) {
-          hwid++;
-          if (hwid > 1) {
-            sb.writeln(',');
-          }
+          sb.writeln(',');
           var entryJSON = formatSanskritEntry(pEntry, hwid);
           sb.write(entryJSON);
+          hwid++;
         }
+        // Used for A study of the language of the Dīrgha-āgama by Karashima
+      } else if (sLanguage == 'pali-sanskrit') {
+        var pEntries = parsePaliSanskrit(entry, processor);
+        for (var pEntry in pEntries) {
+          sb.writeln(',');
+          var entryJSON = formatPaliSanskrit(pEntry, hwid);
+          sb.write(entryJSON);
+          hwid++;
+        }
+        // Used for all others
       } else {
         var pEntries = parseEntry(entry);
         for (var pEntry in pEntries) {
-          hwid++;
-          if (hwid > 1) {
-            sb.writeln(',');
-          }
+          sb.writeln(',');
           var entryJSON = formatEntry(pEntry, hwid);
           sb.write(entryJSON);
+          hwid++;
         }
       }
     }
     sb.writeln(']');
     var outFile = File(outFName);
     outFile.writeAsString(sb.toString());
-    print('Write: $hwid entries to $outFName');
+    print('Wrote ${hwid - hwStart} entries to $outFName');
   } catch (e) {
     print('Could not parse file, error: $e');
     rethrow;

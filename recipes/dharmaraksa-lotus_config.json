@@ -1,0 +1,14 @@
+{
+  "contextMenuText": "Lookup in Lotus Sūtra (Dharmarakṣa) ...",
+  "multiLingualIndex": true,
+  "sources": [{
+    "sourceId": 1,
+    "url": "dharmaraksa-lotus.json",
+    "abbreviation": "Lotus Sūtra (Dharmarakṣa)",
+    "title": "A Glossary of Dharmarakṣa's translation of the Lotus Sūtra (1998)",
+    "citation": "https://glossaries.dila.edu.tw/glossaries/KDR",
+    "author": "Seishi Karashima",
+    "license": "Copyright by author",
+    "startHeadwords": 10500002
+  }]
+}

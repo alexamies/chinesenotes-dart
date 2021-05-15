@@ -1,0 +1,14 @@
+{
+  "contextMenuText": "Lookup in Dīrgha-āgama Glossary ...",
+  "multiLingualIndex": true,
+  "sources": [{
+    "sourceId": 1,
+    "url": "dirgha-agama.json",
+    "abbreviation": "dirgha-agama",
+    "title": "A Study of the Language of the Dīrgha-āgama (1994)",
+    "citation": "https://glossaries.dila.edu.tw/glossaries/DAT?locale=en",
+    "author": "Seishi Karashima",
+    "license": "Copyright by author",
+    "startHeadwords": 10300002
+  }]
+}

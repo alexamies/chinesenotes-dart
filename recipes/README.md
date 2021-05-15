@@ -11,6 +11,32 @@ Set the Dart SDK home with the environment variable DART_HOME. For example,
 DART_HOME=$HOME/development/flutter/bin/cache/dart-sdk
 ```
 
+## Headword ID Ranges
+
+The Chinese Notes code framework can combine entries from multiple souce
+dictionaries into the same bundle. In order to index these uniquely, headword
+IDs are assigned to each entry. Since most dictionary sources are just lists of
+words, the headword IDs are generated when the JSON file is created. In order
+to do this without collisions ranges are set aside in advance.
+
+| Source                             | Range                   |
+|------------------------------------|-------------------------|
+| Base dictionary                    |          2 -    999,999 |
+| FGS Humanistic Buddhism Glossary   |  1,000,002 -  1,999,999 |
+| Buddhist quotations                |  2,00,0002 -  2,999,999 |
+| Literary Chinese quotations        |  3,000,002 -  3,999,999 |
+| FGS Humanistic Buddhism quotations |  4,000,002 -  4,999,999 |
+| Modern Chinese quotations          |  5,000,002 -  5,999,999 |
+| Modern named entities              |  6,000,002 -  6,999,999 |
+| Buddhist named entities            |  7,000,002 -  7,999,999 |
+| Buddhist terminology               |  8,000,002 -  8,999,999 |
+| Mahāvyutpatti                      | 10,000,002 - 10,099,999 |
+| Soothill-Hodous                    | 10,100,002 - 10,199,999 |
+| Lokaksema                          | 10,200,002 - 10,299,999 |
+| Dīrgha-āgama                       | 10,300,002 - 10,399,999 |
+| Lotus Sūtra (Kumārajīva)           | 10,400,002 - 10,499,999 |
+| Lotus Sūtra (Dharmarakṣa)          | 10,500,002 - 10,599,999 |
+
 ## Browser Extensions with TEI files
 
 This recipe intended for the dictionaries and glossaries at 
@@ -87,6 +113,7 @@ cp web/images/icon32.png $TARGET_DIR/images/
 cp web/images/icon48.png $TARGET_DIR/images/
 cp web/images/icon128.png $TARGET_DIR/images/
 ```
+
 There is also an application configuration file that tells the 
 [service worker](https://developers.google.com/web/fundamentals/primers/service-workers)
 how to load the dictionary file. Copy a template with this command
@@ -152,7 +179,80 @@ dart tools/parse_tei.dart \
 The manifest:
 
 ```shell
-cp  recipes/soothill-hodous_manifest.json  soothill-hodous/manifest.json
+cp  recipes/${SOURCE}_manifest.json  $TARGET_DIR/manifest.json
+```
+
+Use the NTI icons
+
+Add other files for icon images and CSS styles with the commands:
+
+```shell
+mkdir $TARGET_DIR/images
+cp ntireader-chrome-ext/styles.css $TARGET_DIR/
+cp ntireader-chrome-ext/images/icon16.png $TARGET_DIR/images/
+cp ntireader-chrome-ext/images/icon32.png $TARGET_DIR/images/
+cp ntireader-chrome-ext/images/icon48.png $TARGET_DIR/images/
+cp ntireader-chrome-ext/images/icon128.png $TARGET_DIR/images/
+```
+
+Configuration file
+
+```shell
+cp recipes/${SOURCE}_config.json $TARGET_DIR/config.json
+```
+
+Popup file
+
+```shell
+cp recipes/${SOURCE}_popup.html $TARGET_DIR/popup.html
+```
+
+Zip it up for archiing with the command
+
+```shell
+BUNDLE=${SOURCE}-chrome-ext.zip
+cd $TARGET_DIR
+zip ${BUNDLE} *.js* *.json *.html *.css images/*
+cd ..
+mkdir archive
+mv $TARGET_DIR/${BUNDLE} archive/
+```
+
+### Dīrgha-āgama
+
+This section includes the recipe for 
+[Seishi Karashima: 「長阿含経」の原語の研究 (A study of the language of the Dīrgha-āgama)](https://glossaries.dila.edu.tw/glossaries/DAT?locale=en)
+
+Download the TEI file
+
+```shell
+SOURCE_ZIP=Study_Dirgha-agama_language.xml.zip
+curl -k -o data/${SOURCE_ZIP}  https://glossaries.dila.edu.tw/data/${SOURCE_ZIP}
+```
+
+Follow the instructions above to unbundle. Then create a JSON bundle
+
+```shell
+SOURCE=dirgha-agama
+TARGET_DIR=$SOURCE
+TARGET_JSON=${SOURCE}.json
+SOURCE_XML=Study_Dirgha-agama_language.xml
+mkdir $TARGET_DIR
+dart tools/parse_tei.dart \
+  -s data/${SOURCE_XML} \
+  -t ${TARGET_DIR}/${TARGET_JSON} \
+  -l "pali-sanskrit" \
+  -n "A Study of the Language of the Dīrgha-āgama (1994)" \
+  -x "Dīrgha-āgama" \
+  -a "Seishi Karashima" \
+  -y "Copyright by author" \
+  -h 10300002
+```
+
+The manifest:
+
+```shell
+cp  recipes/${SOURCE}_manifest.json  $TARGET_DIR/manifest.json
 ```
 
 As above for JavaScript compilation and icons.
@@ -160,13 +260,138 @@ As above for JavaScript compilation and icons.
 Configuration file
 
 ```shell
-cp recipes/soothill-hodous_config.json soothill-hodous/config.json
+cp recipes/${SOURCE}_config.json $TARGET_DIR/config.json
 ```
 
 Popup file
 
 ```shell
-cp recipes/soothill-hodous_popup.html soothill-hodous/popup.html
+cp recipes/${SOURCE}_popup.html $TARGET_DIR/popup.html
+```
+
+Zip it up for archiing with the command
+
+```shell
+BUNDLE=${SOURCE}-chrome-ext.zip
+cd $TARGET_DIR
+zip ${BUNDLE} *.js* *.json *.html *.css images/*
+cd ..
+mkdir archive
+mv $TARGET_DIR/${BUNDLE} archive/
+```
+
+### Glossary of Kumārajīva's Translation of The Lotus Sutra
+
+This section includes the recipe for 
+[Glossary of Kumārajīva's Translation of The Lotus Sutra)]https://glossaries.dila.edu.tw/glossaries/KKJ?locale=en)
+by Seishi Karashima (2001).
+
+Download the TEI file
+
+```shell
+SOURCE_ZIP=kumarajiva.dila.tei.p5.xml.zip
+curl -k -o data/${SOURCE_ZIP}  https://glossaries.dila.edu.tw/data/${SOURCE_ZIP}
+```
+
+Follow the instructions above to unbundle. Then create a JSON bundle
+
+```shell
+SOURCE=kumarajiva-lotus
+TARGET_DIR=$SOURCE
+TARGET_JSON=${SOURCE}.json
+SOURCE_XML=kumarajiva.dila.tei.p5.xml
+mkdir $TARGET_DIR
+dart tools/parse_tei.dart \
+  -s data/${SOURCE_XML} \
+  -t ${TARGET_DIR}/${TARGET_JSON} \
+  -l "chinese" \
+  -n "A Glossary of Kumārajīva's translation of the Lotus Sūtra (2001)" \
+  -x "Glossary of the Lotus Sūtra (Kumārajīva)" \
+  -a "Seishi Karashima" \
+  -y "Copyright by author" \
+  -h 10400002
+```
+
+The manifest:
+
+```shell
+cp  recipes/${SOURCE}_manifest.json  $TARGET_DIR/manifest.json
+```
+
+As above for JavaScript compilation and icons.
+
+Configuration file
+
+```shell
+cp recipes/${SOURCE}_config.json $TARGET_DIR/config.json
+```
+
+Popup file
+
+```shell
+cp recipes/${SOURCE}_popup.html $TARGET_DIR/popup.html
+```
+
+Zip it up for archiing with the command
+
+```shell
+BUNDLE=${SOURCE}-chrome-ext.zip
+cd $TARGET_DIR
+zip ${BUNDLE} *.js* *.json *.html *.css images/*
+cd ..
+mkdir archive
+mv $TARGET_DIR/${BUNDLE} archive/
+```
+### Glossary of Dharmarakṣa's Translation of The Lotus Sutra
+
+This section includes the recipe for 
+[A Glossary of Dharmarakṣa's Translation of the Lotus Sūtra)]https://glossaries.dila.edu.tw/glossaries/KKJ?locale=en)
+by Seishi Karashima (1998).
+
+Download the TEI file
+
+```shell
+SOURCE_ZIP=dharmaraksa.dila.tei.p5.xml.zip
+curl -k -o data/${SOURCE_ZIP}  https://glossaries.dila.edu.tw/data/${SOURCE_ZIP}
+```
+
+Follow the instructions above to unbundle. Then create a JSON bundle
+
+```shell
+SOURCE=dharmaraksa-lotus
+TARGET_DIR=$SOURCE
+TARGET_JSON=${SOURCE}.json
+SOURCE_XML=dharmaraksa.dila.tei.p5.xml
+mkdir $TARGET_DIR
+dart tools/parse_tei.dart \
+  -s data/${SOURCE_XML} \
+  -t ${TARGET_DIR}/${TARGET_JSON} \
+  -l "chinese" \
+  -n "A Glossary of Dharmarakṣa's translation of the Lotus Sūtra (1998)" \
+  -x "Glossary of the Lotus Sūtra (Dharmarakṣa)" \
+  -a "Seishi Karashima" \
+  -y "Copyright by author" \
+  -h 10500002
+```
+
+The manifest:
+
+```shell
+cp  recipes/${SOURCE}_manifest.json $TARGET_DIR/manifest.json
+```
+
+As above for JavaScript compilation and icons.
+
+Configuration file
+
+```shell
+cp recipes/${SOURCE}_config.json $TARGET_DIR/config.json
+```
+
+Popup file
+
+```shell
+cp recipes/${SOURCE}_popup.html $TARGET_DIR/popup.html
 ```
 
 Zip it up for archiing with the command

@@ -3,13 +3,17 @@
 .local-chromium/
 .idea/
 .packages
+ vscode/
 *.pem
 *.crx
 archive/
 coverage/
 main.dart.js*
 data/
+dharmaraksa-lotus/
+dirgha-agama/
 doc/
+kumarajiva-lotus/
 lokaksema/
 soothill-hodous/
 tmp/
