@@ -1,4 +1,16 @@
-# Recipes
+# Multi-Dictionary Workbench
+
+With the recipe given here you can create your own dictionary workbench 
+combining multiple dictionaries on a web page without the need to run a web
+server. It is a multi-dictionary, multilingual workbench, as shown in the
+screenshot below:
+
+![](../drawings/combined-dictionaries-chrome-ext-mulit-multi-1280x800.png?raw=true)
+
+This allows you to do lookup multiple terms at a single time with the results
+from multiple dictionaries shown in the results.
+
+## Setup
 
 This directory contains instructions for building new applications and browser
 extensions.
@@ -36,6 +48,8 @@ to do this without collisions ranges are set aside in advance.
 | Glosary of Dīrgha-āgama              | 10,300,002 - 10,399,999 |
 | Glosary of Lotus Sūtra (Kumārajīva)  | 10,400,002 - 10,499,999 |
 | Glosary of Lotus Sūtra (Dharmarakṣa) | 10,500,002 - 10,599,999 |
+| DDBC Person Authority Database       | 10,600,002 - 10,699,999 |
+
 
 ## Browser Extensions with TEI files
 
@@ -414,29 +428,55 @@ mkdir archive
 mv $TARGET_DIR/${BUNDLE} archive/
 ```
 
-### Person Authority Database
+### Buddhist Person and Place Authority Databases
 
-Thanks to Dharma Drum Buddhist Studies Authority Database
+Thanks to Dharma Drum for creating the <a href='http://authority.dila.edu.tw/'
+>Buddhist Studies Authority Database</a> and making the 
 <a href='http://authority.dila.edu.tw/docs/open_content/download.php'
->Open Content Project<a>
+>Open Content<a> freely available (also at the
+<a href='https://github.com/DILA-edu/Authority-Databases'
+>Authority-Databases</a> Github project).
 
-Download the ZIP file
+create a JSON bundle
+
+```shell
+SOURCE=person-authority
+TARGET_DIR=authority
+TARGET_JSON=${SOURCE}.json
+SOURCE_XML=Buddhist_Studies_Person_Authority.xml
+mkdir $TARGET_DIR
+dart tools/parse_tei.dart \
+  -s data/${SOURCE_XML} \
+  -t ${TARGET_DIR}/${TARGET_JSON} \
+  -l "person" \
+  -n "DDBC Person Authority Database" \
+  -x "Person Authority" \
+  -a "Dharma Drum Buddhist College" \
+  -y "Creative Commons Attribution-ShareAlike 3.0 Unported" \
+  -h 10600002
+```
+
+Download the Person ZIP file
 
 ```shell
 SOURCE_ZIP=authority_person.2021-05.zip
 curl -o data/${SOURCE_ZIP}  http://authority.dila.edu.tw/downloads/${SOURCE_ZIP}
+cd data
+unzip ${SOURCE_ZIP}
+cd ..
 ```
 
-### Place Authority Database
-
-Download the ZIP file
+Download the Place ZIP file
 
 ```shell
 SOURCE_ZIP=authority_place.2021-05.zip
 curl -o data/${SOURCE_ZIP}  http://authority.dila.edu.tw/downloads/${SOURCE_ZIP}
+cd data
+unzip ${SOURCE_ZIP}
+cd ..
 ```
 
-http://authority.dila.edu.tw/downloads/authority_place.2021-05.zip
+
 
 ### Combined Buddhist Dictionaries
 
@@ -622,3 +662,4 @@ Popup file
 ```shell
 cp recipes/${SOURCE}_popup.html $TARGET_DIR/popup.html
 ```
+

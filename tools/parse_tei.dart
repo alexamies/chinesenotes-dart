@@ -23,8 +23,8 @@ const sourceFile = 'source-file';
 const sourceDefault = 'data/tei.p5.xml';
 const targetFile = 'target-file';
 const targetDefault = 'dictionary.json';
-const sourceLang = 'source-lang';
-const sourceLangDefault = 'chinese';
+const sourceEntry = 'source-entry';
+const sourceEntryDefault = 'chinese';
 const titleOption = 'title';
 const titleDefault = 'Full Title';
 const abbrevOption = 'abbreviation';
@@ -58,6 +58,17 @@ class PaliSanskritEntry {
   final String sanskrit;
 
   PaliSanskritEntry(this.chinese, this.pali, this.sanskrit);
+}
+
+class PersonEntry {
+  final String chinese;
+  final String authorityId;
+  final List<String> aka;
+  final String dynasty;
+  final String placeOfOrigin;
+
+  PersonEntry(this.chinese, this.aka, this.authorityId, this.dynasty,
+      this.placeOfOrigin);
 }
 
 class SanskritEntry {
@@ -153,6 +164,25 @@ String formatPaliSanskrit(PaliSanskritEntry entry, int headwordId) {
       '}';
 }
 
+String formatPersonEntry(PersonEntry entry, int headwordId) {
+  var aka =
+      (!entry.aka.isEmpty) ? ' also known as ${entry.aka.join(', ')}, ' : '';
+  var dynasty = (entry.dynasty != '') ? 'dynasty: ${entry.dynasty}, ' : '';
+  var authorityId =
+      (entry.authorityId != '') ? 'authority ID: ${entry.authorityId}, ' : '';
+  var placeOfOrigin = (entry.placeOfOrigin != '')
+      ? 'place of origin: ${entry.placeOfOrigin}'
+      : '';
+  var notes = 'Person ${aka} ${authorityId} ${dynasty} ${placeOfOrigin}';
+  notes = notes.trim();
+  notes = notes.replaceAll(r',$', '');
+  return '{"luid": $headwordId, '
+      '"h": $headwordId,'
+      '"s": "${entry.chinese}",'
+      '"n": "${notes}"'
+      '}';
+}
+
 List<ChineseEntry> parseEntry(XmlElement entry) {
   List<ChineseEntry> pEntries = [];
   final orthElems = entry.findAllElements('orth');
@@ -233,6 +263,50 @@ List<PaliSanskritEntry> parsePaliSanskrit(
   return pEntries;
 }
 
+// Parse a TEI person entry from the authority database
+List<PersonEntry> parsePersonEntry(XmlElement entry) {
+  List<PersonEntry> pEntries = [];
+  final authId = entry.getAttribute('xml:id');
+  String authorityID = (authId != null) ? authId : '';
+  final nameElems = entry.findAllElements('persName');
+  if (nameElems.isEmpty) {
+    print('parsePersonEntry: nameElems.isEmpty');
+    return pEntries;
+  }
+  final ch = nameElems.first.text;
+  List<String> aka = [];
+  final akaElems = entry
+      .findAllElements('persName')
+      .where((el) => el.getAttribute('type') == 'alternative');
+  for (var akaElem in akaElems) {
+    aka.add(akaElem.text);
+  }
+
+  var dynasty = '';
+  final dynastyElems = entry
+      .findAllElements('note')
+      .where((el) => el.getAttribute('type') == 'dynasty');
+  for (var el in dynastyElems) {
+    dynasty = el.text;
+  }
+  dynasty = dynasty.replaceAll('\n', ' ');
+  dynasty = dynasty.trim();
+
+  var placeOfOrigin = '';
+  final placeElems = entry
+      .findAllElements('note')
+      .where((el) => el.getAttribute('type') == 'placeOfOrigin');
+  for (var el in placeElems) {
+    placeOfOrigin = el.text;
+  }
+  placeOfOrigin = placeOfOrigin.replaceAll('\n', ' ');
+  placeOfOrigin = placeOfOrigin.trim();
+
+  var pEntry = PersonEntry(ch, aka, authorityID, dynasty, placeOfOrigin);
+  pEntries.add(pEntry);
+  return pEntries;
+}
+
 List<SanskritEntry> parseSanskritEntry(XmlElement entry) {
   List<SanskritEntry> pEntries = [];
   final san = entry
@@ -274,7 +348,7 @@ void main(List<String> arguments) {
   final parser = ArgParser()
     ..addOption(sourceFile, defaultsTo: sourceDefault, abbr: 's')
     ..addOption(targetFile, defaultsTo: targetDefault, abbr: 't')
-    ..addOption(sourceLang, defaultsTo: sourceLangDefault, abbr: 'l')
+    ..addOption(sourceEntry, defaultsTo: sourceEntryDefault, abbr: 'l')
     ..addOption(titleOption, defaultsTo: titleDefault, abbr: 'n')
     ..addOption(abbrevOption, defaultsTo: abbrevDefault, abbr: 'x')
     ..addOption(authorOption, defaultsTo: authorDefault, abbr: 'a')
@@ -283,14 +357,14 @@ void main(List<String> arguments) {
   argResults = parser.parse(arguments);
   final fName = argResults![sourceFile];
   final outFName = argResults![targetFile];
-  final sLanguage = argResults![sourceLang];
+  final sEntryType = argResults![sourceEntry];
   final title = argResults![titleOption];
   final abbreviation = argResults![abbrevOption];
   final author = argResults![authorOption];
   final license = argResults![licenseOption];
   final hwStartStr = argResults![hwStartOption];
   final hwStart = int.parse(hwStartStr);
-  print('Reading $fName in $sLanguage');
+  print('Reading $fName in $sEntryType');
   var sb = StringBuffer();
   sb.writeln('['
       '{"source_title":"${title}",'
@@ -300,37 +374,51 @@ void main(List<String> arguments) {
   try {
     final file = new File(fName);
     final document = XmlDocument.parse(file.readAsStringSync());
-    final entries = document.findAllElements('entry');
+    final entryTag = (sEntryType != 'person') ? 'entry' : 'person';
+    final entries = document.findAllElements(entryTag);
     var hwid = hwStart;
     final processor = PatternProcessor();
     for (var entry in entries) {
-      // Used for Mahāvyutpatti
-      if (sLanguage == 'sanskrit') {
-        var pEntries = parseSanskritEntry(entry);
-        for (var pEntry in pEntries) {
-          sb.writeln(',');
-          var entryJSON = formatSanskritEntry(pEntry, hwid);
-          sb.write(entryJSON);
-          hwid++;
-        }
-        // Used for A study of the language of the Dīrgha-āgama by Karashima
-      } else if (sLanguage == 'pali-sanskrit') {
-        var pEntries = parsePaliSanskrit(entry, processor);
-        for (var pEntry in pEntries) {
-          sb.writeln(',');
-          var entryJSON = formatPaliSanskrit(pEntry, hwid);
-          sb.write(entryJSON);
-          hwid++;
-        }
-        // Used for all others
-      } else {
-        var pEntries = parseEntry(entry);
-        for (var pEntry in pEntries) {
-          sb.writeln(',');
-          var entryJSON = formatEntry(pEntry, hwid);
-          sb.write(entryJSON);
-          hwid++;
-        }
+      switch (sEntryType) {
+        // Used for Mahāvyutpatti
+        case 'sanskrit':
+          var pEntries = parseSanskritEntry(entry);
+          for (var pEntry in pEntries) {
+            sb.writeln(',');
+            var entryJSON = formatSanskritEntry(pEntry, hwid);
+            sb.write(entryJSON);
+            hwid++;
+          }
+          break;
+        // Used for glossaries by Karashima
+        case 'pali-sanskrit':
+          var pEntries = parsePaliSanskrit(entry, processor);
+          for (var pEntry in pEntries) {
+            sb.writeln(',');
+            var entryJSON = formatPaliSanskrit(pEntry, hwid);
+            sb.write(entryJSON);
+            hwid++;
+          }
+          break;
+        // Used for person authority database
+        case 'person':
+          var pEntries = parsePersonEntry(entry);
+          for (var pEntry in pEntries) {
+            sb.writeln(',');
+            var entryJSON = formatPersonEntry(pEntry, hwid);
+            sb.write(entryJSON);
+            hwid++;
+          }
+          break;
+        // Used for all others, mostly Chinese dictionaries
+        default:
+          var pEntries = parseEntry(entry);
+          for (var pEntry in pEntries) {
+            sb.writeln(',');
+            var entryJSON = formatEntry(pEntry, hwid);
+            sb.write(entryJSON);
+            hwid++;
+          }
       }
     }
     sb.writeln(']');
