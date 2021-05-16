@@ -1,14 +1,95 @@
 {
-  "contextMenuText": "Lookup in Lotus Sūtra (Dharmarakṣa) ...",
+  "contextMenuText": "Lookup with Buddhist Dictionaries Collection ...",
   "multiLingualIndex": true,
   "sources": [{
     "sourceId": 1,
+    "url": "ntireader_words.json",
+    "abbreviation": "NTI Reader",
+    "title": "NTI Reader base dictionary",
+    "citation": "https://ntireader.org",
+    "author": "Alex Amies",
+    "license": "Creative Commons",
+    "startHeadwords": 2
+  },
+  {
+    "sourceId": 2,
+    "url": "fgs_mwe.json",
+    "abbreviation": "HB Glossary",
+    "title": "Fo Guang Shan Humanistic Buddhism Glossary",
+    "citation": "https://foguangpedia.org/the-glossary-of-humanistic-buddhism/",
+    "author": "Fo Guang Shan",
+    "license": "Copyright Fo Guang Shan",
+    "startHeadwords": 1000002
+  },
+  {
+    "sourceId": 3,
+    "url": "buddhist_named_entities.json",
+    "abbreviation": "Buddhist Named Entities",
+    "title": "NTI Reader Buddhist Named Entities",
+    "citation": "https://ntireader.org",
+    "author": "Alex Amies",
+    "license": "Creative Commons",
+    "startHeadwords": 6000002
+  },
+  {
+    "sourceId": 4,
+    "url": "mahavyutpatti.json",
+    "abbreviation": "Mahāvyutpatti",
+    "title": "Mahāvyutpatti",
+    "citation": "https://glossaries.dila.edu.tw/glossaries/MVP",
+    "author": "",
+    "license": "Public domain",
+    "startHeadwords": 10000002
+  },
+  {
+    "sourceId": 5,
+    "url": "soothill-hodous.json",
+    "abbreviation": "Soothill-Hodous",
+    "title": "Soothill-Hodous: A Dictionary of Chinese Buddhist Terms",
+    "citation": "https://glossaries.dila.edu.tw/glossaries/MVP",
+    "author": "Soothill and Hodous",
+    "license": "Copyright authors",
+    "startHeadwords": 10100002
+  },
+  {
+    "sourceId": 6,
+    "url": "lokaksema.json",
+    "abbreviation": "Glosary of Aṣṭasāhasrikā Prajñāpāramitā",
+    "title": "Seishi Karashima: A Glossary of Lokakṣema's Translation of the Aṣṭasāhasrikā Prajñāpāramitā",
+    "citation": "https://glossaries.dila.edu.tw/glossaries/KLS",
+    "author": "Seishi Karashima",
+    "license": "Copyright author",
+    "startHeadwords": 10200002
+  },
+  {
+    "sourceId": 7,
+    "url": "dirgha-agama.json",
+    "abbreviation": "Study of the Dīrgha-āgama",
+    "title": "Seishi Karashima: A Study of the Language of the Dīrgha-āgama",
+    "citation": "https://glossaries.dila.edu.tw/glossaries/KLS",
+    "author": "Seishi Karashima",
+    "license": "Copyright author",
+    "startHeadwords": 10300002
+  },
+  {
+    "sourceId": 8,
+    "url": "kumarajiva-lotus.json",
+    "abbreviation": "Glosary of Lotus Sūtra (Kumārajīva)",
+    "title": "Seishi Karashima: A Glossary of Kumārajīva's translation of the Lotus Sūtra",
+    "citation": "https://glossaries.dila.edu.tw/glossaries/KKJ",
+    "author": "Seishi Karashima",
+    "license": "Copyright author",
+    "startHeadwords": 10400002
+  },
+  {
+    "sourceId": 9,
     "url": "dharmaraksa-lotus.json",
-    "abbreviation": "Lotus Sūtra (Dharmarakṣa)",
-    "title": "A Glossary of Dharmarakṣa's translation of the Lotus Sūtra (1998)",
+    "abbreviation": "Glosary of Lotus Sūtra (Dharmarakṣa)",
+    "title": "Seishi Karashima: A Glossary of Dharmarakṣa's Translation of the Lotus Sūtra",
     "citation": "https://glossaries.dila.edu.tw/glossaries/KDR",
     "author": "Seishi Karashima",
-    "license": "Copyright by author",
+    "license": "Copyright author",
     "startHeadwords": 10500002
-  }]
+  }
+  ]
 }

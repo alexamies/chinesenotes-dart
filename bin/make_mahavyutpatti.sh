@@ -19,7 +19,8 @@ if [ ! -f $TARGET_DIR/mahavyutpatti.json ]; then
     -n "Mahāvyutpatti Sanskrit-Tibetan-Chinese dictionary" \
     -x "Mahāvyutpatti" \
     -a "" \
-    -y "Copyright expired"
+    -y "Public domain" \
+    -h "10000002"
 fi
 cd $TARGET_DIR
 zip mahavyutpatti-chrome-ext-${VERSION}.zip *.js* *.json *.html *.css images/*

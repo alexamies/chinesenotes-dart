@@ -1,7 +1,7 @@
 {
-  "name": "Glossary of the Lotus Sūtra (Dharmarakṣa)",
-  "short_name": "Short name",
-  "description": "A Glossary of Dharmarakṣa's Translation of the Lotus Sūtra by Seishi Karashima (1998)",
+  "name": "Buddhist Dictionaries Combined Collection",
+  "short_name": "Buddhist Dictionaries Combo",
+  "description": "NTI Reader, FGS HB Glossary, Mahavyutpatti, Soothill-Hodous, Glosaries of the Aṣṭa, Dīrgha-āgama, and Lotus Sūtra",
   "author": "Alex Amies",
   "version": "0.0.1",
   "manifest_version": 3,
@@ -14,7 +14,7 @@
   },
   "action": {
     "default_popup": "popup.html",
-    "default_title": "Glossary of the Lotus Sūtra (Dharmarakṣa)",
+    "default_title": "Buddhist Dictionaries Combo",
     "default_icon": {
       "16": "/images/icon16.png",
       "32": "/images/icon32.png",
