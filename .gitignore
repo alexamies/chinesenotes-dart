@@ -8,7 +8,6 @@
 *.crx
 archive/
 authority/
-combined-chrome-ext/
 coverage/
 main.dart.js*
 data/
@@ -19,5 +18,6 @@ kumarajiva-lotus/
 lokaksema/
 soothill-hodous/
 tmp/
+workbench-chrome-ext/
 ntireader.json
 pubspec.lock

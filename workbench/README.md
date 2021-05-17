@@ -551,7 +551,7 @@ souces:
 Make a directory to contain the extension
 
 ```shell
-TARGET_DIR=combined-chrome-ext
+TARGET_DIR=workbench-chrome-ext
 mkdir $TARGET_DIR
 ```
 
@@ -701,7 +701,6 @@ Create a JSON bundle for the Place authority database:
 
 ```shell
 SOURCE=place-authority
-TARGET_DIR=authority
 TARGET_JSON=${SOURCE}.json
 SOURCE_XML=Buddhist_Studies_Place_Authority.xml
 dart tools/parse_tei.dart \
@@ -718,7 +717,7 @@ dart tools/parse_tei.dart \
 The manifest:
 
 ```shell
-SOURCE=combined
+SOURCE=workbench
 cp  workbench/${SOURCE}_manifest.json  $TARGET_DIR/manifest.json
 ```
 
