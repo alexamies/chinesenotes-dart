@@ -49,7 +49,7 @@ to do this without collisions ranges are set aside in advance.
 | Glosary of Lotus Sūtra (Kumārajīva)  | 10,400,002 - 10,499,999 |
 | Glosary of Lotus Sūtra (Dharmarakṣa) | 10,500,002 - 10,599,999 |
 | DDBC Person Authority Database       | 10,600,002 - 10,699,999 |
-
+| DDBC Place Authority Database        | 10,700,002 - 10,699,999 |
 
 ## Browser Extensions with TEI files
 
@@ -100,14 +100,14 @@ dart tools/parse_tei.dart \
 Add a Chrome extension manifest file using the template in this directory
 
 ```shell
-cp recipes/manifest.json ${TARGET_DIR}/
+cp workbench/manifest.json ${TARGET_DIR}/
 ```
 
 Edit the `manifest.json` file, entering the values for your extension or use
 the ready-made one here:
 
 ```shell
-cp recipes/lokaksema_manifest.json ${TARGET_DIR}/manifest.json
+cp workbench/lokaksema_manifest.json ${TARGET_DIR}/manifest.json
 ```
 
 Compile the Dart code with the JavaScript placed in the extension directory:
@@ -134,7 +134,7 @@ There is also an application configuration file that tells the
 how to load the dictionary file. Copy a template with this command
 
 ```shell
-cp recipes/config.json $TARGET_DIR/
+cp workbench/config.json $TARGET_DIR/
 ```
 
 and edit it to be suitable for the particular extension that you are creating.
@@ -143,7 +143,7 @@ There is also a popup file which allows the extension to be used indepdently of
 an external web page. Copy it
 
 ```shell
-cp recipes/popup.html $TARGET_DIR/
+cp workbench/popup.html $TARGET_DIR/
 ```
 
 That is sufficient to create all the resources needed by the extension.
@@ -198,7 +198,7 @@ dart tools/parse_tei.dart \
 The manifest:
 
 ```shell
-cp  recipes/${SOURCE}_manifest.json  $TARGET_DIR/manifest.json
+cp  workbench/${SOURCE}_manifest.json  $TARGET_DIR/manifest.json
 ```
 
 Use the NTI icons
@@ -217,13 +217,13 @@ cp ntireader-chrome-ext/images/icon128.png $TARGET_DIR/images/
 Configuration file
 
 ```shell
-cp recipes/${SOURCE}_config.json $TARGET_DIR/config.json
+cp workbench/${SOURCE}_config.json $TARGET_DIR/config.json
 ```
 
 Popup file
 
 ```shell
-cp recipes/${SOURCE}_popup.html $TARGET_DIR/popup.html
+cp workbench/${SOURCE}_popup.html $TARGET_DIR/popup.html
 ```
 
 Zip it up for archiing with the command
@@ -272,7 +272,7 @@ dart tools/parse_tei.dart \
 The manifest:
 
 ```shell
-cp  recipes/${SOURCE}_manifest.json  $TARGET_DIR/manifest.json
+cp  workbench/${SOURCE}_manifest.json  $TARGET_DIR/manifest.json
 ```
 
 As above for JavaScript compilation and icons.
@@ -280,13 +280,13 @@ As above for JavaScript compilation and icons.
 Configuration file
 
 ```shell
-cp recipes/${SOURCE}_config.json $TARGET_DIR/config.json
+cp workbench/${SOURCE}_config.json $TARGET_DIR/config.json
 ```
 
 Popup file
 
 ```shell
-cp recipes/${SOURCE}_popup.html $TARGET_DIR/popup.html
+cp workbench/${SOURCE}_popup.html $TARGET_DIR/popup.html
 ```
 
 Zip it up for archiing with the command
@@ -336,7 +336,7 @@ dart tools/parse_tei.dart \
 The manifest:
 
 ```shell
-cp  recipes/${SOURCE}_manifest.json  $TARGET_DIR/manifest.json
+cp  workbench/${SOURCE}_manifest.json  $TARGET_DIR/manifest.json
 ```
 
 As above for JavaScript compilation and icons.
@@ -344,13 +344,13 @@ As above for JavaScript compilation and icons.
 Configuration file
 
 ```shell
-cp recipes/${SOURCE}_config.json $TARGET_DIR/config.json
+cp workbench/${SOURCE}_config.json $TARGET_DIR/config.json
 ```
 
 Popup file
 
 ```shell
-cp recipes/${SOURCE}_popup.html $TARGET_DIR/popup.html
+cp workbench/${SOURCE}_popup.html $TARGET_DIR/popup.html
 ```
 
 Zip it up for archiing with the command
@@ -399,7 +399,7 @@ dart tools/parse_tei.dart \
 The manifest:
 
 ```shell
-cp  recipes/${SOURCE}_manifest.json $TARGET_DIR/manifest.json
+cp  workbench/${SOURCE}_manifest.json $TARGET_DIR/manifest.json
 ```
 
 As above for JavaScript compilation and icons.
@@ -407,13 +407,13 @@ As above for JavaScript compilation and icons.
 Configuration file
 
 ```shell
-cp recipes/${SOURCE}_config.json $TARGET_DIR/config.json
+cp workbench/${SOURCE}_config.json $TARGET_DIR/config.json
 ```
 
 Popup file
 
 ```shell
-cp recipes/${SOURCE}_popup.html $TARGET_DIR/popup.html
+cp workbench/${SOURCE}_popup.html $TARGET_DIR/popup.html
 ```
 
 Zip it up for archiing with the command
@@ -437,14 +437,24 @@ Thanks to Dharma Drum for creating the <a href='http://authority.dila.edu.tw/'
 <a href='https://github.com/DILA-edu/Authority-Databases'
 >Authority-Databases</a> Github project).
 
-create a JSON bundle
+Download the Person ZIP file
 
 ```shell
-SOURCE=person-authority
+SOURCE_ZIP=authority_person.2021-05.zip
+curl -o data/${SOURCE_ZIP}  http://authority.dila.edu.tw/downloads/${SOURCE_ZIP}
+cd data
+unzip ${SOURCE_ZIP}
+cd ..
+```
+
+Create a JSON bundle for the Person authority database:
+
+```shell
 TARGET_DIR=authority
-TARGET_JSON=${SOURCE}.json
-SOURCE_XML=Buddhist_Studies_Person_Authority.xml
 mkdir $TARGET_DIR
+SOURCE=person-authority
+SOURCE_XML=Buddhist_Studies_Person_Authority.xml
+TARGET_JSON=${SOURCE}.json
 dart tools/parse_tei.dart \
   -s data/${SOURCE_XML} \
   -t ${TARGET_DIR}/${TARGET_JSON} \
@@ -456,15 +466,7 @@ dart tools/parse_tei.dart \
   -h 10600002
 ```
 
-Download the Person ZIP file
-
-```shell
-SOURCE_ZIP=authority_person.2021-05.zip
-curl -o data/${SOURCE_ZIP}  http://authority.dila.edu.tw/downloads/${SOURCE_ZIP}
-cd data
-unzip ${SOURCE_ZIP}
-cd ..
-```
+TODO: Pinyin and aka indexes.
 
 Download the Place ZIP file
 
@@ -476,9 +478,61 @@ unzip ${SOURCE_ZIP}
 cd ..
 ```
 
+Create a JSON bundle for the Place authority database:
 
+```shell
+SOURCE=place-authority
+TARGET_DIR=authority
+TARGET_JSON=${SOURCE}.json
+SOURCE_XML=Buddhist_Studies_Place_Authority.xml
+dart tools/parse_tei.dart \
+  -s data/${SOURCE_XML} \
+  -t ${TARGET_DIR}/${TARGET_JSON} \
+  -l "place" \
+  -n "DDBC Place Authority Database" \
+  -x "Place Authority" \
+  -a "Dharma Drum Buddhist College" \
+  -y "Creative Commons Attribution-ShareAlike 3.0 Unported" \
+  -h 10700002
+```
 
-### Combined Buddhist Dictionaries
+The manifest:
+
+```shell
+cp  workbench/${TARGET_DIR}_manifest.json $TARGET_DIR/manifest.json
+```
+
+Config file:
+
+```shell
+cp workbench/${TARGET_DIR}_config.json $TARGET_DIR/config.json
+```
+
+Popup file
+
+```shell
+cp workbench/${TARGET_DIR}_popup.html $TARGET_DIR/popup.html
+```
+
+Add CSS styles:
+
+```shell
+cp ntireader-chrome-ext/styles.css $TARGET_DIR/
+```
+
+Zip it up for archiing with the command
+
+```shell
+VERSION=0.0.1
+BUNDLE=${TARGET_DIR}-chrome-ext-${VERSION}.zip
+cd $TARGET_DIR
+zip ${BUNDLE} *.js* *.json *.html *.css
+cd ..
+mkdir archive
+mv $TARGET_DIR/${BUNDLE} archive/
+```
+
+### Buddhist Multi-Dictionary Workbench
 
 Follow the commands below to build an extension the following Buddhist
 souces:
@@ -491,6 +545,8 @@ souces:
  - Karashima's Glosary of the Dīrgha-āgama
  - Karashima's Glosary of Lotus Sūtra (Kumārajīva)
  - Karashima's Glosary of Lotus Sūtra (Dharmarakṣa)
+ - DDBC Person Authority Database
+ - DDBC Place Authority Database
 
 Make a directory to contain the extension
 
@@ -624,12 +680,46 @@ dart tools/parse_tei.dart \
   -h 10500002
 ```
 
+Create a JSON bundle for the Person authority database:
+
+```shell
+SOURCE=person-authority
+SOURCE_XML=Buddhist_Studies_Person_Authority.xml
+TARGET_JSON=${SOURCE}.json
+dart tools/parse_tei.dart \
+  -s data/${SOURCE_XML} \
+  -t ${TARGET_DIR}/${TARGET_JSON} \
+  -l "person" \
+  -n "DDBC Person Authority Database" \
+  -x "Person Authority" \
+  -a "Dharma Drum Buddhist College" \
+  -y "Creative Commons Attribution-ShareAlike 3.0 Unported" \
+  -h 10600002
+```
+
+Create a JSON bundle for the Place authority database:
+
+```shell
+SOURCE=place-authority
+TARGET_DIR=authority
+TARGET_JSON=${SOURCE}.json
+SOURCE_XML=Buddhist_Studies_Place_Authority.xml
+dart tools/parse_tei.dart \
+  -s data/${SOURCE_XML} \
+  -t ${TARGET_DIR}/${TARGET_JSON} \
+  -l "place" \
+  -n "DDBC Place Authority Database" \
+  -x "Place Authority" \
+  -a "Dharma Drum Buddhist College" \
+  -y "Creative Commons Attribution-ShareAlike 3.0 Unported" \
+  -h 10700002
+```
 
 The manifest:
 
 ```shell
 SOURCE=combined
-cp  recipes/${SOURCE}_manifest.json  $TARGET_DIR/manifest.json
+cp  workbench/${SOURCE}_manifest.json  $TARGET_DIR/manifest.json
 ```
 
 Compile the Dart code with the JavaScript placed in the extension directory:
@@ -654,12 +744,12 @@ cp ntireader-chrome-ext/images/icon128.png $TARGET_DIR/images/
 Configuration file
 
 ```shell
-cp recipes/${SOURCE}_config.json $TARGET_DIR/config.json
+cp workbench/${SOURCE}_config.json $TARGET_DIR/config.json
 ```
 
 Popup file
 
 ```shell
-cp recipes/${SOURCE}_popup.html $TARGET_DIR/popup.html
+cp workbench/${SOURCE}_popup.html $TARGET_DIR/popup.html
 ```
 

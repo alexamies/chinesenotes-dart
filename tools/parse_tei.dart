@@ -62,13 +62,39 @@ class PaliSanskritEntry {
 
 class PersonEntry {
   final String chinese;
+  final String english;
+  final String sanskrit;
+  final String japanese;
+  final String tibetan;
   final String authorityId;
   final List<String> aka;
   final String dynasty;
   final String placeOfOrigin;
 
-  PersonEntry(this.chinese, this.aka, this.authorityId, this.dynasty,
+  PersonEntry(
+      this.chinese,
+      this.english,
+      this.sanskrit,
+      this.japanese,
+      this.tibetan,
+      this.aka,
+      this.authorityId,
+      this.dynasty,
       this.placeOfOrigin);
+}
+
+class PlaceEntry {
+  final String chinese;
+  final String english;
+  final String sanskrit;
+  final String japanese;
+  final String tibetan;
+  final String authorityId;
+  final List<String> aka;
+  final String district;
+
+  PlaceEntry(this.chinese, this.english, this.sanskrit, this.japanese,
+      this.tibetan, this.aka, this.authorityId, this.district);
 }
 
 class SanskritEntry {
@@ -126,10 +152,10 @@ String formatEntry(ChineseEntry entry, int headwordId) {
     pinyin = pinyin.replaceAll(ent.key, ent.value);
   }
   return '{"luid": $headwordId, '
-      '"h": $headwordId,'
-      '"s": "${entry.chinese}",'
-      '"p": "${pinyin}",'
-      '"e": "${eng}"'
+      '"h":$headwordId,'
+      '"s":"${entry.chinese}",'
+      '"p":"${pinyin}",'
+      '"e":"${eng}"'
       '}';
 }
 
@@ -157,29 +183,81 @@ String formatPaliSanskrit(PaliSanskritEntry entry, int headwordId) {
   var e = eng.join('; ');
   var n = notes.join(', ');
   return '{"luid": $headwordId, '
-      '"h": $headwordId,'
-      '"s": "${entry.chinese}",'
-      '"e": "${e}",'
-      '"n": "${n}"'
+      '"h":$headwordId,'
+      '"s":"${entry.chinese}",'
+      '"e":"${e}",'
+      '"n":"${n}"'
       '}';
 }
 
 String formatPersonEntry(PersonEntry entry, int headwordId) {
-  var aka =
-      (!entry.aka.isEmpty) ? ' also known as ${entry.aka.join(', ')}, ' : '';
-  var dynasty = (entry.dynasty != '') ? 'dynasty: ${entry.dynasty}, ' : '';
-  var authorityId =
-      (entry.authorityId != '') ? 'authority ID: ${entry.authorityId}, ' : '';
-  var placeOfOrigin = (entry.placeOfOrigin != '')
-      ? 'place of origin: ${entry.placeOfOrigin}'
-      : '';
-  var notes = 'Person ${aka} ${authorityId} ${dynasty} ${placeOfOrigin}';
-  notes = notes.trim();
-  notes = notes.replaceAll(r',$', '');
+  var notes = ['Person'];
+  if (entry.sanskrit != '') {
+    notes.add('Sanskrit eqiuvialent: ${entry.sanskrit}');
+  }
+  if (entry.japanese != '') {
+    notes.add('Japanese: ${entry.japanese}');
+  }
+  if (entry.tibetan != '') {
+    notes.add('Tibetan: ${entry.tibetan}');
+  }
+  if (!entry.aka.isEmpty) {
+    notes.add('also known as: ${entry.aka.join(', ')}');
+  }
+  if (entry.dynasty != '') {
+    notes.add('dynasty: ${entry.dynasty}');
+  }
+  if (entry.authorityId != '') {
+    notes.add('authority ID: ${entry.authorityId}');
+  }
+  if (entry.placeOfOrigin != '') {
+    notes.add('place of origin: ${entry.placeOfOrigin}');
+  }
+  var note = notes
+      .join('; ')
+      .trim()
+      .replaceAll('"', '')
+      .replaceAll('\n', '')
+      .replaceAll('\r', '');
   return '{"luid": $headwordId, '
-      '"h": $headwordId,'
-      '"s": "${entry.chinese}",'
-      '"n": "${notes}"'
+      '"h":$headwordId,'
+      '"s":"${entry.chinese}",'
+      '"e":"${entry.english}",'
+      '"n":"${note}"'
+      '}';
+}
+
+String formatPlaceEntry(PlaceEntry entry, int headwordId) {
+  var notes = ['Place'];
+  if (entry.sanskrit != '') {
+    notes.add('Sanskrit eqiuvialent: ${entry.sanskrit}');
+  }
+  if (entry.japanese != '') {
+    notes.add('Japanese: ${entry.japanese}');
+  }
+  if (entry.tibetan != '') {
+    notes.add('Tibetan: ${entry.tibetan}');
+  }
+  if (!entry.aka.isEmpty) {
+    notes.add('also known as: ${entry.aka.join(', ')}');
+  }
+  if (entry.authorityId != '') {
+    notes.add('authority ID: ${entry.authorityId}');
+  }
+  if (entry.district != '') {
+    notes.add('district: ${entry.district}');
+  }
+  var note = notes
+      .join('; ')
+      .trim()
+      .replaceAll('"', '')
+      .replaceAll('\n', '')
+      .replaceAll('\r', '');
+  return '{"luid": $headwordId, '
+      '"h":$headwordId,'
+      '"s":"${entry.chinese}",'
+      '"e":"${entry.english}",'
+      '"n":"${note}"'
       '}';
 }
 
@@ -266,20 +344,82 @@ List<PaliSanskritEntry> parsePaliSanskrit(
 // Parse a TEI person entry from the authority database
 List<PersonEntry> parsePersonEntry(XmlElement entry) {
   List<PersonEntry> pEntries = [];
+
+  // Person authority ID
   final authId = entry.getAttribute('xml:id');
   String authorityID = (authId != null) ? authId : '';
-  final nameElems = entry.findAllElements('persName');
+  authorityID = authorityID.trim().replaceAll('\n', '');
+
+  // Chinese name
+  final nameElems = entry
+      .findAllElements('persName')
+      .where((el) => el.getAttribute('xml:lang') == 'zho-Hant');
   if (nameElems.isEmpty) {
-    print('parsePersonEntry: nameElems.isEmpty');
     return pEntries;
   }
-  final ch = nameElems.first.text;
+  String ch = nameElems.first.text;
+  ch = ch.trim().replaceAll('\n', '');
+
+  // Sanskrit name, may be empty
+  var sanskrit = '';
+  final sNameElems = entry
+      .findAllElements('persName')
+      .where((el) => el.getAttribute('xml:lang') == 'san-Latn');
+  if (!sNameElems.isEmpty) {
+    sanskrit = sNameElems.first.text;
+  }
+  sanskrit = sanskrit.trim();
+
+  // Japanese name, may be empty
+  var japanese = '';
+  final jNameElems = entry
+      .findAllElements('persName')
+      .where((el) => el.getAttribute('xml:lang') == 'jpn-Latn');
+  if (!jNameElems.isEmpty) {
+    japanese = jNameElems.first.text;
+  }
+  japanese = japanese.trim();
+
+  // Tibetan name, may be empty, example: 無著 Asaṅga, Thogs med
+  var tibetan = '';
+  final tNameElems = entry
+      .findAllElements('persName')
+      .where((el) => el.getAttribute('xml:lang') == 'bod-Latn');
+  if (!tNameElems.isEmpty) {
+    tibetan = tNameElems.first.text;
+  }
+  tibetan = tibetan.trim();
+
+  // English name, may be empty, example: 迦膩色迦一世 Kanishka
+  var english = '';
+  final eNameElems = entry
+      .findAllElements('persName')
+      .where((el) => el.getAttribute('xml:lang') == 'eng-Latn');
+  if (!eNameElems.isEmpty) {
+    english = eNameElems.first.text;
+  }
+
+  var eng = (english != '')
+      ? english
+      : (sanskrit != '')
+          ? sanskrit
+          : (tibetan != '')
+              ? tibetan
+              : japanese;
+  eng = eng
+      .replaceAll('\"', '')
+      .replaceAll('\'', '')
+      .replaceAll('\\', '')
+      .replaceAll('\n', '')
+      .replaceAll('\r', '');
+
+  // Aliases
   List<String> aka = [];
   final akaElems = entry
       .findAllElements('persName')
       .where((el) => el.getAttribute('type') == 'alternative');
   for (var akaElem in akaElems) {
-    aka.add(akaElem.text);
+    aka.add(akaElem.text.trim());
   }
 
   var dynasty = '';
@@ -287,10 +427,8 @@ List<PersonEntry> parsePersonEntry(XmlElement entry) {
       .findAllElements('note')
       .where((el) => el.getAttribute('type') == 'dynasty');
   for (var el in dynastyElems) {
-    dynasty = el.text;
+    dynasty = el.text.trim();
   }
-  dynasty = dynasty.replaceAll('\n', ' ');
-  dynasty = dynasty.trim();
 
   var placeOfOrigin = '';
   final placeElems = entry
@@ -302,7 +440,90 @@ List<PersonEntry> parsePersonEntry(XmlElement entry) {
   placeOfOrigin = placeOfOrigin.replaceAll('\n', ' ');
   placeOfOrigin = placeOfOrigin.trim();
 
-  var pEntry = PersonEntry(ch, aka, authorityID, dynasty, placeOfOrigin);
+  var pEntry = PersonEntry(ch, eng, sanskrit, japanese, tibetan, aka,
+      authorityID, dynasty, placeOfOrigin);
+  pEntries.add(pEntry);
+  return pEntries;
+}
+
+// Parse a TEI place entry from the authority database
+List<PlaceEntry> parsePlaceEntry(XmlElement entry) {
+  List<PlaceEntry> pEntries = [];
+  final authId = entry.getAttribute('xml:id');
+  String authorityID = (authId != null) ? authId : '';
+  final nameElems = entry.findAllElements('placeName');
+  if (nameElems.isEmpty) {
+    return pEntries;
+  }
+  final ch = nameElems.first.text;
+  List<String> aka = [];
+  final akaElems = entry
+      .findAllElements('placeName')
+      .where((el) => el.getAttribute('type') == 'alternative');
+  for (var akaElem in akaElems) {
+    aka.add(akaElem.text);
+  }
+
+  // Sanskrit name, may be empty; example: 梵衍那國 Bāmiyān
+  var sanskrit = '';
+  final sNameElems = entry
+      .findAllElements('placeName')
+      .where((el) => el.getAttribute('xml:lang') == 'san-Latn');
+  if (!sNameElems.isEmpty) {
+    sanskrit = sNameElems.first.text;
+  }
+
+  // Japanese name, may be empty; example: 平城京 Heijō-kyō
+  var japanese = '';
+  final jNameElems = entry
+      .findAllElements('placeName')
+      .where((el) => el.getAttribute('xml:lang') == 'jpn-Latn');
+  if (!jNameElems.isEmpty) {
+    japanese = jNameElems.first.text;
+  }
+
+  // Tibetan name, may be empty; example: 岡仁波齊峰 Kangrinboqê (Mount Kailash)
+  var tibetan = '';
+  final tNameElems = entry
+      .findAllElements('placeName')
+      .where((el) => el.getAttribute('xml:lang') == 'bod-Latn');
+  if (!tNameElems.isEmpty) {
+    tibetan = tNameElems.first.text;
+  }
+
+  // English name, may be empty; example: 梵衍那國 Bamian
+  var english = '';
+  final eNameElems = entry
+      .findAllElements('placeName')
+      .where((el) => el.getAttribute('xml:lang') == 'eng-Latn');
+  if (!eNameElems.isEmpty) {
+    english = eNameElems.first.text;
+  }
+
+  var eng = (english != '')
+      ? english
+      : (sanskrit != '')
+          ? sanskrit
+          : (tibetan != '')
+              ? tibetan
+              : japanese;
+  eng = eng
+      .replaceAll('\"', '')
+      .replaceAll('\'', '')
+      .replaceAll('\\', '')
+      .replaceAll('\n', '')
+      .replaceAll('\r', '');
+
+  var district = '';
+  final districtElems = entry.findAllElements('district');
+  for (var el in districtElems) {
+    district = el.text;
+  }
+  district = district.replaceAll('\n', ' ');
+  district = district.trim();
+
+  var pEntry = PlaceEntry(
+      ch, eng, sanskrit, japanese, tibetan, aka, authorityID, district);
   pEntries.add(pEntry);
   return pEntries;
 }
@@ -374,7 +595,14 @@ void main(List<String> arguments) {
   try {
     final file = new File(fName);
     final document = XmlDocument.parse(file.readAsStringSync());
-    final entryTag = (sEntryType != 'person') ? 'entry' : 'person';
+
+    // Find flavor of TEI entries to process
+    final authorityTags = {'person', 'place'};
+    final entryTag =
+        (authorityTags.contains(sEntryType)) ? sEntryType : 'entry';
+    print('Looking for $entryTag elements');
+
+    // Iterate over entries
     final entries = document.findAllElements(entryTag);
     var hwid = hwStart;
     final processor = PatternProcessor();
@@ -400,12 +628,22 @@ void main(List<String> arguments) {
             hwid++;
           }
           break;
-        // Used for person authority database
+        // Used for Person authority database
         case 'person':
           var pEntries = parsePersonEntry(entry);
           for (var pEntry in pEntries) {
             sb.writeln(',');
             var entryJSON = formatPersonEntry(pEntry, hwid);
+            sb.write(entryJSON);
+            hwid++;
+          }
+          break;
+        // Used for Place authority database
+        case 'place':
+          var pEntries = parsePlaceEntry(entry);
+          for (var pEntry in pEntries) {
+            sb.writeln(',');
+            var entryJSON = formatPlaceEntry(pEntry, hwid);
             sb.write(entryJSON);
             hwid++;
           }
