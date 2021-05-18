@@ -10,21 +10,6 @@ screenshot below:
 This allows you to do lookup multiple terms at a single time with the results
 from multiple dictionaries shown in the results.
 
-See also instructions in ../recipe/README.md.
-
-## Setup
-
-This directory contains instructions for building new applications and browser
-extensions.
-
-Prequisites: Linux or compatible environment with Bash shell.
-
-Set the Dart SDK home with the environment variable DART_HOME. For example,
-
-```shell
-DART_HOME=$HOME/development/flutter/bin/cache/dart-sdk
-```
-
 ## Headword ID Ranges
 
 The Chinese Notes code framework can combine entries from multiple souce
@@ -53,7 +38,29 @@ to do this without collisions ranges are set aside in advance.
 | DDBC Person Authority Database       | 10,600,002 - 10,699,999 |
 | DDBC Place Authority Database        | 10,700,002 - 10,699,999 |
 
-## Recipe
+## Setup
+
+1. Download or build the zip file using the instructions below. Put the zip file
+in a folders, say `workbench`. Unzip it. 
+2. In Chrome, go to Extensions | Manage Extensions and enable Developer Mode.
+3. Click Load Unpacked. Select the directory that the extension is contained in.
+
+## Developers
+
+### Setup
+
+This directory contains instructions for building new applications and browser
+extensions.
+
+Prequisites: Linux or compatible environment with Bash shell.
+
+Set the Dart SDK home with the environment variable DART_HOME. For example,
+
+```shell
+DART_HOME=$HOME/development/flutter/bin/cache/dart-sdk
+```
+
+### Building the Extension
 
 Compile the Dart code with the JavaScript placed in the extension directory:
 
