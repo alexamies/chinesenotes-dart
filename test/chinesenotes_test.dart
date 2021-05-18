@@ -362,8 +362,8 @@ void main() {
     var tokenizer = DictTokenizer(forwardIndex, hwIDIndex);
     const String text = 'hello';
     var tokens = tokenizer.tokenize(text);
-    expect(tokens.length, equals(text.length));
-    expect(tokens.first.token, equals('h'));
+    expect(tokens.length, equals(1));
+    expect(tokens.first.token, equals('hello'));
   });
   test('tokenize a single Chinese character', () {
     var hwIDIndex = headwordsFromJson(jsonString, cnSource);
@@ -405,6 +405,17 @@ void main() {
     expect(tokens.first.token, equals('恐龍'));
     expect(tokens.first.entries.length, equals(1));
     expect(tokens.first.entries.first.pinyinRollup, equals('kǒnglóng'));
+  });
+  test('tokenize with a mixture of Chinese and non-Chinese', () {
+    var hwIDIndex = headwordsFromJson(jsonString, cnSource);
+    var forwardIndex = ForwardIndex.fromHWIndex(hwIDIndex);
+    var tokenizer = DictTokenizer(forwardIndex, hwIDIndex);
+    const String text = '恐龍Dinosaur';
+    var tokens = tokenizer.tokenize(text);
+    expect(tokens.length, equals(2));
+    expect(tokens.first.token, equals('恐龍'));
+    expect(tokens.first.entries.length, equals(1));
+    expect(tokens[1].token, equals('Dinosaur'));
   });
   test('isCJKChar correctly identifies a non-Chinese character', () {
     expect(isCJKChar('ō'), equals(false));

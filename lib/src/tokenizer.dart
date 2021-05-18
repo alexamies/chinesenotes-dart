@@ -16,7 +16,17 @@ class DictTokenizer {
   );
 
   List<TextToken> tokenize(String text) {
-    return _greedyLtoR(text);
+    List<TextToken> tokens = [];
+    final segments = Segment(text);
+    for (var s in segments) {
+      if (s.isChinese) {
+        final t = _greedyLtoR(s.text);
+        tokens.addAll(t);
+      } else {
+        tokens.add(TextToken(s.text, []));
+      }
+    }
+    return tokens;
   }
 
   /// Tokenizes text with a greedy knapsack-like algorithm, scanning left to

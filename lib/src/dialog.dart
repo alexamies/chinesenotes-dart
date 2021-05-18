@@ -36,6 +36,18 @@ void displayLookup(QueryResults results, Element? cnOutput, Element? div,
     for (var term in results.terms) {
       var dictEntries = term.entries;
       print('Showing term ${term.query}, found ${dictEntries.length} entries');
+      final termDiv = DivElement();
+      final termSpan = SpanElement();
+      termSpan.text = term.query;
+      termDiv.children.add(termSpan);
+      print('displayLookup: adding ${term.query} to ${div?.id}');
+      if (results.terms.length > 1) {
+        var summaryElem = document.createElement("summary");
+        summaryElem.children.add(termSpan);
+        termDiv.children.add(summaryElem);
+      }
+      div?.children.add(termDiv);
+
       if (dictEntries.length > 0) {
         if (results.terms.length == 1) {
           var counttDiv = DivElement();
@@ -54,20 +66,14 @@ void displayLookup(QueryResults results, Element? cnOutput, Element? div,
           entryDiv = DetailsElement();
           (entryDiv as DetailsElement).open = true;
         }
-        print('displayLookup: adding results to ${div?.id}');
-        div?.children.add(entryDiv);
+        termDiv.children.add(entryDiv);
         for (var ent in dictEntries.entries) {
           var hwDiv = DivElement();
           hwDiv.text = ent.hwRollup;
           hwDiv.className = 'dict-entry-headword';
-          if (results.terms.length > 1) {
-            var summaryElem = document.createElement("summary");
-            summaryElem.children.add(hwDiv);
-            entryDiv.children.add(summaryElem);
-          } else {
-            entryDiv.children.add(hwDiv);
-          }
+          entryDiv.children.add(hwDiv);
           var senses = ent.getSenses().senses;
+          print('Entry ${ent.headword} has ${senses.length} senses');
           if (senses.length == 1) {
             var sense = senses.first;
             var senseDiv = DivElement();
@@ -137,7 +143,7 @@ void displayLookup(QueryResults results, Element? cnOutput, Element? div,
             counttDiv.text = 'Found ${numFound} senses, showing ${maxSenses}.';
           }
         }
-        div?.children.add(counttDiv);
+        termDiv.children.add(counttDiv);
         var ul = UListElement();
         div?.children.add(ul);
         var numAdded = 0;
@@ -184,7 +190,7 @@ void displayLookup(QueryResults results, Element? cnOutput, Element? div,
             break;
           }
         }
-      } else {
+      } else if (results.terms.length == 1) {
         div?.text = 'Did not find any results.';
       }
       statusDiv?.text = '';

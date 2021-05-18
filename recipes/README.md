@@ -10,8 +10,6 @@ screenshot below:
 This allows you to do lookup multiple terms at a single time with the results
 from multiple dictionaries shown in the results.
 
-See also instructions in ../recipe/README.md.
-
 ## Setup
 
 This directory contains instructions for building new applications and browser
@@ -53,17 +51,16 @@ to do this without collisions ranges are set aside in advance.
 | DDBC Person Authority Database       | 10,600,002 - 10,699,999 |
 | DDBC Place Authority Database        | 10,700,002 - 10,699,999 |
 
-## Recipe
+## Browser Extensions with TEI files
 
-Compile the Dart code with the JavaScript placed in the extension directory:
+This recipe intended for the dictionaries and glossaries at 
 
-```shell
-$DART_HOME/bin/dart2js --csp -o $TARGET_DIR/main.dart.js web/main.dart
-$DART_HOME/bin/dart2js --csp -o $TARGET_DIR/serviceworker_ext.dart.js web/serviceworker_ext.dart
-$DART_HOME/bin/dart2js --csp -o $TARGET_DIR/content.dart.js web/content.dart
-```
+https://glossaries.dila.edu.tw
 
-Download the TEI files and place them in the `data` directory by executing
+Here is an example for Seishi Karashima's *Glossary of Lokakṣema's Translation
+of the Aṣṭasāhasrikā Prajñāpāramitā*.
+
+Download the TEI file and place it in the `data` directory by executing
 these commands from the top level directory of the project:
 
 ```shell
@@ -72,8 +69,54 @@ SOURCE_ZIP=${SOURCE}.dila.tei.p5.xml.zip
 curl -k -o data/${SOURCE_ZIP}  https://glossaries.dila.edu.tw/data/${SOURCE_ZIP}
 cd data
 unzip ${SOURCE_ZIP}
+cd ..
 ```
 
+Make a directory to place the extension
+
+```shell
+TARGET_DIR=lokaksema
+mkdir $TARGET_DIR
+```
+
+Parse the TEI file and transform to JSON that can be read by the Chinese Notes
+libraries.
+
+```shell
+SOURCE=lokaksema
+SOURCE_XML=${SOURCE}.xml
+TARGET_JSON=${SOURCE}.json
+dart tools/parse_tei.dart \
+  -s data/${SOURCE_XML} \
+  -t ${TARGET_DIR}/${TARGET_JSON} \
+  -l "chinese" \
+  -n "A Glossary of Lokakṣema's Translation of the Aṣṭasāhasrikā Prajñāpāramitā" \
+  -x "Lokakṣema" \
+  -a "Seishi Karashima" \
+  -y "Copyright by author" \
+  -h 10200002
+```
+
+Add a Chrome extension manifest file using the template in this directory
+
+```shell
+cp workbench/manifest.json ${TARGET_DIR}/
+```
+
+Edit the `manifest.json` file, entering the values for your extension or use
+the ready-made one here:
+
+```shell
+cp workbench/lokaksema_manifest.json ${TARGET_DIR}/manifest.json
+```
+
+Compile the Dart code with the JavaScript placed in the extension directory:
+
+```shell
+$DART_HOME/bin/dart2js --csp -o $TARGET_DIR/main.dart.js web/main.dart
+$DART_HOME/bin/dart2js --csp -o $TARGET_DIR/serviceworker_ext.dart.js web/serviceworker_ext.dart
+$DART_HOME/bin/dart2js --csp -o $TARGET_DIR/content.dart.js web/content.dart
+```
 
 Add other files for icon images and CSS styles with the commands:
 
