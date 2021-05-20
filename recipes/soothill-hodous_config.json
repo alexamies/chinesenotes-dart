@@ -1,0 +1,14 @@
+{
+  "contextMenuText": "Lookup in Soothill-Hodous ...",
+  "multiLingualIndex": true,
+  "sources": [{
+    "sourceId": 1,
+    "url": "soothill-hodous.json",
+    "abbreviation": "Soothill-Hodous",
+    "title": "Soothill-Hodous: A Dictionary of Chinese Buddhist Terms",
+    "citation": "https://glossaries.dila.edu.tw/glossaries/SHH",
+    "author": "William Edward Soothill and Lewis Hodous, Digitization, editorial changes and preface Charles Muller",
+    "license": "Copyright by authors",
+    "startHeadwords": 2
+  }]
+}

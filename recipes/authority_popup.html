@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+    <title>DDBC Person and Place Authority Database</title>
+    <link rel='stylesheet' href='styles.css'>
+  </head>
+  <body>
+    <h1>DDBC Person and Place Authority Database</h1>
+    <div id='cnOutput'>
+      <p>
+        This extension is based on the Person and Place Authority Databases form
+        the Library and Information Center at Dharma Drum Institute of Liberal
+        Arts. 
+        Use the dicitonary either by selected text on the page and right
+        clicking to use the context menu or from this popup page. 
+        Search for a term. Examples: 無著 (Asaṅga), 平城京 (Heijō-kyō).
+        <a href='popup.html' target='_blank'
+        title='Open this page in a new tab to avoid needing to reload it each time'
+        >Open this page in a new tab</a> to avoid needing to reload it each time.
+      </p>
+      <div id='formDiv'>
+        <form name='multiLookupForm' id='multiLookupForm' action='#'>
+          <div>
+            <label for='multiLookupInput'>Search for</label>
+            <input type='text' name='multiLookupInput'
+                   id='multiLookupInput' size='40' required/>
+            <button type='submit' id='multiLookupSubmit' disabled>
+              <span>Find</span>
+            </button>
+          </div>
+        </form>
+      </div>
+      <div id='lookupResults'></div>
+      <div id='lookupError'></div>
+      <div class='status' id='status'></div>
+      <details>
+        <summary>Settings</summary>
+        <h2>Configuration Settings</h2>
+        <h3>Dictionary Sources</h3>
+        <div id='sourcesDiv'>
+          <form name='sourcesForm' id='sourcesForm' action='#'>
+            <fieldset class='source-form-element'>
+              <input type='checkbox' name='sourceName1'
+                     id='sourceName1' size='40'
+                     value='1,Person Authority Database,DDBC Person Authority Database,http://authority.dila.edu.tw/,Dharma Drum Buddhist College,Creative Commons Attribution-ShareAlike 3.0 Unported,10600002'
+                     checked='true'
+                     disabled='true'/>
+              <label for='sourceName1'
+                     >DDBC Person Authority Database</label>
+            </fieldset>
+            <fieldset class='source-form-element'>
+              <input type='hidden' name='sourceURL1'
+                     id='sourceURL1' size='40'
+                     value='person-authority.json'
+                     readonly='true'/>
+            </fieldset>
+            <fieldset class='source-form-element'>
+              <input type='checkbox' name='sourceName2'
+                     id='sourceName2' size='40'
+                     value='2,Place Authority Database,DDBC Place Authority Database,http://authority.dila.edu.tw/,Dharma Drum Buddhist College,Creative Commons Attribution-ShareAlike 3.0 Unported,10700002'
+                     checked='true'
+                     disabled='true'/>
+              <label for='sourceName2'
+                     >DDBC Place Authority Database</label>
+            </fieldset>
+            <fieldset class='source-form-element'>
+              <input type='hidden' name='sourceURL2'
+                     id='sourceURL2' size='40'
+                     value='place-authority.json'
+                     readonly='true'/>
+            </fieldset>
+          </form>
+        </div>
+      </details>
+    </div>
+    <script defer src='main.dart.js'></script>
+  </body>
+</html>

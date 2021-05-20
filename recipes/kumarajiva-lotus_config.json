@@ -1,0 +1,14 @@
+{
+  "contextMenuText": "Lookup in Glossary of the Lotus Sūtra (Kumārajīva) ...",
+  "multiLingualIndex": true,
+  "sources": [{
+    "sourceId": 1,
+    "url": "kumarajiva-lotus.json",
+    "abbreviation": "Lotus Sūtra (Kumārajīva)",
+    "title": "Glossary of the Lotus Sūtra (Kumārajīva)",
+    "citation": "https://glossaries.dila.edu.tw/glossaries/KKJ",
+    "author": "Seishi Karashima",
+    "license": "Copyright by author",
+    "startHeadwords": 10400002
+  }]
+}

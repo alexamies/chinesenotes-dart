@@ -1,14 +1,9 @@
-# Multi-Dictionary Workbench
+# Chrome Extension Recipes
 
-With the recipe given here you can create your own dictionary workbench 
-combining multiple dictionaries on a web page without the need to run a web
-server. It is a multi-dictionary, multilingual workbench, as shown in the
-screenshot below:
+With the recipe given here you can create your own Chrome extensions. Examples
+use the TEI dictionary files at 
 
-![](../drawings/combined-dictionaries-chrome-ext-mulit-multi-1280x800.png?raw=true)
-
-This allows you to do lookup multiple terms at a single time with the results
-from multiple dictionaries shown in the results.
+<a href='http://authority.dila.edu.tw/'>Buddhist Studies Authority Database Project</a>
 
 ## Setup
 
@@ -65,6 +60,7 @@ these commands from the top level directory of the project:
 
 ```shell
 mkdir data
+SOURCE=lokaksema
 SOURCE_ZIP=${SOURCE}.dila.tei.p5.xml.zip
 curl -k -o data/${SOURCE_ZIP}  https://glossaries.dila.edu.tw/data/${SOURCE_ZIP}
 cd data
@@ -83,7 +79,6 @@ Parse the TEI file and transform to JSON that can be read by the Chinese Notes
 libraries.
 
 ```shell
-SOURCE=lokaksema
 SOURCE_XML=${SOURCE}.xml
 TARGET_JSON=${SOURCE}.json
 dart tools/parse_tei.dart \
@@ -100,14 +95,14 @@ dart tools/parse_tei.dart \
 Add a Chrome extension manifest file using the template in this directory
 
 ```shell
-cp workbench/manifest.json ${TARGET_DIR}/
+cp recipe/manifest.json ${TARGET_DIR}/
 ```
 
 Edit the `manifest.json` file, entering the values for your extension or use
 the ready-made one here:
 
 ```shell
-cp workbench/lokaksema_manifest.json ${TARGET_DIR}/manifest.json
+cp recipe/lokaksema_manifest.json ${TARGET_DIR}/manifest.json
 ```
 
 Compile the Dart code with the JavaScript placed in the extension directory:
@@ -134,7 +129,7 @@ There is also an application configuration file that tells the
 how to load the dictionary file. Copy a template with this command
 
 ```shell
-cp workbench/config.json $TARGET_DIR/
+cp recipe/config.json $TARGET_DIR/
 ```
 
 and edit it to be suitable for the particular extension that you are creating.
@@ -143,7 +138,7 @@ There is also a popup file which allows the extension to be used indepdently of
 an external web page. Copy it
 
 ```shell
-cp workbench/popup.html $TARGET_DIR/
+cp recipe/popup.html $TARGET_DIR/
 ```
 
 That is sufficient to create all the resources needed by the extension.
@@ -198,7 +193,7 @@ dart tools/parse_tei.dart \
 The manifest:
 
 ```shell
-cp  workbench/${SOURCE}_manifest.json  $TARGET_DIR/manifest.json
+cp  recipe/${SOURCE}_manifest.json  $TARGET_DIR/manifest.json
 ```
 
 Use the NTI icons
@@ -217,13 +212,13 @@ cp ntireader-chrome-ext/images/icon128.png $TARGET_DIR/images/
 Configuration file
 
 ```shell
-cp workbench/${SOURCE}_config.json $TARGET_DIR/config.json
+cp recipe/${SOURCE}_config.json $TARGET_DIR/config.json
 ```
 
 Popup file
 
 ```shell
-cp workbench/${SOURCE}_popup.html $TARGET_DIR/popup.html
+cp recipe/${SOURCE}_popup.html $TARGET_DIR/popup.html
 ```
 
 Zip it up for archiving with the command
@@ -272,7 +267,7 @@ dart tools/parse_tei.dart \
 The manifest:
 
 ```shell
-cp  workbench/${SOURCE}_manifest.json  $TARGET_DIR/manifest.json
+cp  recipe/${SOURCE}_manifest.json  $TARGET_DIR/manifest.json
 ```
 
 As above for JavaScript compilation and icons.
@@ -280,13 +275,13 @@ As above for JavaScript compilation and icons.
 Configuration file
 
 ```shell
-cp workbench/${SOURCE}_config.json $TARGET_DIR/config.json
+cp recipe/${SOURCE}_config.json $TARGET_DIR/config.json
 ```
 
 Popup file
 
 ```shell
-cp workbench/${SOURCE}_popup.html $TARGET_DIR/popup.html
+cp recipe/${SOURCE}_popup.html $TARGET_DIR/popup.html
 ```
 
 Zip it up for archiving with the command
@@ -336,7 +331,7 @@ dart tools/parse_tei.dart \
 The manifest:
 
 ```shell
-cp  workbench/${SOURCE}_manifest.json  $TARGET_DIR/manifest.json
+cp  recipe/${SOURCE}_manifest.json  $TARGET_DIR/manifest.json
 ```
 
 As above for JavaScript compilation and icons.
@@ -344,13 +339,13 @@ As above for JavaScript compilation and icons.
 Configuration file
 
 ```shell
-cp workbench/${SOURCE}_config.json $TARGET_DIR/config.json
+cp recipe/${SOURCE}_config.json $TARGET_DIR/config.json
 ```
 
 Popup file
 
 ```shell
-cp workbench/${SOURCE}_popup.html $TARGET_DIR/popup.html
+cp recipe/${SOURCE}_popup.html $TARGET_DIR/popup.html
 ```
 
 Zip it up for archiving with the command
@@ -399,7 +394,7 @@ dart tools/parse_tei.dart \
 The manifest:
 
 ```shell
-cp  workbench/${SOURCE}_manifest.json $TARGET_DIR/manifest.json
+cp  recipe/${SOURCE}_manifest.json $TARGET_DIR/manifest.json
 ```
 
 As above for JavaScript compilation and icons.
@@ -407,13 +402,13 @@ As above for JavaScript compilation and icons.
 Configuration file
 
 ```shell
-cp workbench/${SOURCE}_config.json $TARGET_DIR/config.json
+cp recipe/${SOURCE}_config.json $TARGET_DIR/config.json
 ```
 
 Popup file
 
 ```shell
-cp workbench/${SOURCE}_popup.html $TARGET_DIR/popup.html
+cp recipe/${SOURCE}_popup.html $TARGET_DIR/popup.html
 ```
 
 Zip it up for archiving with the command
@@ -499,19 +494,19 @@ dart tools/parse_tei.dart \
 The manifest:
 
 ```shell
-cp  workbench/${TARGET_DIR}_manifest.json $TARGET_DIR/manifest.json
+cp  recipe/${TARGET_DIR}_manifest.json $TARGET_DIR/manifest.json
 ```
 
 Config file:
 
 ```shell
-cp workbench/${TARGET_DIR}_config.json $TARGET_DIR/config.json
+cp recipe/${TARGET_DIR}_config.json $TARGET_DIR/config.json
 ```
 
 Popup file
 
 ```shell
-cp workbench/${TARGET_DIR}_popup.html $TARGET_DIR/popup.html
+cp recipe/${TARGET_DIR}_popup.html $TARGET_DIR/popup.html
 ```
 
 Add CSS styles:
@@ -718,7 +713,7 @@ The manifest:
 
 ```shell
 SOURCE=workbench
-cp  workbench/${SOURCE}_manifest.json  $TARGET_DIR/manifest.json
+cp  recipe/${SOURCE}_manifest.json  $TARGET_DIR/manifest.json
 ```
 
 Compile the Dart code with the JavaScript placed in the extension directory:
@@ -743,13 +738,13 @@ cp ntireader-chrome-ext/images/icon128.png $TARGET_DIR/images/
 Configuration file
 
 ```shell
-cp workbench/${SOURCE}_config.json $TARGET_DIR/config.json
+cp recipe/${SOURCE}_config.json $TARGET_DIR/config.json
 ```
 
 Popup file
 
 ```shell
-cp workbench/${SOURCE}_popup.html $TARGET_DIR/popup.html
+cp recipe/${SOURCE}_popup.html $TARGET_DIR/popup.html
 ```
 
 Zip it up for archiving with the command
