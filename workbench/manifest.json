@@ -14,7 +14,7 @@
   },
   "action": {
     "default_popup": "popup.html",
-    "default_title": "Buddhist Dictionaries Combo",
+    "default_title": "Buddhist Multi-Dictionary Workbench",
     "default_icon": {
       "16": "/images/icon16.png",
       "32": "/images/icon32.png",

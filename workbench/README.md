@@ -24,23 +24,32 @@ It is shown in the screenshot below:
 This allows you to do lookup multiple terms at a single time with the results
 from multiple dictionaries shown in the results.
 
-It incorporates many TEI <a href='https://glossaries.dila.edu.tw/'
->glossary files</a> and Dharma Drum 
-<a href='http://authority.dila.edu.tw/'
->Buddhist Studies Authority Database</a> files.
+It incorporates many TEI
+[glossary files](https://glossaries.dila.edu.tw/) 
+and Dharma Drum person and place entries in the
+[Buddhist Studies Authority Database](http://authority.dila.edu.tw) files.
 Thanks to Dharma Drum for making these freely available under a Creative
-Commons license and providing the  
-<a href='http://authority.dila.edu.tw/docs/open_content/download.php'
->files<a> for download (also at the
-<a href='https://github.com/DILA-edu/Authority-Databases'
->Authority-Databases</a> Github project).
+Commons license and providing the files for
+[download](http://authority.dila.edu.tw/docs/open_content/download.php) and
+also for the
+[Authority-Databases Github project](https://github.com/DILA-edu/Authority-Databases).
 
 ## Setup
 
-1. Download or build the zip file using the instructions below. Put the zip file
-in a folders, say `workbench`. Unzip it. 
-2. In Chrome, go to Extensions | Manage Extensions and enable Developer Mode.
-3. Click Load Unpacked. Select the directory that the extension is contained in.
+1. Download or build the zip file using the instructions below. 
+2. Unzip it. 
+3. In Chrome, go to **Extensions** | **Manage Extensions** and enable **Developer Mode**.
+4. Click **Load Unpacked**. Select the directory that the extension is contained in.
+
+## Use it
+
+In Chrome, 
+
+1. Go to Extensions
+2. Select **Buddhist Multi-Dictionary Workbench**
+3. Click the link “Open this page in a new tab”
+
+You should see a screen like above.
 
 ## Developers
 
@@ -71,10 +80,14 @@ git clone https://github.com/alexamies/buddhist-dictionary.git
 
 ### Building the Extension
 
-Execute this shell command at the top-level project directory:
+Execute this shell command at the top-level project directory.
 
 ```shell
 bin/make_workbench.sh
 ```
+
+It is not well tested yet.
+If you have problems, execute the commands one at a time. There is a known
+issue in the format of the authority JSON files.
 
 The bundle will be zipped up and moved to the `archive` directory.

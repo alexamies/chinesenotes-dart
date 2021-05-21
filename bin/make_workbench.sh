@@ -19,10 +19,6 @@ if [[ ! -d data ]]; then
 fi
 
 # Copy the NTI Reader and HB Glossary files
-cp $NTI_READER_HOME/downloads/ntireader_words.json $TARGET_DIR/
-cp $NTI_READER_HOME/downloads/buddhist_named_entities.json $TARGET_DIR/
-
-# HB Glossary
 cd $NTI_READER_HOME
 bin/make_downloads.sh
 python3 bin/tsv2json.py "data/dictionary/fgs_mwe.txt" fgs_mwe.json \
@@ -31,6 +27,8 @@ python3 bin/tsv2json.py "data/dictionary/fgs_mwe.txt" \
   "${CNOTES_DART_HOME}/${TARGET_DIR}/fgs_mwe.json" \
   "Fo Guang Shan Glossary of Humnastic Buddhism" "HB Glossary" "FGS" "Copyright Fo Guang Shan"
 cd $CNOTES_DART_HOME
+cp $NTI_READER_HOME/downloads/ntireader_words.json $TARGET_DIR/
+cp $NTI_READER_HOME/downloads/buddhist_named_entities.json $TARGET_DIR/
 
 # TEI glossary files
 
@@ -189,8 +187,8 @@ cp workbench/popup.html $TARGET_DIR/
 
 VERSION=0.0.1
 BUNDLE=${SOURCE}-chrome-ext-${VERSION}.zip
-zip -r filename.zip folder
 zip -r ${BUNDLE} $TARGET_DIR/
-cd ..
-mkdir archive
-mv $TARGET_DIR/${BUNDLE} archive/
+if [[ ! -d $TARGET_DIR ]]; then
+  mkdir archive
+fi
+mv ${BUNDLE} archive/
