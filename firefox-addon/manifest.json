@@ -1,0 +1,35 @@
+{
+  "manifest_version": 2,
+  "name": "Chinese Notes Chinese-English Dictionary",
+  "description": "A dictionary app",
+  "version": "0.0.1",
+  "homepage_url": "https://github.com/alexamies/chinesenotes-dart",
+
+  "description": "The dictionary can be used to lookup Chinese words by simplified or traditional Chinese or reverse lookup from English equivalent.",
+
+  "icons": {
+    "48": "images/icon48.png"
+  },
+
+  "permissions": [
+    "activeTab",
+    "contextMenus"
+  ],
+
+  "browser_action": {
+    "default_icon": "images/icon48.png",
+    "default_title": "Test it",
+    "default_popup": "popup.html"
+  },
+
+  "background": {
+    "scripts": ["background.dart.js"]
+  },
+
+  "content_scripts": [
+    {
+      "matches": ["*://*.mozilla.org/*"],
+      "js": ["content.js"]
+    }
+  ]
+}

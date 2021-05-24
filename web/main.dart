@@ -1,7 +1,6 @@
 /// Client application to load dicitonaries and display lookup results.
 
 import 'dart:html';
-import 'dart:js';
 
 import 'package:chinesenotes/chinesenotes.dart';
 import 'package:chinesenotes/chinesenotes_html.dart';
