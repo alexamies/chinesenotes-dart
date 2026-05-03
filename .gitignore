@@ -8,6 +8,7 @@
 *.crx
 archive/
 authority/
+chinesenotes-dart.code-workspace
 coverage/
 main.dart.js*
 data/
